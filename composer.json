@@ -1,0 +1,18 @@
+{
+    "name": "clue/stdio-react",
+    "description": "Async standard console input & output (STDIN, STDOUT)",
+    "require": {
+        "react/event-loop": "0.3.*",
+        "react/stream": "0.3.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lück",
+            "email": "christian@lueck.tv"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "Clue\\Stdio\\React": "src/" }
+    }
+}
