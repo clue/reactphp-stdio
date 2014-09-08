@@ -1,22 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "c0c7cf1e40b46d0d2a692b901387e54f",
+    "hash": "6d74ffec0c37203e9b8c63c0cf055acc",
     "packages": [
         {
             "name": "evenement/evenement",
             "version": "v1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/igorw/evenement",
-                "reference": "v1.0.0"
+                "url": "https://github.com/igorw/evenement.git",
+                "reference": "fa966683e7df3e5dd5929d984a44abfbd6bafe8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/igorw/evenement/zipball/v1.0.0",
-                "reference": "v1.0.0",
+                "url": "https://api.github.com/repos/igorw/evenement/zipball/fa966683e7df3e5dd5929d984a44abfbd6bafe8d",
+                "reference": "fa966683e7df3e5dd5929d984a44abfbd6bafe8d",
                 "shasum": ""
             },
             "require": {
@@ -43,7 +44,7 @@
             "keywords": [
                 "event-dispatcher"
             ],
-            "time": "2012-05-30 08:01:08"
+            "time": "2012-05-30 15:01:08"
         },
         {
             "name": "react/event-loop",
@@ -52,12 +53,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/event-loop.git",
-                "reference": "v0.3.3"
+                "reference": "c75b334ef4a345d6c89954af71a4ef17fce4d04d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/event-loop/zipball/v0.3.3",
-                "reference": "v0.3.3",
+                "url": "https://api.github.com/repos/reactphp/event-loop/zipball/c75b334ef4a345d6c89954af71a4ef17fce4d04d",
+                "reference": "c75b334ef4a345d6c89954af71a4ef17fce4d04d",
                 "shasum": ""
             },
             "require": {
@@ -95,12 +96,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/stream.git",
-                "reference": "v0.3.3"
+                "reference": "c212d551d021bcc3a172688b7a08219a262e5dfb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/stream/zipball/v0.3.3",
-                "reference": "v0.3.3",
+                "url": "https://api.github.com/repos/reactphp/stream/zipball/c212d551d021bcc3a172688b7a08219a262e5dfb",
+                "reference": "c212d551d021bcc3a172688b7a08219a262e5dfb",
                 "shasum": ""
             },
             "require": {
@@ -144,6 +145,7 @@
     "stability-flags": [
 
     ],
+    "prefer-stable": false,
     "platform": [
 
     ],

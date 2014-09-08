@@ -13,6 +13,6 @@
         }
     ],
     "autoload": {
-        "psr-0": { "Clue\\Stdio\\React": "src/" }
+        "psr-4": { "Clue\\Stdio\\React\\": "src/" }
     }
 }
