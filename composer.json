@@ -2,8 +2,8 @@
     "name": "clue/stdio-react",
     "description": "Async standard console input & output (STDIN, STDOUT)",
     "require": {
-        "react/event-loop": "0.3.*",
-        "react/stream": "0.3.*"
+        "react/event-loop": "0.3.*|0.4.*",
+        "react/stream": "0.3.*|0.4.*"
     },
     "license": "MIT",
     "authors": [
