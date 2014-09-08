@@ -1,9 +1,9 @@
 <?php
 
-namespace Clue\Stdio\React\Helper;
+namespace Clue\React\Stdio\Helper;
 
 use React\EventLoop\LoopInterface;
-use Clue\Stdio\React\Stdio;
+use Clue\React\Stdio\Stdio;
 use InvalidArgumentException;
 
 /**

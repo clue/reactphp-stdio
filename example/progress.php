@@ -1,7 +1,7 @@
 <?php
 
-use Clue\Stdio\React\Stdio;
-use Clue\Stdio\React\Helper\ProgressBar;
+use Clue\React\Stdio\Stdio;
+use Clue\React\Stdio\Helper\ProgressBar;
 
 require __DIR__ . '/../vendor/autoload.php';
 

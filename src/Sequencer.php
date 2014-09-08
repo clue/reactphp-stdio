@@ -1,6 +1,6 @@
 <?php
 
-namespace Clue\Stdio\React;
+namespace Clue\React\Stdio;
 
 class Sequencer
 {

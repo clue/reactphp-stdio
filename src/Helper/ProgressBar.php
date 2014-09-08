@@ -1,8 +1,8 @@
 <?php
 
-namespace Clue\Stdio\React\Helper;
+namespace Clue\React\Stdio\Helper;
 
-use Clue\Stdio\React\Stdio;
+use Clue\React\Stdio\Stdio;
 
 class ProgressBar
 {

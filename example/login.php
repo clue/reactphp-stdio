@@ -1,6 +1,6 @@
 <?php
 
-use Clue\Stdio\React\Stdio;
+use Clue\React\Stdio\Stdio;
 
 require __DIR__ . '/../vendor/autoload.php';
 

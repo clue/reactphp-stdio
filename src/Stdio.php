@@ -1,6 +1,6 @@
 <?php
 
-namespace Clue\Stdio\React;
+namespace Clue\React\Stdio;
 
 use React\Stream\StreamInterface;
 use React\Stream\CompositeStream;

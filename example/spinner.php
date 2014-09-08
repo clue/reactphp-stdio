@@ -1,8 +1,8 @@
 <?php
 
-use Clue\Stdio\React\Stdio;
+use Clue\React\Stdio\Stdio;
 use React\EventLoop\LoopInterface;
-use Clue\Stdio\React\Helper\Spinner;
+use Clue\React\Stdio\Helper\Spinner;
 
 require __DIR__ . '/../vendor/autoload.php';
 
