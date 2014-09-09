@@ -1,10 +1,8 @@
 {
     "name": "clue/stdio-react",
     "description": "Async standard console input & output (STDIN, STDOUT)",
-    "require": {
-        "react/event-loop": "0.3.*|0.4.*",
-        "react/stream": "0.3.*|0.4.*"
-    },
+    "keywords": ["stdio", "stdin", "stdout", "readline", "ReactPHP", "async"],
+    "homepage": "https://github.com/clue/php-stdio-react",
     "license": "MIT",
     "authors": [
         {
@@ -12,6 +10,10 @@
             "email": "christian@lueck.tv"
         }
     ],
+    "require": {
+        "react/event-loop": "0.3.*|0.4.*",
+        "react/stream": "0.3.*|0.4.*"
+    },
     "autoload": {
         "psr-4": { "Clue\\React\\Stdio\\": "src/" }
     }
