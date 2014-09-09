@@ -11,6 +11,7 @@
         }
     ],
     "require": {
+        "php": ">=5.3",
         "react/event-loop": "0.3.*|0.4.*",
         "react/stream": "0.3.*|0.4.*"
     },
