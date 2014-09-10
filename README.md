@@ -25,8 +25,8 @@ See also the [examples](examples).
 
 ## Install
 
-The recommended way to install this library is [through composer](packagist://getcomposer.org).
-[New to composer?](packagist://getcomposer.org/doc/00-intro.md)
+The recommended way to install this library is [through composer](https://getcomposer.org).
+[New to composer?](https://getcomposer.org/doc/00-intro.md)
 
 ```JSON
 {
