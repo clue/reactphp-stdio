@@ -149,6 +149,45 @@ class Readline extends EventEmitter
     }
 
     /**
+     * move cursor to right by $n chars (or left if $n is negative)
+     *
+     * zero or out of range moves are simply ignored
+     *
+     * @param int $n
+     * @return self
+     * @uses self::moveCursorTo()
+     */
+    public function moveCursorBy($n)
+    {
+        return $this->moveCursorTo($this->linepos + $n);
+    }
+
+    /**
+     * move cursor to given position in current line buffer
+     *
+     * out of range (exceeding current input buffer) are simply ignored
+     *
+     * @param int $n
+     * @return self
+     * @uses self::redraw()
+     */
+    public function moveCursorTo($n)
+    {
+        if ($n < 0 || $n === $this->linepos || $n > $this->strlen($this->linebuffer)) {
+            return $this;
+        }
+
+        $this->linepos = $n;
+
+        // only redraw if cursor is actually visible
+        if ($this->echo) {
+            $this->redraw();
+        }
+
+        return $this;
+    }
+
+    /**
      * set current text input buffer
      *
      * this moves the cursor to the end of the current
@@ -401,45 +440,6 @@ class Readline extends EventEmitter
         }
 
         $this->redraw();
-    }
-
-    /**
-     * move cursor to right by $n chars (or left if $n is negative)
-     *
-     * zero or out of range moves are simply ignored
-     *
-     * @param int $n
-     * @return self
-     * @uses self::moveCursorTo()
-     */
-    public function moveCursorBy($n)
-    {
-        return $this->moveCursorTo($this->linepos + $n);
-    }
-
-    /**
-     * move cursor to given position in current line buffer
-     *
-     * out of range (exceeding current input buffer) are simply ignored
-     *
-     * @param int $n
-     * @return self
-     * @uses self::redraw()
-     */
-    public function moveCursorTo($n)
-    {
-        if ($n < 0 || $n === $this->linepos || $n > $this->strlen($this->linebuffer)) {
-            return $this;
-        }
-
-        $this->linepos = $n;
-
-        // only redraw if cursor is actually visible
-        if ($this->echo) {
-            $this->redraw();
-        }
-
-        return $this;
     }
 
     /**
