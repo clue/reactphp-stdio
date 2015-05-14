@@ -111,6 +111,35 @@ class Readline extends EventEmitter
     }
 
     /**
+     * set current text input buffer
+     *
+     * this moves the cursor to the end of the current
+     * input buffer (if any).
+     *
+     * @param string $input
+     * @return self
+     * @uses self::redraw()
+     */
+    public function setInput($input)
+    {
+        $this->linebuffer = $input;
+        $this->linepos = $this->strlen($this->linebuffer);
+        $this->redraw();
+
+        return $this;
+    }
+
+    /**
+     * get current text input buffer
+     *
+     * @return string
+     */
+    public function getInput()
+    {
+        return $this->linebuffer;
+    }
+
+    /**
      * set history handler to use (or none)
      *
      * The history handler will be called whenever the user hits the UP or DOWN
