@@ -189,9 +189,15 @@ class Readline extends EventEmitter
     /**
      * redraw the current input prompt
      *
+     * Usually, there should be no need to to call this method manually. It will
+     * be invoked automatically whenever we detect the readline input needs to
+     * be (re)written to the output.
+     *
      * Clear the current line and draw the input prompt. If input echo is
      * enabled, will also draw the current input buffer and move to the current
      * input buffer position.
+     *
+     * @return self
      */
     public function redraw()
     {
@@ -209,6 +215,8 @@ class Readline extends EventEmitter
             }
         }
         $this->write($output);
+
+        return $this;
     }
 
     public function clear()

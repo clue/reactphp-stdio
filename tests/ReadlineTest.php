@@ -6,8 +6,8 @@ class ReadlineTest extends TestCase
 {
     public function setUp()
     {
-        $output = $this->getMockBuilder('Clue\React\Stdio\Stdout')->disableOriginalConstructor()->getMock();
-        $this->readline = new Readline($output);
+        $this->output = $this->getMockBuilder('Clue\React\Stdio\Stdout')->disableOriginalConstructor()->getMock();
+        $this->readline = new Readline($this->output);
     }
 
     public function testSettersReturnSelf()
@@ -44,5 +44,15 @@ class ReadlineTest extends TestCase
         $this->readline->setInput('täst');
         $this->assertEquals('täst', $this->readline->getInput());
         $this->assertEquals(4, $this->readline->getCursorPosition());
+    }
+
+    public function testRedrawingReadlineWritesToOutputOnce()
+    {
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+        $this->readline->moveCursorBy(-2);
+
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "> " . "test" . "\x08\x08"));
+        $this->assertSame($this->readline, $this->readline->redraw());
     }
 }
