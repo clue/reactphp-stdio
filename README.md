@@ -2,14 +2,16 @@
 
 Async standard console input & output (STDIN, STDOUT) for React PHP
 
-> Note: This project is in early alpha stage! Feel free to report any issues you encounter.
+> Note: This project is in early beta stage! Feel free to report any issues you encounter.
 
 ## Quickstart example
 
 Once [installed](#install), you can use the following code to present a prompt in a CLI program:
 
 ```php
+$loop = React\EventLoop\Factory::create();
 $stdio = new Stdio($loop);
+
 $stdio->getReadline()->setPrompt('Input > ');
 
 $stdio->on('line', function ($line) use ($stdio) {
@@ -19,6 +21,8 @@ $stdio->on('line', function ($line) use ($stdio) {
         $stdio->end();
     }
 });
+
+$loop->run();
 ```
 
 See also the [examples](examples).
@@ -31,7 +35,7 @@ The recommended way to install this library is [through composer](https://getcom
 ```JSON
 {
     "require": {
-        "clue/stdio-react": "dev-master"
+        "clue/stdio-react": "~0.1.0"
     }
 }
 ```
