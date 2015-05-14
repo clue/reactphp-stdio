@@ -80,6 +80,16 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->setEcho(true));
     }
 
+    public function testSettingEchoAsteriskWithInputDoesRedraw()
+    {
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "> " . "****"));
+
+        $this->assertSame($this->readline, $this->readline->setEcho('*'));
+    }
+
     public function testSettingEchoOffWithInputDoesRedraw()
     {
         $this->readline->setEcho(true);
@@ -101,7 +111,16 @@ class ReadlineTest extends TestCase
 
     public function testSettingInputDoesRedraw()
     {
-        $this->output->expects($this->once())->method('write');
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "test"));
+        $this->assertSame($this->readline, $this->readline->setInput('test'));
+    }
+
+    public function testSettingInputWithEchoAsteriskDoesRedraw()
+    {
+        $this->readline->setEcho('*');
+
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "****"));
+
         $this->assertSame($this->readline, $this->readline->setInput('test'));
     }
 
