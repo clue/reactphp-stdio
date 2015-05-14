@@ -111,6 +111,21 @@ class Readline extends EventEmitter
     }
 
     /**
+     * get current cursor position
+     *
+     * cursor position is measured in number of text characters
+     *
+     * @return int
+     * @see self::moveCursorTo() to move the cursor to a given position
+     * @see self::moveCursorBy() to move the cursor by given number of characters
+     * @see self::setMove() to toggle whether the user can move the cursor position
+     */
+    public function getCursorPosition()
+    {
+        return $this->linepos;
+    }
+
+    /**
      * set current text input buffer
      *
      * this moves the cursor to the end of the current
@@ -323,11 +338,12 @@ class Readline extends EventEmitter
      * zero or out of range moves are simply ignored
      *
      * @param int $n
+     * @return self
      * @uses self::moveCursorTo()
      */
     public function moveCursorBy($n)
     {
-        $this->moveCursorTo($this->linepos + $n);
+        return $this->moveCursorTo($this->linepos + $n);
     }
 
     /**
@@ -336,6 +352,7 @@ class Readline extends EventEmitter
      * out of range (exceeding current input buffer) are simply ignored
      *
      * @param int $n
+     * @return self
      * @uses self::redraw()
      */
     public function moveCursorTo($n)
@@ -346,6 +363,8 @@ class Readline extends EventEmitter
 
         $this->linepos = $n;
         $this->redraw();
+
+        return $this;
     }
 
     /**
