@@ -66,9 +66,8 @@ class Readline extends EventEmitter
     public function setPrompt($prompt)
     {
         $this->prompt = $prompt;
-        $this->redraw();
 
-        return $this;
+        return $this->redraw();
     }
 
     /**
@@ -85,9 +84,8 @@ class Readline extends EventEmitter
     public function setEcho($echo)
     {
         $this->echo = !!$echo;
-        $this->redraw();
 
-        return $this;
+        return $this->redraw();
     }
 
     /**
@@ -105,9 +103,8 @@ class Readline extends EventEmitter
         $this->move = !!$move;
 
         $this->linepos = $this->strlen($this->linebuffer);
-        $this->redraw();
 
-        return $this;
+        return $this->redraw();
     }
 
     /**
@@ -139,9 +136,8 @@ class Readline extends EventEmitter
     {
         $this->linebuffer = $input;
         $this->linepos = $this->strlen($this->linebuffer);
-        $this->redraw();
 
-        return $this;
+        return $this->redraw();
     }
 
     /**
@@ -370,9 +366,8 @@ class Readline extends EventEmitter
         }
 
         $this->linepos = $n;
-        $this->redraw();
 
-        return $this;
+        return $this->redraw();
     }
 
     /**
