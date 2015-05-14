@@ -220,7 +220,7 @@ class Readline extends EventEmitter
     /**
      * redraw the current input prompt
      *
-     * Usually, there should be no need to to call this method manually. It will
+     * Usually, there should be no need to call this method manually. It will
      * be invoked automatically whenever we detect the readline input needs to
      * be (re)written to the output.
      *
@@ -229,6 +229,7 @@ class Readline extends EventEmitter
      * input buffer position.
      *
      * @return self
+     * @internal
      */
     public function redraw()
     {
@@ -254,37 +255,54 @@ class Readline extends EventEmitter
         return $this;
     }
 
+    /**
+     * Clears the current input prompt (if any)
+     *
+     * Usually, there should be no need to call this method manually. It will
+     * be invoked automatically whenever we detect that output needs to be
+     * written in place of the current prompt. The prompt will be rewritten
+     * after clearing the prompt and writing the output.
+     *
+     * @return self
+     * @see Stdio::write() which is responsible for invoking this method
+     * @internal
+     */
     public function clear()
     {
         if ($this->prompt !== '' || ($this->echo !== false && $this->linebuffer !== '')) {
             $this->write("\r\033[K");
         }
-        // $output = str_repeat("\x09 \x09", strlen($this->prompt . $this->linebuffer));
-        // $this->write($output);
+
+        return $this;
     }
 
+    /** @internal */
     public function onChar($char)
     {
         $this->sequencer->push($char);
     }
 
+    /** @internal */
     public function onKeyBackspace()
     {
         // left delete only if not at the beginning
         $this->deleteChar($this->linepos - 1);
     }
 
+    /** @internal */
     public function onKeyDelete()
     {
         // right delete only if not at the end
         $this->deleteChar($this->linepos);
     }
 
+    /** @internal */
     public function onKeyInsert()
     {
         // TODO: toggle insert mode
     }
 
+    /** @internal */
     public function onKeyTab()
     {
         if ($this->autocomplete !== null) {
@@ -292,6 +310,7 @@ class Readline extends EventEmitter
         }
     }
 
+    /** @internal */
     public function onKeyEnter()
     {
         if ($this->echo !== false) {
@@ -300,6 +319,7 @@ class Readline extends EventEmitter
         $this->processLine();
     }
 
+    /** @internal */
     public function onKeyLeft()
     {
         if ($this->move) {
@@ -307,6 +327,7 @@ class Readline extends EventEmitter
         }
     }
 
+    /** @internal */
     public function onKeyRight()
     {
         if ($this->move) {
@@ -314,6 +335,7 @@ class Readline extends EventEmitter
         }
     }
 
+    /** @internal */
     public function onKeyUp()
     {
         if ($this->history !== null) {
@@ -321,6 +343,7 @@ class Readline extends EventEmitter
         }
     }
 
+    /** @internal */
     public function onKeyDown()
     {
         if ($this->history !== null) {
@@ -328,7 +351,11 @@ class Readline extends EventEmitter
         }
     }
 
-    // character(s) that could not be processed by the sequencer
+    /**
+     * Will be invoked for character(s) that could not otherwise be processed by the sequencer
+     *
+     * @internal
+     */
     public function onFallback($chars)
     {
         $pre  = $this->substr($this->linebuffer, 0, $this->linepos); // read everything up until before backspace
@@ -354,6 +381,7 @@ class Readline extends EventEmitter
      * indices out of range (exceeding current input buffer) are simply ignored
      *
      * @param int $n
+     * @internal
      */
     public function deleteChar($n)
     {
