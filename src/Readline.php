@@ -75,13 +75,28 @@ class Readline extends EventEmitter
     }
 
     /**
-     * whether or not to echo input
+     * sets whether/how to echo text input
      *
-     * disabling echo output is a good idea for password prompts. Will redraw
-     * the current prompt and only echo the current input buffer according to
-     * the new setting.
+     * The default setting is `true`, which means that every character will be
+     * echo'ed as-is, i.e. you can see what you're typing.
+     * For example: Typing "test" shows "test".
      *
-     * @param boolean $echo
+     * You can turn this off by supplying `false`, which means that *nothing*
+     * will be echo'ed while you're typing. This could be a good idea for
+     * password prompts. Note that this could be confusing for users, so using
+     * a character replacement as following is often preferred.
+     * For example: Typing "test" shows "" (nothing).
+     *
+     * Alternative, you can supply a single character replacement character
+     * that will be echo'ed for each character in the text input. This could
+     * be a good idea for password prompts, where an asterisk character ("*")
+     * is often used to indicate typing activity and password length.
+     * For example: Typing "test" shows "****" (with asterisk replacement)
+     *
+     * Changing this setting will redraw the current prompt and echo the current
+     * input buffer according to the new setting.
+     *
+     * @param boolean|string $echo echo can be turned on (boolean true) or off (boolean true), or you can supply a single character replacement string
      * @return self
      * @uses self::redraw()
      */
@@ -91,7 +106,7 @@ class Readline extends EventEmitter
             return $this;
         }
 
-        $this->echo = !!$echo;
+        $this->echo = $echo;
 
         // only redraw if there is any input
         if ($this->linebuffer !== '') {
@@ -153,7 +168,7 @@ class Readline extends EventEmitter
         $this->linepos = $this->strlen($this->linebuffer);
 
         // only redraw if input should be echo'ed (i.e. is not hidden anyway)
-        if ($this->echo) {
+        if ($this->echo !== false) {
             $this->redraw();
         }
 
@@ -219,8 +234,12 @@ class Readline extends EventEmitter
     {
         // Erase characters from cursor to end of line
         $output = "\r\033[K" . $this->prompt;
-        if ($this->echo) {
-            $output .= $this->linebuffer;
+        if ($this->echo !== false) {
+            if ($this->echo === true) {
+                $output .= $this->linebuffer;
+            } else {
+                $output .= str_repeat($this->echo, $this->strlen($this->linebuffer));
+            }
 
             $len = $this->strlen($this->linebuffer);
             if ($this->linepos !== $len) {
@@ -237,7 +256,7 @@ class Readline extends EventEmitter
 
     public function clear()
     {
-        if ($this->prompt !== '' || ($this->echo && $this->linebuffer !== '')) {
+        if ($this->prompt !== '' || ($this->echo !== false && $this->linebuffer !== '')) {
             $this->write("\r\033[K");
         }
         // $output = str_repeat("\x09 \x09", strlen($this->prompt . $this->linebuffer));
@@ -275,7 +294,7 @@ class Readline extends EventEmitter
 
     public function onKeyEnter()
     {
-        if ($this->echo) {
+        if ($this->echo !== false) {
             $this->write("\n");
         }
         $this->processLine();

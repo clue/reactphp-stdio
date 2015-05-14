@@ -17,7 +17,7 @@ $password = null;
 $stdio->on('line', function ($line) use ($stdio, &$first, &$username, &$password) {
     if ($first) {
         $stdio->getReadline()->setPrompt('Password: ');
-        $stdio->getReadline()->setEcho(false);
+        $stdio->getReadline()->setEcho('*');
         $username = $line;
         $first = false;
     } else {
