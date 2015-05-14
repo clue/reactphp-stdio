@@ -60,12 +60,15 @@ class Readline extends EventEmitter
      * Will redraw the current input prompt with the current input buffer.
      *
      * @param string $prompt
+     * @return self
      * @uses self::redraw()
      */
     public function setPrompt($prompt)
     {
         $this->prompt = $prompt;
         $this->redraw();
+
+        return $this;
     }
 
     /**
@@ -76,12 +79,15 @@ class Readline extends EventEmitter
      * the new setting.
      *
      * @param boolean $echo
+     * @return self
      * @uses self::redraw()
      */
     public function setEcho($echo)
     {
         $this->echo = !!$echo;
         $this->redraw();
+
+        return $this;
     }
 
     /**
@@ -91,6 +97,8 @@ class Readline extends EventEmitter
      * input buffer (if any).
      *
      * @param boolean $move
+     * @return self
+     * @uses self::redraw()
      */
     public function setMove($move)
     {
@@ -98,6 +106,8 @@ class Readline extends EventEmitter
 
         $this->linepos = $this->strlen($this->linebuffer);
         $this->redraw();
+
+        return $this;
     }
 
     /**
@@ -107,10 +117,13 @@ class Readline extends EventEmitter
      * arrow keys.
      *
      * @param HistoryInterface|null $history
+     * @return self
      */
     public function setHistory(HistoryInterface $history = null)
     {
         $this->history = $history;
+
+        return $this;
     }
 
     /**
@@ -120,10 +133,13 @@ class Readline extends EventEmitter
      * key.
      *
      * @param AutocompleteInterface|null $autocomplete
+     * @return self
      */
     public function setAutocomplete(AutocompleteInterface $autocomplete = null)
     {
         $this->autocomplete = $autocomplete;
+
+        return $this;
     }
 
     /**
