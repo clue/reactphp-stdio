@@ -55,4 +55,73 @@ class ReadlineTest extends TestCase
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "> " . "test" . "\x08\x08"));
         $this->assertSame($this->readline, $this->readline->redraw());
     }
+
+    public function testSettingSameSettingsDoesNotNeedToRedraw()
+    {
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+        $this->readline->moveCursorBy(-2);
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->setPrompt('> '));
+        $this->assertSame($this->readline, $this->readline->setInput('test'));
+        $this->assertSame($this->readline, $this->readline->moveCursorTo(2));
+    }
+
+    public function testSettingEchoOnWithInputDoesRedraw()
+    {
+        $this->readline->setEcho(false);
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "> " . "test"));
+
+        $this->assertSame($this->readline, $this->readline->setEcho(true));
+    }
+
+    public function testSettingEchoOffWithInputDoesRedraw()
+    {
+        $this->readline->setEcho(true);
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "> "));
+
+        $this->assertSame($this->readline, $this->readline->setEcho(false));
+    }
+
+    public function testSettingEchoWithoutInputDoesNotNeedToRedraw()
+    {
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->setEcho(false));
+        $this->assertSame($this->readline, $this->readline->setEcho(true));
+    }
+
+    public function testSettingInputDoesRedraw()
+    {
+        $this->output->expects($this->once())->method('write');
+        $this->assertSame($this->readline, $this->readline->setInput('test'));
+    }
+
+    public function testSettingInputWithoutEchoDoesNotNeedToRedraw()
+    {
+        $this->readline->setEcho(false);
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->setInput('test'));
+    }
+
+    public function testMovingCursorWithoutEchoDoesNotNeedToRedraw()
+    {
+        $this->readline->setEcho(false);
+        $this->readline->setInput('test');
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->moveCursorTo(0));
+        $this->assertSame($this->readline, $this->readline->moveCursorBy(2));
+    }
 }
