@@ -65,10 +65,13 @@ class Readline extends EventEmitter
      */
     public function setPrompt($prompt)
     {
-        $this->prompt = $prompt;
-        $this->redraw();
+        if ($prompt === $this->prompt) {
+            return $this;
+        }
 
-        return $this;
+        $this->prompt = $prompt;
+
+        return $this->redraw();
     }
 
     /**
@@ -84,8 +87,16 @@ class Readline extends EventEmitter
      */
     public function setEcho($echo)
     {
+        if ($echo === $this->echo) {
+            return $this;
+        }
+
         $this->echo = !!$echo;
-        $this->redraw();
+
+        // only redraw if there is any input
+        if ($this->linebuffer !== '') {
+            $this->redraw();
+        }
 
         return $this;
     }
@@ -104,10 +115,7 @@ class Readline extends EventEmitter
     {
         $this->move = !!$move;
 
-        $this->linepos = $this->strlen($this->linebuffer);
-        $this->redraw();
-
-        return $this;
+        return $this->moveCursorTo($this->strlen($this->linebuffer));
     }
 
     /**
@@ -137,9 +145,17 @@ class Readline extends EventEmitter
      */
     public function setInput($input)
     {
+        if ($this->linebuffer === $input) {
+            return $this;
+        }
+
         $this->linebuffer = $input;
         $this->linepos = $this->strlen($this->linebuffer);
-        $this->redraw();
+
+        // only redraw if input should be echo'ed (i.e. is not hidden anyway)
+        if ($this->echo) {
+            $this->redraw();
+        }
 
         return $this;
     }
@@ -189,9 +205,15 @@ class Readline extends EventEmitter
     /**
      * redraw the current input prompt
      *
+     * Usually, there should be no need to to call this method manually. It will
+     * be invoked automatically whenever we detect the readline input needs to
+     * be (re)written to the output.
+     *
      * Clear the current line and draw the input prompt. If input echo is
      * enabled, will also draw the current input buffer and move to the current
      * input buffer position.
+     *
+     * @return self
      */
     public function redraw()
     {
@@ -209,6 +231,8 @@ class Readline extends EventEmitter
             }
         }
         $this->write($output);
+
+        return $this;
     }
 
     public function clear()
@@ -358,11 +382,15 @@ class Readline extends EventEmitter
     public function moveCursorTo($n)
     {
         if ($n < 0 || $n === $this->linepos || $n > $this->strlen($this->linebuffer)) {
-            return;
+            return $this;
         }
 
         $this->linepos = $n;
-        $this->redraw();
+
+        // only redraw if cursor is actually visible
+        if ($this->echo) {
+            $this->redraw();
+        }
 
         return $this;
     }
