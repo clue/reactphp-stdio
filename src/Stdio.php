@@ -102,12 +102,14 @@ class Stdio extends CompositeStream
             $this->write($data);
         }
 
+        $this->readline->setInput('')->setPrompt('')->clear();
         $this->input->pause();
         $this->output->end();
     }
 
     public function close()
     {
+        $this->readline->setInput('')->setPrompt('')->clear();
         $this->input->pause();
         $this->input->close();
         $this->output->close();

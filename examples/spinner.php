@@ -20,7 +20,6 @@ $spinner = new Spinner($loop, $stdio);
 
 $stdio->on('line', function ($line) use ($stdio, &$tid, $loop, $spinner) {
     $stdio->overwrite('Processing... DONE');
-    $stdio->getReadline()->setPrompt('');
 
     $stdio->end();
     $spinner->pause();
