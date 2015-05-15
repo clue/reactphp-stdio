@@ -153,4 +153,144 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->moveCursorTo(0));
         $this->assertSame($this->readline, $this->readline->moveCursorBy(2));
     }
+
+    public function testWriteSimpleCharWritesOnce()
+    {
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "k"));
+
+        $this->pushInputBytes($this->readline, 'k');
+    }
+
+    public function testWriteMultiByteCharWritesOnce()
+    {
+        $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "\xF0\x9D\x84\x9E"));
+
+        // "𝄞" – U+1D11E MUSICAL SYMBOL G CLEF
+        $this->pushInputBytes($this->readline, "\xF0\x9D\x84\x9E");
+    }
+
+    public function testKeysSimpleChars()
+    {
+        $this->pushInputBytes($this->readline, 'hi!');
+
+        $this->assertEquals('hi!', $this->readline->getInput());
+        $this->assertEquals(3, $this->readline->getCursorPosition());
+
+        return $this->readline;
+    }
+
+    /**
+     * @depends testKeysSimpleChars
+     * @param Readline $readline
+     */
+    public function testKeysBackspaceDeletesLastCharacter(Readline $readline)
+    {
+        $readline->onKeyBackspace();
+
+        $this->assertEquals('hi', $readline->getInput());
+        $this->assertEquals(2, $readline->getCursorPosition());
+    }
+
+    public function testKeysMultiByteInput()
+    {
+        $this->pushInputBytes($this->readline, 'hä');
+
+        $this->assertEquals('hä', $this->readline->getInput());
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+
+        return $this->readline;
+    }
+
+    /**
+     * @depends testKeysMultiByteInput
+     * @param Readline $readline
+     */
+    public function testKeysBackspaceDeletesWholeMultibyteCharacter(Readline $readline)
+    {
+        $readline->onKeyBackspace();
+
+        $this->assertEquals('h', $readline->getInput());
+    }
+
+    public function testKeysBackspaceMiddle()
+    {
+        $this->readline->setInput('test');
+        $this->readline->moveCursorTo(2);
+
+        $this->readline->onKeyBackspace();
+
+        $this->assertEquals('tst', $this->readline->getInput());
+        $this->assertEquals(1, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysBackspaceFrontDoesNothing()
+    {
+        $this->readline->setInput('test');
+        $this->readline->moveCursorTo(0);
+
+        $this->readline->onKeyBackspace();
+
+        $this->assertEquals('test', $this->readline->getInput());
+        $this->assertEquals(0, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysDeleteMiddle()
+    {
+        $this->readline->setInput('test');
+        $this->readline->moveCursorTo(2);
+
+        $this->readline->onKeyDelete();
+
+        $this->assertEquals('tet', $this->readline->getInput());
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysDeleteEndDoesNothing()
+    {
+        $this->readline->setInput('test');
+
+        $this->readline->onKeyDelete();
+
+        $this->assertEquals('test', $this->readline->getInput());
+        $this->assertEquals(4, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysPrependCharacterInFrontOfMultiByte()
+    {
+        $this->readline->setInput('ü');
+        $this->readline->moveCursorTo(0);
+
+        $this->pushInputBytes($this->readline, 'h');
+
+        $this->assertEquals('hü', $this->readline->getInput());
+        $this->assertEquals(1, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysWriteMultiByteAfterMultiByte()
+    {
+        $this->readline->setInput('ü');
+
+        $this->pushInputBytes($this->readline, 'ä');
+
+        $this->assertEquals('üä', $this->readline->getInput());
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+    }
+
+    public function testKeysPrependMultiByteInFrontOfMultiByte()
+    {
+        $this->readline->setInput('ü');
+        $this->readline->moveCursorTo(0);
+
+        $this->pushInputBytes($this->readline, 'ä');
+
+        $this->assertEquals('äü', $this->readline->getInput());
+        $this->assertEquals(1, $this->readline->getCursorPosition());
+    }
+
+    private function pushInputBytes(Readline $readline, $bytes)
+    {
+        foreach (str_split($bytes, 1) as $byte) {
+            $readline->onChar($byte);
+        }
+    }
 }

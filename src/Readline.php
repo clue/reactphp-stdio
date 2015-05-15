@@ -48,7 +48,35 @@ class Readline extends EventEmitter
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_INS, array($this, 'onKeyInsert'));
 
-        $this->sequencer->addFallback('', array($this, 'onFallback'));
+        $expect = 0;
+        $char = '';
+        $that = $this;
+        $this->sequencer->addFallback('', function ($byte) use (&$expect, &$char, $that) {
+            if ($expect === 0) {
+                $code = ord($byte);
+                // count number of bytes expected for this UTF-8 multi-byte character
+                $expect = 1;
+                if ($code & 128 && $code & 64) {
+                    ++$expect;
+                    if ($code & 32) {
+                        ++$expect;
+                        if ($code & 16) {
+                            ++$expect;
+                        }
+                    }
+                }
+            }
+            $char .= $byte;
+            --$expect;
+
+            // forward buffered bytes as a single multi byte character once last byte has been read
+            if ($expect === 0) {
+                $save = $char;
+                $char = '';
+                $that->onFallback($save);
+            }
+        });
+
         $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
             echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
         });
@@ -401,16 +429,12 @@ class Readline extends EventEmitter
      */
     public function onFallback($chars)
     {
-        $pre  = $this->substr($this->linebuffer, 0, $this->linepos); // read everything up until before backspace
+        // read everything up until before current position
+        $pre  = $this->substr($this->linebuffer, 0, $this->linepos);
         $post = $this->substr($this->linebuffer, $this->linepos);
 
         $this->linebuffer = $pre . $chars . $post;
-
-        // TODO: fix lineposition for partial multibyte characters
         ++$this->linepos;
-        if ($this->linepos >= $this->strlen($this->linebuffer)) {
-            $this->linepos = $this->strlen($this->linebuffer);
-        }
 
         $this->redraw();
     }
@@ -429,16 +453,17 @@ class Readline extends EventEmitter
     public function deleteChar($n)
     {
         $len = $this->strlen($this->linebuffer);
-        if ($n < 0 || $n > $len) {
+        if ($n < 0 || $n >= $len) {
             return;
         }
 
-        // TODO: multibyte-characters
-
-        $pre  = $this->substr($this->linebuffer, 0, $n); // read everything up until before current position
+        // read everything up until before current position
+        $pre  = $this->substr($this->linebuffer, 0, $n);
         $post = $this->substr($this->linebuffer, $n + 1);
+
         $this->linebuffer = $pre . $post;
 
+        // move cursor one cell to the left if we're deleting in front of the cursor
         if ($n < $this->linepos) {
             --$this->linepos;
         }
@@ -463,24 +488,6 @@ class Readline extends EventEmitter
         $this->linepos = 0;
 
         $this->redraw();
-    }
-
-    protected function readEscape($char)
-    {
-        $this->inEscape = false;
-
-        if($char === self::ESC_LEFT && $this->move) {
-            $this->moveCursorBy(-1);
-        } else if($char === self::ESC_RIGHT && $this->move) {
-            $this->moveCursorBy(1);
-        } else if ($char === self::ESC_UP && $this->history !== null) {
-            $this->history->moveUp();
-        } else if ($char === self::ESC_DOWN && $this->history !== null) {
-            $this->history->moveDown();
-        } else {
-            $this->write('invalid char');
-            // ignore unknown escape code
-        }
     }
 
     protected function strlen($str)
