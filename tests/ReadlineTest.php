@@ -124,6 +124,16 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->setInput('test'));
     }
 
+    public function testSettingInputWithSameLengthWithEchoAsteriskDoesNotNeedToRedraw()
+    {
+        $this->readline->setInput('test');
+        $this->readline->setEcho('*');
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->setInput('demo'));
+    }
+
     public function testSettingInputWithoutEchoDoesNotNeedToRedraw()
     {
         $this->readline->setEcho(false);
