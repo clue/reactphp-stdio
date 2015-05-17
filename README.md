@@ -1,6 +1,6 @@
 # clue/stdio-react [![Build Status](https://travis-ci.org/clue/php-stdio-react.svg?branch=master)](https://travis-ci.org/clue/php-stdio-react)
 
-Async standard console input & output (STDIN, STDOUT) for React PHP
+Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDOUT) for React PHP
 
 > Note: This project is in early beta stage! Feel free to report any issues you encounter.
 
@@ -181,12 +181,26 @@ simply pass a boolean `true` like this:
 $readline->setMove(true);
 ```
 
-The `getCursorPosition()` method can be used to access the current cursor position.
+The `getCursorPosition()` method can be used to access the current cursor position,
+measured in number of characters.
 This can be useful if you want to get a substring of the current *user input buffer*.
 Simply invoke it like this:
 
 ```php
 $position = $readline->getCursorPosition();
+```
+
+The `getCursorCell()` method can be used to get the current cursor position,
+measured in number of monospace cells.
+Most *normal* characters (plain ASCII and most multi-byte UTF-8 sequences) take a single monospace cell.
+However, there are a number of characters that have no visual representation
+(and do not take a cell at all) or characters that do not fit within a single
+cell (like some asian glyphs).
+This method is mostly useful for calculating the visual cursor position on screen,
+but you may also invoke it like this:
+
+```php
+$cell = $readline->getCursorCell();
 ```
 
 The `moveCursorTo($position)` method can be used to set the current cursor position to the given absolute character position.
