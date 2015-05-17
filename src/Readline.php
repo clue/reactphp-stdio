@@ -48,7 +48,35 @@ class Readline extends EventEmitter
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_INS, array($this, 'onKeyInsert'));
 
-        $this->sequencer->addFallback('', array($this, 'onFallback'));
+        $expect = 0;
+        $char = '';
+        $that = $this;
+        $this->sequencer->addFallback('', function ($byte) use (&$expect, &$char, $that) {
+            if ($expect === 0) {
+                $code = ord($byte);
+                // count number of bytes expected for this UTF-8 multi-byte character
+                $expect = 1;
+                if ($code & 128 && $code & 64) {
+                    ++$expect;
+                    if ($code & 32) {
+                        ++$expect;
+                        if ($code & 16) {
+                            ++$expect;
+                        }
+                    }
+                }
+            }
+            $char .= $byte;
+            --$expect;
+
+            // forward buffered bytes as a single multi byte character once last byte has been read
+            if ($expect === 0) {
+                $save = $char;
+                $char = '';
+                $that->onFallback($save);
+            }
+        });
+
         $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
             echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
         });
@@ -134,12 +162,15 @@ class Readline extends EventEmitter
     }
 
     /**
-     * get current cursor position
+     * Gets current cursor position measured in number of text characters.
      *
-     * cursor position is measured in number of text characters
+     * Note that the number of text characters doesn't necessarily reflect the
+     * number of monospace cells occupied by the text characters. If you want
+     * to know the latter, use `self::getCursorCell()` instead.
      *
      * @return int
-     * @see self::moveCursorTo() to move the cursor to a given position
+     * @see self::getCursorCell() to get the position measured in monospace cells
+     * @see self::moveCursorTo() to move the cursor to a given character position
      * @see self::moveCursorBy() to move the cursor by given number of characters
      * @see self::setMove() to toggle whether the user can move the cursor position
      */
@@ -149,13 +180,55 @@ class Readline extends EventEmitter
     }
 
     /**
-     * move cursor to right by $n chars (or left if $n is negative)
+     * Gets current cursor position measured in monospace cells.
      *
-     * zero or out of range moves are simply ignored
+     * Note that the cell position doesn't necessarily reflect the number of
+     * text characters. If you want to know the latter, use
+     * `self::getCursorPosition()` instead.
+     *
+     * Most "normal" characters occupy a single monospace cell, i.e. the ASCII
+     * sequence for "A" requires a single cell, as do most UTF-8 sequences
+     * like "Ä".
+     *
+     * However, there are a number of code points that do not require a cell
+     * (i.e. invisible surrogates) or require two cells (e.g. some asian glyphs).
+     *
+     * Also note that this takes the echo mode into account, i.e. the cursor is
+     * always at position zero if echo is off. If using a custom echo character
+     * (like asterisk), it will take its width into account instead of the actual
+     * input characters.
+     *
+     * @return int
+     * @see self::getCursorPosition() to get current cursor position measured in characters
+     * @see self::moveCursorTo() to move the cursor to a given character position
+     * @see self::moveCursorBy() to move the cursor by given number of characters
+     * @see self::setMove() to toggle whether the user can move the cursor position
+     * @see self::setEcho()
+     */
+    public function getCursorCell()
+    {
+        if ($this->echo === false) {
+            return 0;
+        }
+        if ($this->echo !== true) {
+            return $this->strwidth($this->echo) * $this->linepos;
+        }
+        return $this->strwidth($this->substr($this->linebuffer, 0, $this->linepos));
+    }
+
+    /**
+     * Moves cursor to right by $n chars (or left if $n is negative).
+     *
+     * Zero value or values out of range (exceeding current input buffer) are
+     * simply ignored.
+     *
+     * Will redraw() the readline only if the visible cell position changes,
+     * see `self::getCursorCell()` for more details.
      *
      * @param int $n
      * @return self
      * @uses self::moveCursorTo()
+     * @uses self::redraw()
      */
     public function moveCursorBy($n)
     {
@@ -163,9 +236,12 @@ class Readline extends EventEmitter
     }
 
     /**
-     * move cursor to given position in current line buffer
+     * Moves cursor to given position in current line buffer.
      *
-     * out of range (exceeding current input buffer) are simply ignored
+     * Values out of range (exceeding current input buffer) are simply ignored.
+     *
+     * Will redraw() the readline only if the visible cell position changes,
+     * see `self::getCursorCell()` for more details.
      *
      * @param int $n
      * @return self
@@ -177,10 +253,11 @@ class Readline extends EventEmitter
             return $this;
         }
 
+        $old = $this->getCursorCell();
         $this->linepos = $n;
 
-        // only redraw if cursor is actually visible
-        if ($this->echo) {
+        // only redraw if visible cell position change (implies cursor is actually visible)
+        if ($this->getCursorCell() !== $old) {
             $this->redraw();
         }
 
@@ -280,18 +357,13 @@ class Readline extends EventEmitter
         $output = "\r\033[K" . $this->prompt;
         if ($this->echo !== false) {
             if ($this->echo === true) {
-                $output .= $this->linebuffer;
+                $buffer = $this->linebuffer;
             } else {
-                $output .= str_repeat($this->echo, $this->strlen($this->linebuffer));
+                $buffer = str_repeat($this->echo, $this->strlen($this->linebuffer));
             }
 
-            $len = $this->strlen($this->linebuffer);
-            if ($this->linepos !== $len) {
-                $reverse = $len - $this->linepos;
-
-                // move back $reverse chars (by sending backspace)
-                $output .= str_repeat("\x08", $reverse);
-            }
+            // write output, then move back $reverse chars (by sending backspace)
+            $output .= $buffer . str_repeat("\x08", $this->strwidth($buffer) - $this->getCursorCell());
         }
         $this->write($output);
 
@@ -401,16 +473,12 @@ class Readline extends EventEmitter
      */
     public function onFallback($chars)
     {
-        $pre  = $this->substr($this->linebuffer, 0, $this->linepos); // read everything up until before backspace
+        // read everything up until before current position
+        $pre  = $this->substr($this->linebuffer, 0, $this->linepos);
         $post = $this->substr($this->linebuffer, $this->linepos);
 
         $this->linebuffer = $pre . $chars . $post;
-
-        // TODO: fix lineposition for partial multibyte characters
         ++$this->linepos;
-        if ($this->linepos >= $this->strlen($this->linebuffer)) {
-            $this->linepos = $this->strlen($this->linebuffer);
-        }
 
         $this->redraw();
     }
@@ -429,16 +497,17 @@ class Readline extends EventEmitter
     public function deleteChar($n)
     {
         $len = $this->strlen($this->linebuffer);
-        if ($n < 0 || $n > $len) {
+        if ($n < 0 || $n >= $len) {
             return;
         }
 
-        // TODO: multibyte-characters
-
-        $pre  = $this->substr($this->linebuffer, 0, $n); // read everything up until before current position
+        // read everything up until before current position
+        $pre  = $this->substr($this->linebuffer, 0, $n);
         $post = $this->substr($this->linebuffer, $n + 1);
+
         $this->linebuffer = $pre . $post;
 
+        // move cursor one cell to the left if we're deleting in front of the cursor
         if ($n < $this->linepos) {
             --$this->linepos;
         }
@@ -465,24 +534,6 @@ class Readline extends EventEmitter
         $this->redraw();
     }
 
-    protected function readEscape($char)
-    {
-        $this->inEscape = false;
-
-        if($char === self::ESC_LEFT && $this->move) {
-            $this->moveCursorBy(-1);
-        } else if($char === self::ESC_RIGHT && $this->move) {
-            $this->moveCursorBy(1);
-        } else if ($char === self::ESC_UP && $this->history !== null) {
-            $this->history->moveUp();
-        } else if ($char === self::ESC_DOWN && $this->history !== null) {
-            $this->history->moveDown();
-        } else {
-            $this->write('invalid char');
-            // ignore unknown escape code
-        }
-    }
-
     protected function strlen($str)
     {
         return mb_strlen($str, $this->encoding);
@@ -494,6 +545,11 @@ class Readline extends EventEmitter
             $len = $this->strlen($str) - $start;
         }
         return (string)mb_substr($str, $start, $len, $this->encoding);
+    }
+
+    private function strwidth($str)
+    {
+        return mb_strwidth($str, $this->encoding);
     }
 
     protected function write($data)
