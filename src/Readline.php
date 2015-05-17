@@ -203,11 +203,15 @@ class Readline extends EventEmitter
             return $this;
         }
 
+        // remember old input length if echo replacement is used
+        $oldlen = (is_string($this->echo)) ? $this->strlen($this->linebuffer) : null;
+
         $this->linebuffer = $input;
         $this->linepos = $this->strlen($this->linebuffer);
 
         // only redraw if input should be echo'ed (i.e. is not hidden anyway)
-        if ($this->echo !== false) {
+        // and echo replacement is used, make sure the input length changes
+        if ($this->echo !== false && $this->linepos !== $oldlen) {
             $this->redraw();
         }
 
