@@ -41,6 +41,12 @@ class Stdin extends Stream
         }
     }
 
+    public function close()
+    {
+        $this->pause();
+        parent::close();
+    }
+
     public function __destruct()
     {
         $this->pause();

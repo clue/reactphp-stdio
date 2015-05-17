@@ -29,8 +29,7 @@ $stdio->on('line', function ($line) use ($stdio, &$first, &$username, &$password
 $loop->run();
 
 echo <<<EOT
-
-
+---------------------
 Confirmation:
 ---------------------
 Username: $username

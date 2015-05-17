@@ -12,16 +12,17 @@ $stdio->getReadline()->setPrompt('> ');
 
 $stdio->writeln('Will print periodic messages until you type "quit" or "exit"');
 
-$stdio->on('line', function ($line) use ($stdio, $loop) {
+$stdio->on('line', function ($line) use ($stdio, $loop, &$timer) {
     $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
 
     if ($line === 'quit' || $line === 'exit') {
-        $loop->stop();
+        $timer->cancel();
+        $stdio->end();
     }
 });
 
 // add some periodic noise
-$loop->addPeriodicTimer(2.0, function () use ($stdio) {
+$timer = $loop->addPeriodicTimer(2.0, function () use ($stdio) {
     $stdio->writeln('hello');
 });
 
