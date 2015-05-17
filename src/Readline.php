@@ -424,13 +424,17 @@ class Readline extends EventEmitter
     /** @internal */
     public function onKeyHome()
     {
-        $this->moveCursorTo(0);
+        if ($this->move) {
+            $this->moveCursorTo(0);
+        }
     }
 
     /** @internal */
     public function onKeyEnd()
     {
-        $this->moveCursorTo($this->strlen($this->linebuffer));
+        if ($this->move) {
+            $this->moveCursorTo($this->strlen($this->linebuffer));
+        }
     }
 
     /** @internal */
