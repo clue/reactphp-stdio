@@ -42,6 +42,25 @@ class ReadlineTest extends TestCase
         $this->assertEquals(7, $this->readline->getCursorCell());
     }
 
+    public function testSettingMoveOffDoesNotAllowDirectionKeysToChangePosition()
+    {
+        $this->readline->setInput('test');
+        $this->readline->setMove(false);
+        $this->readline->moveCursorTo(2);
+
+        $this->readline->onKeyLeft();
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+
+        $this->readline->onKeyRight();
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+
+        $this->readline->onKeyHome();
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+
+        $this->readline->onKeyEnd();
+        $this->assertEquals(2, $this->readline->getCursorPosition());
+    }
+
     public function testMultiByteInput()
     {
         $this->readline->setInput('täst');
@@ -190,6 +209,32 @@ class ReadlineTest extends TestCase
     public function testKeysEndMovesToEnd(Readline $readline)
     {
         $readline->onKeyEnd();
+
+        $this->assertEquals(4, $readline->getCursorPosition());
+
+        return $readline;
+    }
+
+    /**
+     * @depends testKeysEndMovesToEnd
+     * @param Readline $readline
+     */
+    public function testKeysLeftMovesToLeft(Readline $readline)
+    {
+        $readline->onKeyLeft();
+
+        $this->assertEquals(3, $readline->getCursorPosition());
+
+        return $readline;
+    }
+
+    /**
+     * @depends testKeysLeftMovesToLeft
+     * @param Readline $readline
+     */
+    public function testKeysRightMovesToRight(Readline $readline)
+    {
+        $readline->onKeyRight();
 
         $this->assertEquals(4, $readline->getCursorPosition());
     }
