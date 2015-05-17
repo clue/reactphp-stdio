@@ -35,7 +35,7 @@ The recommended way to install this library is [through composer](https://getcom
 ```JSON
 {
     "require": {
-        "clue/stdio-react": "~0.1.0"
+        "clue/stdio-react": "~0.2.0"
     }
 }
 ```
