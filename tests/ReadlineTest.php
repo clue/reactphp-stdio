@@ -173,6 +173,27 @@ class ReadlineTest extends TestCase
         $this->pushInputBytes($this->readline, "\xF0\x9D\x84\x9E");
     }
 
+    public function testKeysHomeMovesToFront()
+    {
+        $this->readline->setInput('test');
+        $this->readline->onKeyHome();
+
+        $this->assertEquals(0, $this->readline->getCursorPosition());
+
+        return $this->readline;
+    }
+
+    /**
+     * @depends testKeysHomeMovesToFront
+     * @param Readline $readline
+     */
+    public function testKeysEndMovesToEnd(Readline $readline)
+    {
+        $readline->onKeyEnd();
+
+        $this->assertEquals(4, $readline->getCursorPosition());
+    }
+
     public function testKeysSimpleChars()
     {
         $this->pushInputBytes($this->readline, 'hi!');

@@ -15,8 +15,10 @@ class Readline extends EventEmitter
     const ESC_RIGHT    = "C";
     const ESC_UP       = "A";
     const ESC_DOWN     = "B";
-    const ESC_DEL      = "3~";
+    const ESC_HOME     = "1~";
     const ESC_INS      = "2~";
+    const ESC_DEL      = "3~";
+    const ESC_END      = "4~";
 
     const ESC_F10 = "20~";
 
@@ -45,8 +47,10 @@ class Readline extends EventEmitter
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_RIGHT, array($this, 'onKeyRight'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_UP, array($this, 'onKeyUp'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DOWN, array($this, 'onKeyDown'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
+        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_HOME, array($this, 'onKeyHome'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_INS, array($this, 'onKeyInsert'));
+        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
+        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_END, array($this, 'onKeyEnd'));
 
         $expect = 0;
         $char = '';
@@ -415,6 +419,18 @@ class Readline extends EventEmitter
     public function onKeyInsert()
     {
         // TODO: toggle insert mode
+    }
+
+    /** @internal */
+    public function onKeyHome()
+    {
+        $this->moveCursorTo(0);
+    }
+
+    /** @internal */
+    public function onKeyEnd()
+    {
+        $this->moveCursorTo($this->strlen($this->linebuffer));
     }
 
     /** @internal */
