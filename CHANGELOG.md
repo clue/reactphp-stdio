@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2015-05-18)
+
+*   Feature: Support multi-byte UTF-8 characters and account for cell width
+    (#20)
+
+*   Feature: Add support for HOME and END keys
+    (#22)
+
+*   Fix: Clear readline input and restore TTY on end
+    (#21)
+
 ## 0.2.0 (2015-05-17)
 
 *   Feature: Support echo replacements (asterisk for password prompts)

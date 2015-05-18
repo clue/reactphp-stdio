@@ -2,7 +2,7 @@
 
 Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDOUT) for React PHP
 
-> Note: This project is in early beta stage! Feel free to report any issues you encounter.
+> Note: This project is in beta stage! Feel free to report any issues you encounter.
 
 ## Quickstart example
 
@@ -269,7 +269,7 @@ The recommended way to install this library is [through composer](https://getcom
 ```JSON
 {
     "require": {
-        "clue/stdio-react": "~0.2.0"
+        "clue/stdio-react": "~0.3.0"
     }
 }
 ```
