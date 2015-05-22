@@ -74,4 +74,28 @@ class MemoryHistoryTest extends TestCase
         $this->history->moveUp($this->readline);
         $this->history->moveDown($this->readline);
     }
+
+    public function testMovingUpClearsCurrentInput()
+    {
+        $this->readline->expects($this->once())->method('getInput')->will($this->returnValue('input'));
+
+        $this->history->addLine('first');
+
+        $this->readline->expects($this->once())->method('setInput')->with($this->equalTo('first'));
+
+        $this->history->moveUp($this->readline);
+
+        return $this->history;
+    }
+
+    /**
+     * @depends testMovingUpClearsCurrentInput
+     * @param History $history
+     */
+    public function testMovingDownRestoresLastBufferAgain(History $history)
+    {
+        $this->readline->expects($this->once())->method('setInput')->with($this->equalTo('input'));
+
+        $history->moveDown($this->readline);
+    }
 }

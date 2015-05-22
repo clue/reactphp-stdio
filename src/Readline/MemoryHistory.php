@@ -8,6 +8,7 @@ class MemoryHistory implements History
 {
     private $lines = array();
     private $position = null;
+    private $unsaved = null;
 
     public function addLine($line)
     {
@@ -29,8 +30,7 @@ class MemoryHistory implements History
         if ($this->position === null) {
             // first time up => move to last entry
             $this->position = count($this->lines) - 1;
-
-            // TODO: buffer current user input
+            $this->unsaved = $readline->getInput();
         } else {
             // somewhere in the list => move by one
             $this->position--;
@@ -50,8 +50,8 @@ class MemoryHistory implements History
             $this->position++;
             $readline->setInput($this->lines[$this->position]);
         } else {
-            // moved beyond bottom => restore empty input
-            $readline->setInput('');
+            // moved beyond bottom => restore original unsaved input
+            $readline->setInput($this->unsaved);
             $this->position = null;
         }
     }
