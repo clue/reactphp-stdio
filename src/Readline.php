@@ -8,6 +8,8 @@ use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 use Clue\React\Utf8\Sequencer as Utf8Sequencer;
 use Clue\React\Term\ControlCodeParser;
+use Clue\React\Stdio\Readline\History;
+use Clue\React\Stdio\Readline\MemoryHistory;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
@@ -17,7 +19,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $echo = true;
     private $autocomplete = null;
     private $move = true;
-    private $history = null;
+    private $history;
     private $encoding = 'utf-8';
 
     private $input;
@@ -25,10 +27,16 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $sequencer;
     private $closed = false;
 
-    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
+    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output, History $history = null)
     {
         $this->input = $input;
+
+        if ($history === null) {
+            $history = new MemoryHistory();
+        }
+
         $this->output = $output;
+        $this->history = $history;
 
         if (!$this->input->isReadable()) {
             return $this->close();
@@ -311,19 +319,32 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
-     * set history handler to use (or none)
+     * set history handler to use
      *
      * The history handler will be called whenever the user hits the UP or DOWN
      * arrow keys.
      *
-     * @param HistoryInterface|null $history
+     * If you do not want to use history support, simply pass a `NullHistory` object.
+     *
+     * @param History $history new history handler to use
      * @return self
      */
-    public function setHistory(HistoryInterface $history = null)
+    public function setHistory(History $history)
     {
         $this->history = $history;
 
         return $this;
+    }
+
+    /**
+     * Gets the current history handler in use
+     *
+     * @return History
+     * @see self::setHistory()
+     */
+    public function getHistory()
+    {
+        return $this->history;
     }
 
     /**
@@ -468,17 +489,13 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyUp()
     {
-        if ($this->history !== null) {
-            $this->history->up();
-        }
+        $this->history->moveUp($this);
     }
 
     /** @internal */
     public function onKeyDown()
     {
-        if ($this->history !== null) {
-            $this->history->down();
-        }
+        $this->history->moveDown($this);
     }
 
     /**
@@ -548,9 +565,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         }
 
         // process stored input buffer
-        if ($this->history !== null) {
-            $this->history->addLine($line);
-        }
+        $this->history->addLine($line);
         $this->emit('data', array($line));
     }
 

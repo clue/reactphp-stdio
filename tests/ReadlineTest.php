@@ -495,6 +495,35 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
+    public function testHistoryGetterReturnsSameFromSetter()
+    {
+        $history = $this->getMock('Clue\React\Stdio\Readline\History');
+
+        $this->assertSame($this->readline, $this->readline->setHistory($history));
+
+        $this->assertSame($history, $this->readline->getHistory());
+    }
+
+    public function testKeysCursorUpInvokesHistoryHandler()
+    {
+        $history = $this->getMock('Clue\React\Stdio\Readline\History');
+        $history->expects($this->once())->method('moveUp')->with($this->equalTo($this->readline));
+
+        $this->readline->setHistory($history);
+
+        $this->readline->onKeyUp($this->readline);
+    }
+
+    public function testKeysCursorDownInvokesHistoryHandler()
+    {
+        $history = $this->getMock('Clue\React\Stdio\Readline\History');
+        $history->expects($this->once())->method('moveDown')->with($this->equalTo($this->readline));
+
+        $this->readline->setHistory($history);
+
+        $this->readline->onKeyDown($this->readline);
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));
