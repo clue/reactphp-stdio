@@ -1,6 +1,7 @@
 <?php
 
 use Clue\React\Stdio\Stdio;
+use Clue\React\Stdio\Readline\WordAutocomplete;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -30,6 +31,9 @@ $readline->on('data', function ($line) use ($readline) {
         $readline->addHistory($line);
     }
 });
+
+$autocomplete = new WordAutocomplete(array('exit', 'quit', 'hello', 'test', 'help', 'here'));
+$stdio->getReadline()->setAutocomplete($autocomplete);
 
 $stdio->writeln('Will print periodic messages until you type "quit" or "exit"');
 

@@ -8,6 +8,8 @@ use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 use Clue\React\Utf8\Sequencer as Utf8Sequencer;
 use Clue\React\Term\ControlCodeParser;
+use Clue\React\Stdio\Readline\Autocomplete;
+use Clue\React\Stdio\Readline\NullAutocomplete;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
@@ -29,15 +31,19 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $historyUnsaved = null;
     private $historyLimit = 500;
 
-    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
+    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output, Autocomplete $autocomplete = null)
     {
+        if ($autocomplete === null) {
+            $autocomplete = new NullAutocomplete();
+        }
+
         $this->input = $input;
         $this->output = $output;
+        $this->autocomplete = $autocomplete;
 
         if (!$this->input->isReadable()) {
             return $this->close();
         }
-
         // push input through control code parser
         $parser = new ControlCodeParser($input);
 
@@ -387,15 +393,18 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
-     * set autocompletion handler to use (or none)
+     * set autocompletion handler to use
      *
      * The autocomplete handler will be called whenever the user hits the TAB
      * key.
      *
-     * @param AutocompleteInterface|null $autocomplete
+     * If you do not want to use autocomplet support, simply pass a `NullAutocomplete` object.
+     *
+     * @param Autocomplete $autocomplete
      * @return self
      */
-    public function setAutocomplete(AutocompleteInterface $autocomplete = null)
+
+    public function setAutocomplete(Autocomplete $autocomplete)
     {
         $this->autocomplete = $autocomplete;
 
@@ -495,9 +504,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyTab()
     {
-        if ($this->autocomplete !== null) {
-            $this->autocomplete->run();
-        }
+        $this->autocomplete->go($this);
     }
 
     /** @internal */
