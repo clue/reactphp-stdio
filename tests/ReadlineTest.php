@@ -495,6 +495,15 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
+    public function testAutocompleteGetterReturnsSameFromSetter()
+    {
+        $autocomplete = $this->getMock('Clue\React\Stdio\Readline\Autocomplete');
+
+        $this->assertSame($this->readline, $this->readline->setAutocomplete($autocomplete));
+
+        $this->assertSame($autocomplete, $this->readline->getAutocomplete());
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));

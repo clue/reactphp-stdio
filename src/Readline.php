@@ -412,6 +412,17 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
+     * Gets the current autocomplete handler in use
+     *
+     * @return Autocomplete
+     * @see self::setAutocomplete()
+     */
+    public function getAutocomplete()
+    {
+        return $this->autocomplete;
+    }
+
+    /**
      * redraw the current input prompt
      *
      * Usually, there should be no need to call this method manually. It will
