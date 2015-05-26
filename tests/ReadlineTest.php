@@ -504,6 +504,16 @@ class ReadlineTest extends TestCase
         $this->assertSame($autocomplete, $this->readline->getAutocomplete());
     }
 
+    public function testKeysTabInvokesAutocompleteHandler()
+    {
+        $autocomplete = $this->getMock('Clue\React\Stdio\Readline\Autocomplete');
+        $autocomplete->expects($this->once())->method('go')->with($this->equalTo($this->readline));
+
+        $this->readline->setAutocomplete($autocomplete);
+
+        $this->readline->onKeyTab();
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));
