@@ -26,6 +26,17 @@ class TestCase extends PHPUnit_Framework_TestCase
         return $mock;
     }
 
+    protected function expectCallableOnceWith($value)
+    {
+        $mock = $this->createCallableMock();
+        $mock
+            ->expects($this->once())
+            ->method('__invoke')
+            ->with($this->equalTo($value));
+
+        return $mock;
+    }
+
     protected function expectCallableOnceParameter($type)
     {
         $mock = $this->createCallableMock();

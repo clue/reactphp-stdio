@@ -537,21 +537,20 @@ class Readline extends EventEmitter
 
     /**
      * process the current line buffer, emit event and redraw empty line
+     *
+     * @uses self::setInput()
      */
     protected function processLine()
     {
+        // store and reset/clear/redraw current input
         $line = $this->linebuffer;
+        $this->setInput('');
 
-        $this->emit('data', array($line));
-
+        // process stored input buffer
         if ($this->history !== null) {
             $this->history->addLine($line);
         }
-
-        $this->linebuffer = '';
-        $this->linepos = 0;
-
-        $this->redraw();
+        $this->emit('data', array($line));
     }
 
     protected function strlen($str)
