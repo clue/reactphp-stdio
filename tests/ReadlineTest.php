@@ -449,6 +449,33 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
+    public function testEmitEmptyInputOnEnter()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith(''));
+        $this->readline->onKeyEnter();
+    }
+
+    public function testEmitInputOnEnterAndClearsInput()
+    {
+        $this->readline->setInput('test');
+        $this->readline->on('data', $this->expectCallableOnceWith('test'));
+        $this->readline->onKeyEnter();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testSetInputDuringEmitKeepsInput()
+    {
+        $readline = $this->readline;
+
+        $readline->on('data', function ($line) use ($readline) {
+            $readline->setInput('test');
+        });
+        $readline->onKeyEnter();
+
+        $this->assertEquals('test', $readline->getInput());
+    }
+
     private function pushInputBytes(Readline $readline, $bytes)
     {
         foreach (str_split($bytes, 1) as $byte) {
