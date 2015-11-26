@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 (2015-11-26)
+
+*   Fix: Support calling `Readline::setInput()` during `line` event
+    (#28)
+
+    ```php
+$stdio->on('line', function ($line) use ($stdio) {
+    $stdio->getReadline()->setInput($line . '!');
+});
+```
+
 ## 0.3.0 (2015-05-18)
 
 *   Feature: Support multi-byte UTF-8 characters and account for cell width
