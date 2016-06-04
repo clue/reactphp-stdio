@@ -2,11 +2,10 @@
 
 namespace Clue\React\Stdio;
 
-use React\Stream\StreamInterface;
 use React\Stream\CompositeStream;
 use React\EventLoop\LoopInterface;
-use React\Stream\ReadableStream;
-use React\Stream\Stream;
+use React\Stream\ReadableStreamInterface;
+use React\Stream\WritableStreamInterface;
 
 class Stdio extends CompositeStream
 {
@@ -16,13 +15,23 @@ class Stdio extends CompositeStream
     private $readline;
     private $needsNewline = false;
 
-    public function __construct(LoopInterface $loop, $input = true)
+    public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
-        $this->input = new Stdin($loop);
+        if ($input === null) {
+            $input = new Stdin($loop);
+        }
 
-        $this->output = new Stdout(STDOUT);
+        if ($output === null) {
+            $output = new Stdout(STDOUT);
+        }
 
-        $this->readline = new Readline($this->input, $this->output);
+        if ($readline === null) {
+            $readline = new Readline($input, $output);
+        }
+
+        $this->input = $input;
+        $this->output = $output;
+        $this->readline = $readline;
 
         $that = $this;
 
@@ -35,10 +44,6 @@ class Stdio extends CompositeStream
         $this->readline->on('data', function($line) use ($that) {
             $that->emit('line', array($line, $that));
         });
-
-        if (!$input) {
-            $this->pause();
-        }
     }
 
     public function pause()
