@@ -6,8 +6,9 @@ class ReadlineTest extends TestCase
 {
     public function setUp()
     {
+        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
         $this->output = $this->getMockBuilder('Clue\React\Stdio\Stdout')->disableOriginalConstructor()->getMock();
-        $this->readline = new Readline($this->output);
+        $this->readline = new Readline($this->input, $this->output);
     }
 
     public function testSettersReturnSelf()

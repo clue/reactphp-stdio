@@ -3,6 +3,8 @@
 namespace Clue\React\Stdio;
 
 use Evenement\EventEmitter;
+use React\Stream\ReadableStreamInterface;
+use React\Stream\WritableStreamInterface;
 
 class Readline extends EventEmitter
 {
@@ -34,8 +36,11 @@ class Readline extends EventEmitter
     private $output;
     private $sequencer;
 
-    public function __construct($output)
+    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
+        // input data emits a single char into readline
+        $input->on('data', array($this, 'onChar'));
+
         $this->output = $output;
 
         $this->sequencer = new Sequencer();
