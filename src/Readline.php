@@ -6,6 +6,8 @@ use Evenement\EventEmitter;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
+use Clue\React\Utf8\Sequencer as Utf8Sequencer;
+use React\Stream\ReadableStream;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
@@ -62,34 +64,18 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
         $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_END, array($this, 'onKeyEnd'));
 
-        $expect = 0;
-        $char = '';
-        $that = $this;
-        $this->sequencer->addFallback('', function ($byte) use (&$expect, &$char, $that) {
-            if ($expect === 0) {
-                $code = ord($byte);
-                // count number of bytes expected for this UTF-8 multi-byte character
-                $expect = 1;
-                if ($code & 128 && $code & 64) {
-                    ++$expect;
-                    if ($code & 32) {
-                        ++$expect;
-                        if ($code & 16) {
-                            ++$expect;
-                        }
-                    }
-                }
-            }
-            $char .= $byte;
-            --$expect;
+        // push input into sequencer
+        $input->on('data', array($this->sequencer, 'push'));
 
-            // forward buffered bytes as a single multi byte character once last byte has been read
-            if ($expect === 0) {
-                $save = $char;
-                $char = '';
-                $that->onFallback($save);
-            }
+        // push sequencer output through utf8sequencer
+        $readable = new ReadableStream();
+        $this->sequencer->addFallback('', function ($data) use ($readable) {
+            $readable->emit('data', array($data));
         });
+
+        // push utf8sequences as input
+        $utf8 = new Utf8Sequencer($readable);
+        $utf8->on('data', array($this, 'onFallback'));
 
         $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
             echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
@@ -519,7 +505,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $post = $this->substr($this->linebuffer, $this->linepos);
 
         $this->linebuffer = $pre . $chars . $post;
-        ++$this->linepos;
+        $this->linepos += $this->strlen($chars);
 
         $this->redraw();
     }
