@@ -1,13 +1,19 @@
 <?php
 
 use Clue\React\Stdio\Readline;
+use React\Stream\ReadableStream;
 
 class ReadlineTest extends TestCase
 {
+    private $input;
+    private $output;
+    private $readline;
+
     public function setUp()
     {
-        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $this->output = $this->getMockBuilder('Clue\React\Stdio\Stdout')->disableOriginalConstructor()->getMock();
+        $this->input = new ReadableStream();
+        $this->output = $this->getMock('React\Stream\WritableStreamInterface');
+
         $this->readline = new Readline($this->input, $this->output);
     }
 
@@ -480,7 +486,7 @@ class ReadlineTest extends TestCase
     private function pushInputBytes(Readline $readline, $bytes)
     {
         foreach (str_split($bytes, 1) as $byte) {
-            $readline->onChar($byte);
+            $this->input->emit('data', array($byte));
         }
     }
 }

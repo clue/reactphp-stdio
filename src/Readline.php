@@ -33,14 +33,12 @@ class Readline extends EventEmitter
     private $history = null;
     private $encoding = 'utf-8';
 
+    private $input;
     private $output;
     private $sequencer;
 
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
-        // input data emits a single char into readline
-        $input->on('data', array($this, 'onChar'));
-
         $this->output = $output;
 
         $this->sequencer = new Sequencer();
@@ -89,6 +87,9 @@ class Readline extends EventEmitter
         $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
             echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
         });
+
+        // input data emits a single char into readline
+        $input->on('data', array($this->sequencer, 'push'));
     }
 
     /**
@@ -374,7 +375,7 @@ class Readline extends EventEmitter
             // write output, then move back $reverse chars (by sending backspace)
             $output .= $buffer . str_repeat("\x08", $this->strwidth($buffer) - $this->getCursorCell());
         }
-        $this->write($output);
+        $this->output->write($output);
 
         return $this;
     }
@@ -394,16 +395,10 @@ class Readline extends EventEmitter
     public function clear()
     {
         if ($this->prompt !== '' || ($this->echo !== false && $this->linebuffer !== '')) {
-            $this->write("\r\033[K");
+            $this->output->write("\r\033[K");
         }
 
         return $this;
-    }
-
-    /** @internal */
-    public function onChar($char)
-    {
-        $this->sequencer->push($char);
     }
 
     /** @internal */
@@ -454,7 +449,7 @@ class Readline extends EventEmitter
     public function onKeyEnter()
     {
         if ($this->echo !== false) {
-            $this->write("\n");
+            $this->output->write("\n");
         }
         $this->processLine();
     }
@@ -574,10 +569,5 @@ class Readline extends EventEmitter
     private function strwidth($str)
     {
         return mb_strwidth($str, $this->encoding);
-    }
-
-    protected function write($data)
-    {
-        $this->output->write($data);
     }
 }
