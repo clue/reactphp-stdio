@@ -7,26 +7,10 @@ use React\Stream\ReadableStreamInterface;
 use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 use Clue\React\Utf8\Sequencer as Utf8Sequencer;
-use React\Stream\ReadableStream;
+use Clue\React\Term\ControlCodeParser;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
-    const KEY_BACKSPACE = "\x7f";
-    const KEY_ENTER = "\n";
-    const KEY_TAB = "\t";
-
-    const ESC_SEQUENCE = "\033[";
-    const ESC_LEFT     = "D";
-    const ESC_RIGHT    = "C";
-    const ESC_UP       = "A";
-    const ESC_DOWN     = "B";
-    const ESC_HOME     = "1~";
-    const ESC_INS      = "2~";
-    const ESC_DEL      = "3~";
-    const ESC_END      = "4~";
-
-    const ESC_F10 = "20~";
-
     private $prompt = '';
     private $linebuffer = '';
     private $linepos = 0;
@@ -50,42 +34,46 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             return $this->close();
         }
 
-        $this->sequencer = new Sequencer();
-        $this->sequencer->addSequence(self::KEY_ENTER, array($this, 'onKeyEnter'));
-        $this->sequencer->addSequence(self::KEY_BACKSPACE, array($this, 'onKeyBackspace'));
-        $this->sequencer->addSequence(self::KEY_TAB, array($this, 'onKeyTab'));
+        // push input through control code parser
+        $parser = new ControlCodeParser($input);
 
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_LEFT, array($this, 'onKeyLeft'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_RIGHT, array($this, 'onKeyRight'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_UP, array($this, 'onKeyUp'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DOWN, array($this, 'onKeyDown'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_HOME, array($this, 'onKeyHome'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_INS, array($this, 'onKeyInsert'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_DEL, array($this, 'onKeyDelete'));
-        $this->sequencer->addSequence(self::ESC_SEQUENCE . self::ESC_END, array($this, 'onKeyEnd'));
+        $that = $this;
+        $codes = array(
+            "\n" => 'onKeyEnter',
+            "\x7f" => 'onKeyBackspace',
+            "\t" => 'onKeyTab',
 
-        // push input into sequencer
-        $input->on('data', array($this->sequencer, 'push'));
+            "\033[A" => 'onKeyUp',
+            "\033[B" => 'onKeyDown',
+            "\033[C" => 'onKeyRight',
+            "\033[D" => 'onKeyLeft',
 
-        // push sequencer output through utf8sequencer
-        $readable = new ReadableStream();
-        $this->sequencer->addFallback('', function ($data) use ($readable) {
-            $readable->emit('data', array($data));
-        });
+            "\033[1~" => 'onKeyHome',
+            "\033[2~" => 'onKeyInsert',
+            "\033[3~" => 'onKeyDelete',
+            "\033[4~" => 'onKeyEnd',
 
-        // push utf8sequences as input
-        $utf8 = new Utf8Sequencer($readable);
+//          "\033[20~" => 'onKeyF10',
+        );
+        $decode = function ($code) use ($codes, $that) {
+            if (isset($codes[$code])) {
+                $method = $codes[$code];
+                $that->$method($code);
+                return;
+            }
+        };
+
+        $parser->on('csi', $decode);
+        $parser->on('c0', $decode);
+
+        // push resulting data through utf8 sequencer
+        $utf8 = new Utf8Sequencer($parser);
         $utf8->on('data', array($this, 'onFallback'));
 
-        $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
-            echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
-        });
-
-        // input data emits a single char into readline
-        $input->on('data', array($this->sequencer, 'push'));
-        $input->on('end', array($this, 'handleEnd'));
-        $input->on('error', array($this, 'handleError'));
-        $input->on('close', array($this, 'close'));
+        // process all stream events (forwarded from input stream)
+        $utf8->on('end', array($this, 'handleEnd'));
+        $utf8->on('error', array($this, 'handleError'));
+        $utf8->on('close', array($this, 'close'));
     }
 
     /**
