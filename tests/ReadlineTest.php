@@ -483,6 +483,75 @@ class ReadlineTest extends TestCase
         $this->assertEquals('test', $readline->getInput());
     }
 
+    public function testEmitErrorWillEmitErrorAndClose()
+    {
+        $this->readline->on('error', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('error', array(new \RuntimeException()));
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testEmitEndWillEmitEndAndClose()
+    {
+        $this->readline->on('end', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('end');
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testEmitCloseWillEmitClose()
+    {
+        $this->readline->on('end', $this->expectCallableNever());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('close');
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testClosedStdinWillCloseReadline()
+    {
+        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input->expects($this->once())->method('isReadable')->willReturn(false);
+
+        $this->readline = new Readline($this->input, $this->output);
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testPauseWillBeForwarded()
+    {
+        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input->expects($this->once())->method('pause');
+
+        $this->readline = new Readline($this->input, $this->output);
+
+        $this->readline->pause();
+    }
+
+    public function testResumeWillBeForwarded()
+    {
+        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input->expects($this->once())->method('resume');
+
+        $this->readline = new Readline($this->input, $this->output);
+
+        $this->readline->resume();
+    }
+
+    public function testPipeWillReturnDest()
+    {
+        $dest = $this->getMock('React\Stream\WritableStreamInterface');
+
+        $ret = $this->readline->pipe($dest);
+
+        $this->assertEquals($dest, $ret);
+    }
+
     private function pushInputBytes(Readline $readline, $bytes)
     {
         foreach (str_split($bytes, 1) as $byte) {

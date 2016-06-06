@@ -5,8 +5,9 @@ namespace Clue\React\Stdio;
 use Evenement\EventEmitter;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\WritableStreamInterface;
+use React\Stream\Util;
 
-class Readline extends EventEmitter
+class Readline extends EventEmitter implements ReadableStreamInterface
 {
     const KEY_BACKSPACE = "\x7f";
     const KEY_ENTER = "\n";
@@ -36,10 +37,16 @@ class Readline extends EventEmitter
     private $input;
     private $output;
     private $sequencer;
+    private $closed = false;
 
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
+        $this->input = $input;
         $this->output = $output;
+
+        if (!$this->input->isReadable()) {
+            return $this->close();
+        }
 
         $this->sequencer = new Sequencer();
         $this->sequencer->addSequence(self::KEY_ENTER, array($this, 'onKeyEnter'));
@@ -90,6 +97,9 @@ class Readline extends EventEmitter
 
         // input data emits a single char into readline
         $input->on('data', array($this->sequencer, 'push'));
+        $input->on('end', array($this, 'handleEnd'));
+        $input->on('error', array($this, 'handleError'));
+        $input->on('close', array($this, 'close'));
     }
 
     /**
@@ -569,5 +579,56 @@ class Readline extends EventEmitter
     private function strwidth($str)
     {
         return mb_strwidth($str, $this->encoding);
+    }
+
+    /** @internal */
+    public function handleEnd()
+    {
+        if (!$this->closed) {
+            $this->emit('end');
+            $this->close();
+        }
+    }
+
+    /** @internal */
+    public function handleError(\Exception $error)
+    {
+        $this->emit('error', array($error));
+        $this->close();
+    }
+
+    public function isReadable()
+    {
+        return !$this->closed && $this->input->isReadable();
+    }
+
+    public function pause()
+    {
+        $this->input->pause();
+    }
+
+    public function resume()
+    {
+        $this->input->resume();
+    }
+
+    public function pipe(WritableStreamInterface $dest, array $options = array())
+    {
+        Util::pipe($this, $dest, $options);
+
+        return $dest;
+    }
+
+    public function close()
+    {
+        if ($this->closed) {
+            return;
+        }
+
+        $this->closed = true;
+
+        $this->input->close();
+
+        $this->emit('close');
     }
 }
