@@ -34,6 +34,23 @@ class StdioTest extends TestCase
         $this->assertSame($readline, $stdio->getReadline());
     }
 
+    public function testWriteEmptyStringWillNotWriteToOutput()
+    {
+        $input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $output = $this->getMock('React\Stream\WritableStreamInterface');
+
+        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+        $readline = new Readline($input, $output);
+        $readline->setPrompt('> ');
+        $readline->setInput('input');
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $output->expects($this->never())->method('write');
+
+        $stdio->write('');
+    }
+
     public function testWriteWillClearReadlineWriteOutputAndRestoreReadline()
     {
         $input = $this->getMock('React\Stream\ReadableStreamInterface');
@@ -56,7 +73,7 @@ class StdioTest extends TestCase
         $this->assertEquals("\r\033[K" . "test\n" . "\r\033[K" . "> input", $buffer);
     }
 
-    public function testWriteAgainWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
+    public function testWriteAgainWillMoveToPreviousLineWriteOutputAndRestoreReadlinePosition()
     {
         $input = $this->getMock('React\Stream\ReadableStreamInterface');
         $output = $this->getMock('React\Stream\WritableStreamInterface');
@@ -77,10 +94,10 @@ class StdioTest extends TestCase
 
         $stdio->write('world');
 
-        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[5C" . "world\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\033[A" . "\r\033[5C" . "world\n" . "\033[7C", $buffer);
     }
 
-    public function testWriteAgainWithBackspaceWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
+    public function testWriteAgainWithBackspaceWillMoveToPreviousLineWriteOutputAndRestoreReadlinePosition()
     {
         $input = $this->getMock('React\Stream\ReadableStreamInterface');
         $output = $this->getMock('React\Stream\WritableStreamInterface');
@@ -101,7 +118,7 @@ class StdioTest extends TestCase
 
         $stdio->write("\x08 world!");
 
-        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[6C" . "\x08 world!\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\033[A" . "\r\033[6C" . "\x08 world!\n" . "\033[7C", $buffer);
     }
 
     public function testWriteAgainWithNewlinesWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()

@@ -70,17 +70,40 @@ class Stdio extends CompositeStream
 
     public function write($data)
     {
-        // clear readline prompt in order to overwrite with data
-        $this->readline->clear();
-
-        // move one line up if the last write did not end with a newline
-        if ($this->incompleteLine !== '') {
-            $this->output->write("\033[A");
-            $this->output->write("\r\033[" . $this->width($this->incompleteLine) . "C");
+        if ((string)$data === '') {
+            return;
         }
 
-        // write actual data
-        $this->output->write($data);
+        $out = $data;
+
+        $lastNewline = strrpos($data, "\n");
+
+        $restoreReadline = false;
+
+        if ($this->incompleteLine !== '') {
+            // the last write did not end with a newline => append to existing row
+
+            // move one line up and move cursor to last position before writing data
+            $out = "\033[A" . "\r\033[" . $this->width($this->incompleteLine) . "C" . $out;
+
+            // data contains a newline, so this will overwrite the readline prompt
+            if ($lastNewline !== false) {
+                // move cursor to beginning of readline prompt and clear line
+                // clearing is important because $data may not overwrite the whole line
+                $out = "\r\033[K" . $out;
+
+                // make sure to restore readline after this output
+                $restoreReadline = true;
+            }
+        } else {
+            // here, we're writing to a new line => overwrite readline prompt
+
+            // move cursor to beginning of readline prompt and clear line
+            $out = "\r\033[K" . $out;
+
+            // we always overwrite the readline prompt, so restore it on next line
+            $restoreReadline = true;
+        }
 
         // following write will have have to append to this line if it does not end with a newline
         $endsWithNewline = substr($data, -1) === "\n";
@@ -90,9 +113,7 @@ class Stdio extends CompositeStream
             $this->incompleteLine = '';
         } else {
             // always end data with newline in order to append readline on next line
-            $this->output->write("\n");
-
-            $lastNewline = strrpos($data, "\n");
+            $out .= "\n";
 
             if ($lastNewline === false) {
                 // contains no newline at all, everything is incomplete
@@ -103,8 +124,21 @@ class Stdio extends CompositeStream
             }
         }
 
-        // restore original readline prompt and line buffer
-        $this->readline->redraw();
+        if ($restoreReadline) {
+            // write output and restore original readline prompt and line buffer
+            $this->output->write($out);
+            $this->readline->redraw();
+        } else {
+            // restore original cursor position in readline prompt
+            $pos = $this->width($this->readline->getPrompt()) + $this->readline->getCursorCell();
+            if ($pos !== 0) {
+                // we always start at beginning of line, move right by X
+                $out .= "\033[" . $pos . "C";
+            }
+
+            // write to actual output stream
+            $this->output->write($out);
+        }
     }
 
     public function writeln($line)
