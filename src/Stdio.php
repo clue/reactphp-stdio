@@ -2,17 +2,21 @@
 
 namespace Clue\React\Stdio;
 
-use React\Stream\CompositeStream;
+use Evenement\EventEmitter;
+use React\Stream\DuplexStreamInterface;
 use React\EventLoop\LoopInterface;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\WritableStreamInterface;
+use React\Stream\Util;
 
-class Stdio extends CompositeStream
+class Stdio extends EventEmitter implements DuplexStreamInterface
 {
     private $input;
     private $output;
     private $readline;
 
+    private $ending = false;
+    private $closed = false;
     private $incompleteLine = '';
 
     public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
@@ -35,19 +39,27 @@ class Stdio extends CompositeStream
 
         $that = $this;
 
-        // stdin emits single chars
-        $this->input->on('data', function ($data) use ($that) {
-            $that->emit('char', array($data, $that));
-        });
-
         // readline data emits a new line
         $incomplete =& $this->incompleteLine;
         $this->readline->on('data', function($line) use ($that, &$incomplete) {
             // readline emits a new line on enter, so start with a blank line
             $incomplete = '';
 
+            // emit data with trailing newline in order to preserve readable API
+            $that->emit('data', array($line . PHP_EOL));
+
+            // emit custom line event for ease of use
             $that->emit('line', array($line, $that));
         });
+
+        // handle all input events (readline forwards all input events)
+        $this->readline->on('error', array($this, 'handleError'));
+        $this->readline->on('end', array($this, 'handleEnd'));
+        $this->readline->on('close', array($this, 'handleCloseInput'));
+
+        // handle all output events
+        $this->output->on('error', array($this, 'handleError'));
+        $this->output->on('close', array($this, 'handleCloseOutput'));
     }
 
     public function pause()
@@ -60,6 +72,23 @@ class Stdio extends CompositeStream
         $this->input->resume();
     }
 
+    public function isReadable()
+    {
+        return $this->input->isReadable();
+    }
+
+    public function isWritable()
+    {
+        return $this->output->isWritable();
+    }
+
+    public function pipe(WritableStreamInterface $dest, array $options = array())
+    {
+        Util::pipe($this, $dest, $options);
+
+        return $dest;
+    }
+
     public function handleBuffer()
     {
         $that = $this;
@@ -70,7 +99,7 @@ class Stdio extends CompositeStream
 
     public function write($data)
     {
-        if ((string)$data === '') {
+        if ($this->ending || (string)$data === '') {
             return;
         }
 
@@ -159,18 +188,33 @@ class Stdio extends CompositeStream
 
     public function end($data = null)
     {
+        if ($this->ending) {
+            return;
+        }
+
         if ($data !== null) {
             $this->write($data);
         }
 
+        $this->ending = true;
+
+        // clear readline output, close input and end output
         $this->readline->setInput('')->setPrompt('')->clear();
-        $this->input->pause();
+        $this->input->close();
         $this->output->end();
     }
 
     public function close()
     {
-        $this->readline->setInput('')->setPrompt('')->clear();
+        if ($this->closed) {
+            return;
+        }
+
+        $this->ending = true;
+        $this->closed = true;
+
+        // clear readline output and then close
+        $this->readline->setInput('')->setPrompt('')->clear()->close();
         $this->input->close();
         $this->output->close();
     }
@@ -193,5 +237,34 @@ class Stdio extends CompositeStream
     private function width($str)
     {
         return mb_strwidth($str, 'utf-8') - 2 * substr_count($str, "\x08");
+    }
+
+    /** @internal */
+    public function handleError(\Exception $e)
+    {
+        $this->emit('error', array($e));
+        $this->close();
+    }
+
+    /** @internal */
+    public function handleEnd()
+    {
+        $this->emit('end', array());
+    }
+
+    /** @internal */
+    public function handleCloseInput()
+    {
+        if (!$this->output->isWritable()) {
+            $this->close();
+        }
+    }
+
+    /** @internal */
+    public function handleCloseOutput()
+    {
+        if (!$this->input->isReadable()) {
+            $this->close();
+        }
     }
 }
