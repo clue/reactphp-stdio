@@ -195,28 +195,28 @@ class ReadlineTest extends TestCase
     {
         $this->readline->on('data', $this->expectCallableOnceWith('hello'));
 
-        $this->pushInputBytes($this->readline, "hello\n");
+        $this->input->emit('data', array("hello\n"));
     }
 
     public function testDataEventWillNotBeEmittedForIncompleteLine()
     {
         $this->readline->on('data', $this->expectCallableNever());
 
-        $this->pushInputBytes($this->readline, "hello");
+        $this->input->emit('data', array("hello"));
     }
 
     public function testDataEventWillBeEmittedForEmptyLine()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));
 
-        $this->pushInputBytes($this->readline, "\n");
+        $this->input->emit('data', array("\n"));
     }
 
     public function testWriteSimpleCharWritesOnce()
     {
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "k"));
 
-        $this->pushInputBytes($this->readline, 'k');
+        $this->input->emit('data', array('k'));
     }
 
     public function testWriteMultiByteCharWritesOnce()
@@ -224,7 +224,7 @@ class ReadlineTest extends TestCase
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "\xF0\x9D\x84\x9E"));
 
         // "𝄞" – U+1D11E MUSICAL SYMBOL G CLEF
-        $this->pushInputBytes($this->readline, "\xF0\x9D\x84\x9E");
+        $this->input->emit('data', array("\xF0\x9D\x84\x9E"));
     }
 
     public function testKeysHomeMovesToFront()
@@ -276,7 +276,7 @@ class ReadlineTest extends TestCase
 
     public function testKeysSimpleChars()
     {
-        $this->pushInputBytes($this->readline, 'hi!');
+        $this->input->emit('data', array('hi!'));
 
         $this->assertEquals('hi!', $this->readline->getInput());
         $this->assertEquals(3, $this->readline->getCursorPosition());
@@ -300,7 +300,7 @@ class ReadlineTest extends TestCase
 
     public function testKeysMultiByteInput()
     {
-        $this->pushInputBytes($this->readline, 'hä');
+        $this->input->emit('data', array('hä'));
 
         $this->assertEquals('hä', $this->readline->getInput());
         $this->assertEquals(2, $this->readline->getCursorPosition());
@@ -372,7 +372,7 @@ class ReadlineTest extends TestCase
         $this->readline->setInput('ü');
         $this->readline->moveCursorTo(0);
 
-        $this->pushInputBytes($this->readline, 'h');
+        $this->input->emit('data', array('h'));
 
         $this->assertEquals('hü', $this->readline->getInput());
         $this->assertEquals(1, $this->readline->getCursorPosition());
@@ -383,7 +383,7 @@ class ReadlineTest extends TestCase
     {
         $this->readline->setInput('ü');
 
-        $this->pushInputBytes($this->readline, 'ä');
+        $this->input->emit('data', array('ä'));
 
         $this->assertEquals('üä', $this->readline->getInput());
         $this->assertEquals(2, $this->readline->getCursorPosition());
@@ -395,7 +395,7 @@ class ReadlineTest extends TestCase
         $this->readline->setInput('ü');
         $this->readline->moveCursorTo(0);
 
-        $this->pushInputBytes($this->readline, 'ä');
+        $this->input->emit('data', array('ä'));
 
         $this->assertEquals('äü', $this->readline->getInput());
         $this->assertEquals(1, $this->readline->getCursorPosition());
@@ -578,12 +578,5 @@ class ReadlineTest extends TestCase
         $ret = $this->readline->pipe($dest);
 
         $this->assertEquals($dest, $ret);
-    }
-
-    private function pushInputBytes(Readline $readline, $bytes)
-    {
-        foreach (str_split($bytes, 1) as $byte) {
-            $this->input->emit('data', array($byte));
-        }
     }
 }
