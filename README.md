@@ -41,7 +41,16 @@ $loop = React\EventLoop\Factory::create();
 $stdio = new Stdio($loop);
 ```
 
+See below for waiting for user input and writing output.
+Alternatively, the `Stdio` is also a well-behaving duplex stream
+(implementing React's `DuplexStreamInterface`) that emits each complete
+line as a `data` event (including the trailing newline). This is considered
+advanced usage.
+
 #### Output
+
+The `Stdio` is a well-behaving writable stream
+implementing React's `WritableStreamInterface`.
 
 The `writeln($line)` method can be used to print a line to console output.
 A trailing newline will be added automatically.
@@ -58,9 +67,23 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
+The `overwrite($text)` method can be used to overwrite/replace the last
+incomplete line with the given text:
+
+```php
+$stdio->write('Loading…');
+$stdio->overwrite('Done!');
+```
+
+Alternatively, you can also use the `Stdio` as a writable stream.
+You can `pipe()` any readable stream into this stream.
+
 #### Input
 
-The `Stdio` will emit a `line` event for every line read from console input.
+The `Stdio` is a well-behaving readable stream
+implementing React's `ReadableStreamInterface`.
+
+It will emit a `line` event for every line read from console input.
 The event will contain the input buffer as-is, without the trailing newline.
 You can register any number of event handlers like this:
 
@@ -78,6 +101,10 @@ so read on..
 Using the `line` event is the recommended way to wait for user input.
 Alternatively, using the `Readline` as a readable stream is considered advanced
 usage.
+
+Alternatively, you can also use the `Stdio` as a readable stream, which emits
+each complete line as a `data` event (including the trailing newline).
+This can be used to `pipe()` this stream into other writable streams.
 
 ### Readline
 
