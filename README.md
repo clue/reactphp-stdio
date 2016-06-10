@@ -117,6 +117,13 @@ You can restore this behavior by passing an empty prompt:
 $readline->setPrompt('');
 ```
 
+The `getPrompt()` method can be used to get the current input prompt.
+It will return an empty string unless you've set anything else:
+
+```php
+assert($readline->getPrompt() === '');
+```
+
 #### Echo
 
 The *echo mode* controls how the actual *user input buffer* will be presented in the *user input line*.

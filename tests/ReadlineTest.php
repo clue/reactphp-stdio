@@ -26,6 +26,7 @@ class ReadlineTest extends TestCase
 
     public function testInputStartsEmpty()
     {
+        $this->assertEquals('', $this->readline->getPrompt());
         $this->assertEquals('', $this->readline->getInput());
         $this->assertEquals(0, $this->readline->getCursorPosition());
         $this->assertEquals(0, $this->readline->getCursorCell());
@@ -37,6 +38,12 @@ class ReadlineTest extends TestCase
         $this->assertEquals('hello', $this->readline->getInput());
         $this->assertEquals(5, $this->readline->getCursorPosition());
         $this->assertEquals(5, $this->readline->getCursorCell());
+    }
+
+    public function testPromptAfterSetting()
+    {
+        $this->assertSame($this->readline, $this->readline->setPrompt('> '));
+        $this->assertEquals('> ' , $this->readline->getPrompt());
     }
 
     public function testSettingInputMovesCursorToEnd()

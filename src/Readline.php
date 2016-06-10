@@ -123,6 +123,17 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
+     * returns the prompt to prepend to input line
+     *
+     * @return string
+     * @see self::setPrompt()
+     */
+    public function getPrompt()
+    {
+        return $this->prompt;
+    }
+
+    /**
      * sets whether/how to echo text input
      *
      * The default setting is `true`, which means that every character will be
