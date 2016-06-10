@@ -75,6 +75,10 @@ $stdio->on('line', function ($line) {
 You can control various aspects of the console input through the [`Readline`](#readline),
 so read on..
 
+Using the `line` event is the recommended way to wait for user input.
+Alternatively, using the `Readline` as a readable stream is considered advanced
+usage.
+
 ### Readline
 
 The [`Readline`](#readline) class is responsible for reacting to user input and presenting a prompt to the user.
@@ -88,6 +92,12 @@ You can access the current instance through the [`Stdio`](#stdio):
 ```php
 $readline = $stdio->getReadline();
 ```
+
+See above for waiting for user input.
+Alternatively, the `Readline` is also a well-behaving readable stream
+(implementing React's `ReadableStreamInterface`) that emits each complete
+line as a `data` event (without the trailing newline). This is considered
+advanced usage.
 
 #### Prompt
 

@@ -3,8 +3,11 @@
 namespace Clue\React\Stdio;
 
 use Evenement\EventEmitter;
+use React\Stream\ReadableStreamInterface;
+use React\Stream\WritableStreamInterface;
+use React\Stream\Util;
 
-class Readline extends EventEmitter
+class Readline extends EventEmitter implements ReadableStreamInterface
 {
     const KEY_BACKSPACE = "\x7f";
     const KEY_ENTER = "\n";
@@ -31,12 +34,19 @@ class Readline extends EventEmitter
     private $history = null;
     private $encoding = 'utf-8';
 
+    private $input;
     private $output;
     private $sequencer;
+    private $closed = false;
 
-    public function __construct($output)
+    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
+        $this->input = $input;
         $this->output = $output;
+
+        if (!$this->input->isReadable()) {
+            return $this->close();
+        }
 
         $this->sequencer = new Sequencer();
         $this->sequencer->addSequence(self::KEY_ENTER, array($this, 'onKeyEnter'));
@@ -84,6 +94,12 @@ class Readline extends EventEmitter
         $this->sequencer->addFallback(self::ESC_SEQUENCE, function ($bytes) {
             echo 'unknown sequence: ' . ord($bytes) . PHP_EOL;
         });
+
+        // input data emits a single char into readline
+        $input->on('data', array($this->sequencer, 'push'));
+        $input->on('end', array($this, 'handleEnd'));
+        $input->on('error', array($this, 'handleError'));
+        $input->on('close', array($this, 'close'));
     }
 
     /**
@@ -369,7 +385,7 @@ class Readline extends EventEmitter
             // write output, then move back $reverse chars (by sending backspace)
             $output .= $buffer . str_repeat("\x08", $this->strwidth($buffer) - $this->getCursorCell());
         }
-        $this->write($output);
+        $this->output->write($output);
 
         return $this;
     }
@@ -389,16 +405,10 @@ class Readline extends EventEmitter
     public function clear()
     {
         if ($this->prompt !== '' || ($this->echo !== false && $this->linebuffer !== '')) {
-            $this->write("\r\033[K");
+            $this->output->write("\r\033[K");
         }
 
         return $this;
-    }
-
-    /** @internal */
-    public function onChar($char)
-    {
-        $this->sequencer->push($char);
     }
 
     /** @internal */
@@ -449,7 +459,7 @@ class Readline extends EventEmitter
     public function onKeyEnter()
     {
         if ($this->echo !== false) {
-            $this->write("\n");
+            $this->output->write("\n");
         }
         $this->processLine();
     }
@@ -571,8 +581,54 @@ class Readline extends EventEmitter
         return mb_strwidth($str, $this->encoding);
     }
 
-    protected function write($data)
+    /** @internal */
+    public function handleEnd()
     {
-        $this->output->write($data);
+        if (!$this->closed) {
+            $this->emit('end');
+            $this->close();
+        }
+    }
+
+    /** @internal */
+    public function handleError(\Exception $error)
+    {
+        $this->emit('error', array($error));
+        $this->close();
+    }
+
+    public function isReadable()
+    {
+        return !$this->closed && $this->input->isReadable();
+    }
+
+    public function pause()
+    {
+        $this->input->pause();
+    }
+
+    public function resume()
+    {
+        $this->input->resume();
+    }
+
+    public function pipe(WritableStreamInterface $dest, array $options = array())
+    {
+        Util::pipe($this, $dest, $options);
+
+        return $dest;
+    }
+
+    public function close()
+    {
+        if ($this->closed) {
+            return;
+        }
+
+        $this->closed = true;
+
+        $this->input->close();
+
+        $this->emit('close');
     }
 }

@@ -22,18 +22,17 @@ class Stdio extends CompositeStream
 
         $this->output = new Stdout(STDOUT);
 
-        $this->readline = $readline = new Readline($this->output);
+        $this->readline = new Readline($this->input, $this->output);
 
         $that = $this;
 
-        // input data emits a single char into readline
-        $this->input->on('data', function ($data) use ($that, $readline) {
+        // stdin emits single chars
+        $this->input->on('data', function ($data) use ($that) {
             $that->emit('char', array($data, $that));
-            $readline->onChar($data);
         });
 
         // readline data emits a new line
-        $readline->on('data', function($line) use ($that) {
+        $this->readline->on('data', function($line) use ($that) {
             $that->emit('line', array($line, $that));
         });
 
