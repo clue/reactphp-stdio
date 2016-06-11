@@ -191,6 +191,27 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->moveCursorBy(2));
     }
 
+    public function testDataEventWillBeEmittedForCompleteLine()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith('hello'));
+
+        $this->pushInputBytes($this->readline, "hello\n");
+    }
+
+    public function testDataEventWillNotBeEmittedForIncompleteLine()
+    {
+        $this->readline->on('data', $this->expectCallableNever());
+
+        $this->pushInputBytes($this->readline, "hello");
+    }
+
+    public function testDataEventWillBeEmittedForEmptyLine()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith(''));
+
+        $this->pushInputBytes($this->readline, "\n");
+    }
+
     public function testWriteSimpleCharWritesOnce()
     {
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "k"));
