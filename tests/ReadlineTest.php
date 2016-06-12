@@ -511,6 +511,45 @@ class ReadlineTest extends TestCase
         $this->assertEquals('test', $readline->getInput());
     }
 
+    public function testWillRedrawEmptyPromptOnEnter()
+    {
+        $this->readline->setPrompt('> ');
+
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->onKeyEnter();
+
+        $this->assertEquals("\n\r\033[K" . "> ", $buffer);
+    }
+
+    public function testWillRedrawEmptyPromptOnEnterWithData()
+    {
+        $this->readline->setPrompt('> ');
+        $this->readline->setInput('test');
+
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->onKeyEnter();
+
+        $this->assertEquals("\n\r\033[K" . "> ", $buffer);
+    }
+
+    public function testWillNotRedrawPromptOnEnterWhenEchoIsOff()
+    {
+        $this->readline->setEcho(false);
+        $this->readline->setPrompt('> ');
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->readline->onKeyEnter();
+    }
+
     public function testEmitErrorWillEmitErrorAndClose()
     {
         $this->readline->on('error', $this->expectCallableOnce());
