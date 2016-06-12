@@ -30,6 +30,17 @@ class FunctionalExampleTest extends TestCase
         $this->assertNotContains('you just said:', $output);
     }
 
+    public function testPeriodicExampleWithClosedInputQuitsImmediately()
+    {
+        $output = $this->execExample('php 01-periodic.php <&-');
+
+        if (strpos($output, 'said') !== false) {
+            $this->markTestIncomplete('Your platform exhibits a closed STDIN bug, this may need some further debugging');
+        }
+
+        $this->assertNotContains('you just said:', $output);
+    }
+
     private function execExample($command)
     {
         chdir(__DIR__ . '/../examples/');

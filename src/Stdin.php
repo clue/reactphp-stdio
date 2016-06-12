@@ -14,6 +14,12 @@ class Stdin extends Stream
     {
         parent::__construct(STDIN, $loop);
 
+        // support starting program with closed STDIN ("example.php 0<&-")
+        // the stream is a valid resource and is not EOF, but fstat fails
+        if (fstat(STDIN) === false) {
+            return $this->close();
+        }
+
         if ($this->isTty()) {
             $this->oldMode = shell_exec('stty -g');
 
