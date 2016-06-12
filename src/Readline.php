@@ -539,7 +539,13 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     {
         // store and reset/clear/redraw current input
         $line = $this->linebuffer;
-        $this->setInput('');
+        if ($line !== '') {
+            // the line is not empty, reset it (and implicitly redraw prompt)
+            $this->setInput('');
+        } elseif ($this->echo !== false) {
+            // explicitly redraw prompt after empty line
+            $this->redraw();
+        }
 
         // process stored input buffer
         if ($this->history !== null) {
