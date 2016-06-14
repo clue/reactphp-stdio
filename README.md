@@ -19,6 +19,7 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
     * [Stdin](#stdin)
 * [Install](#install)
 * [License](#license)
+* [More](#more)
 
 > Note: This project is in beta stage! Feel free to report any issues you encounter.
 
@@ -337,3 +338,8 @@ More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
 ## License
 
 MIT
+
+## More
+
+* If you want to learn more about processing streams of data, refer to the documentation of
+  the underlying [react/stream](https://github.com/reactphp/stream) component.
