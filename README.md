@@ -2,6 +2,24 @@
 
 Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDOUT) for React PHP
 
+**Table of Contents**
+
+* [Quickstart example](#quickstart-example)
+* [Usage](#usage)
+  * [Stdio](#stdio)
+    * [Output](#output)
+    * [Input](#input)
+  * [Readline](#readline)
+    * [Prompt](#prompt)
+    * [Echo](#echo)
+    * [Input buffer](#input-buffer)
+    * [Cursor](#cursor)
+  * [Advanced](#advanced)
+    * [Stdout](#stdout)
+    * [Stdin](#stdin)
+* [Install](#install)
+* [License](#license)
+
 > Note: This project is in beta stage! Feel free to report any issues you encounter.
 
 ## Quickstart example
