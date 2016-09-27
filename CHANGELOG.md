@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.0 (2016-09-27)
+
+*   Feature / BC break: The `Stdio` is now a well-behaving duplex stream
+    (#35 by @clue)
+
+*   Feature / BC break: The `Readline` is now a well-behaving readable stream
+    (#32 by @clue)
+
+*   Feature: Add `Readline::getPrompt()` helper
+    (#33 by @clue)
+
+*   Feature / Fix: All unsupported special keys, key codes and byte sequences will now be ignored
+    (#36, #30, #19, #38 by @clue)
+
+*   Fix: Explicitly redraw prompt on empty input
+    (#37 by @clue)
+
+*   Fix: Writing data that contains multiple newlines will no longer end up garbled
+    (#34, #35 by @clue)
+
 ## 0.3.1 (2015-11-26)
 
 *   Fix: Support calling `Readline::setInput()` during `line` event

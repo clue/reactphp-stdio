@@ -329,8 +329,10 @@ $stdin = $stdio->getInput();
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
+This will install the latest supported version:
+
 ```bash
-$ composer require clue/stdio-react:~0.3.0
+$ composer require clue/stdio-react:^0.4
 ```
 
 More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
