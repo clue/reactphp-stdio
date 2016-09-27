@@ -14,8 +14,6 @@ class Stdin extends Stream
     public function __construct(LoopInterface $loop)
     {
         parent::__construct(STDIN, $loop);
-
-        $this->bufferSize = 1;
     }
 
     public function resume()
