@@ -198,11 +198,22 @@ class ReadlineTest extends TestCase
         $this->input->emit('data', array("hello\n"));
     }
 
-    public function testDataEventWillNotBeEmittedForIncompleteLine()
+    public function testDataEventWillNotBeEmittedForIncompleteLineButWillStayInInputBuffer()
     {
         $this->readline->on('data', $this->expectCallableNever());
 
         $this->input->emit('data', array("hello"));
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testDataEventWillBeEmittedForCompleteLineAndRemainingWillStayInInputBuffer()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith('hello'));
+
+        $this->input->emit('data', array("hello\nworld"));
+
+        $this->assertEquals('world', $this->readline->getInput());
     }
 
     public function testDataEventWillBeEmittedForEmptyLine()

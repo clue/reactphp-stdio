@@ -15,7 +15,7 @@
         "react/event-loop": "0.3.*|0.4.*",
         "react/stream": "^0.4.2",
         "clue/utf8-react": "^0.1",
-        "clue/term-react": "^0.1"
+        "clue/term-react": "^0.1.1"
     },
     "autoload": {
         "psr-4": { "Clue\\React\\Stdio\\": "src/" }
