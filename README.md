@@ -17,6 +17,7 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
   * [Advanced](#advanced)
     * [Stdout](#stdout)
     * [Stdin](#stdin)
+* [Pitfalls](#pitfalls)
 * [Install](#install)
 * [License](#license)
 * [More](#more)
@@ -322,6 +323,34 @@ You can access the current instance through the [`Stdio`](#stdio):
 
 ```php
 $stdin = $stdio->getInput();
+```
+
+## Pitfalls
+
+The [`Readline`](#readline) has to redraw the current user
+input line whenever output is written to the `STDOUT`.
+Because of this, it is important to make sure any output is always
+written like this instead of using `echo` statements:
+
+```php
+// echo 'hello world!' . PHP_EOL;
+$stdio->write('hello world!' . PHP_EOL);
+```
+
+Depending on your program, it may or may not be reasonable to
+replace all such occurences.
+As an alternative, you may utilize output buffering that will
+automatically forward all write events to the [`Stdio`](#stdio)
+instance like this:
+
+```php
+ob_start(function ($chunk) use ($stdio) {
+    // forward write event to Stdio instead
+    $stdio->write($chunk);
+
+    // discard data from normal output handling
+    return '';
+}, 1);
 ```
 
 ## Install
