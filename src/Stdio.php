@@ -89,14 +89,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         return $dest;
     }
 
-    public function handleBuffer()
-    {
-        $that = $this;
-        ob_start(function ($chunk) use ($that) {
-            $that->write($chunk);
-        }, 2);
-    }
-
     public function write($data)
     {
         if ($this->ending || (string)$data === '') {
