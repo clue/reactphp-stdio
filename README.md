@@ -14,6 +14,7 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
     * [Echo](#echo)
     * [Input buffer](#input-buffer)
     * [Cursor](#cursor)
+    * [History](#history)
   * [Advanced](#advanced)
     * [Stdout](#stdout)
     * [Stdin](#stdin)
@@ -282,6 +283,57 @@ For example, to move the cursor one character to the left, simply call:
 ```php
 $readline->moveCursorBy(-1);
 ```
+
+#### History
+
+By default, users can access the history of previous commands by using their
+UP and DOWN cursor keys on the keyboard.
+The history will start with an empty state, thus this feature is effectively
+disabled, as the UP and DOWN cursor keys have no function then.
+
+The `listHistory(): string[]` method can be used to
+return an array with all lines in the history.
+This will be an empty array until you add new entries via `addHistory()`.
+
+```php
+$list = $readline->listHistory();
+
+assert(count($list) === 0);
+```
+
+The `addHistory(string $line): Readline` method can be used to
+add a new line to the (bottom position of the) history list.
+A following `listHistory()` call will return this line as the last element.
+
+```php
+$readline->addHistory('a');
+$readline->addHistory('b');
+
+$list = $readline->listHistory();
+assert($list === array('a', 'b'));
+```
+
+The `clearHistory(): Readline` method can be used to
+clear the complete history list.
+A following `listHistory()` call will return an empty array until you add new
+entries via `addHistory()` again.
+Note that the history feature will effectively be disabled if the history is
+empty, as the UP and DOWN cursor keys have no function then.
+
+```php
+$readline->clearHistory();
+
+$list = $readline->listHistory();
+assert(count($list) === 0);
+```
+
+There is no such thing as a `readHistory()` or `writeHistory()` method
+because filesystem operations are inherently blocking and thus beyond the scope
+of this library.
+Using your favorite filesystem API and an appropriate number of `addHistory()`
+or a single `listHistory()` call respectively should be fairly straight
+forward and is left up as an exercise for the reader of this documentation
+(i.e. *you*).
 
 ### Advanced
 

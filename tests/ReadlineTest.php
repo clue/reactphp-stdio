@@ -495,35 +495,6 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
-    public function testHistoryGetterReturnsSameFromSetter()
-    {
-        $history = $this->getMock('Clue\React\Stdio\Readline\History');
-
-        $this->assertSame($this->readline, $this->readline->setHistory($history));
-
-        $this->assertSame($history, $this->readline->getHistory());
-    }
-
-    public function testKeysCursorUpInvokesHistoryHandler()
-    {
-        $history = $this->getMock('Clue\React\Stdio\Readline\History');
-        $history->expects($this->once())->method('moveUp')->with($this->equalTo($this->readline));
-
-        $this->readline->setHistory($history);
-
-        $this->readline->onKeyUp($this->readline);
-    }
-
-    public function testKeysCursorDownInvokesHistoryHandler()
-    {
-        $history = $this->getMock('Clue\React\Stdio\Readline\History');
-        $history->expects($this->once())->method('moveDown')->with($this->equalTo($this->readline));
-
-        $this->readline->setHistory($history);
-
-        $this->readline->onKeyDown($this->readline);
-    }
-
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));
@@ -657,5 +628,139 @@ class ReadlineTest extends TestCase
         $ret = $this->readline->pipe($dest);
 
         $this->assertEquals($dest, $ret);
+    }
+
+    public function testHistoryStartsEmpty()
+    {
+        $this->assertEquals(array(), $this->readline->listHistory());
+    }
+
+    public function testHistoryAddReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->addHistory('hello'));
+    }
+
+    public function testHistoryAddEndsUpInList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertEquals(array('a', 'b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryUpEmptyDoesNotChangeInput()
+    {
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryUpCyclesToLast()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryUpBeyondTopCyclesToFirst()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('a', $this->readline->getInput());
+    }
+
+    public function testHistoryDownNotCyclingDoesNotChangeInput()
+    {
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpRestoresEmpty()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpToTopRestoresBottom()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpRestoresOriginal()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryDownBeyondAfterUpStillRestoresOriginal()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryClearReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->clearHistory());
+    }
+
+    public function testHistoryClearResetsToEmptyList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->clearHistory();
+
+        $this->assertEquals(array(), $this->readline->listHistory());
+    }
+
+    public function testHistoryClearWhileCyclingRestoresOriginalInput()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->clearHistory();
+
+        $this->assertEquals('hello', $this->readline->getInput());
     }
 }
