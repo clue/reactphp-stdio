@@ -599,9 +599,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         }
 
         // process stored input buffer
-        if ($line !== '') {
-            $this->addHistory($line);
-        }
         $this->emit('data', array($line));
     }
 

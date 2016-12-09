@@ -291,6 +291,25 @@ UP and DOWN cursor keys on the keyboard.
 The history will start with an empty state, thus this feature is effectively
 disabled, as the UP and DOWN cursor keys have no function then.
 
+Note that the history is not maintained automatically.
+Any input the user submits by hitting enter will *not* be added to the history
+automatically.
+This may seem inconvenient at first, but it actually gives you more control over
+what (and when) lines should be added to the history.
+If you want to automatically add everything from the user input to the history,
+you may want to use something like this:
+
+```php
+$readline->on('data', function ($line) use ($readline) {
+    $all = $readline->listHistory();
+    
+    // skip empty line and duplicate of previous line
+    if (trim($line) !== '' && $line !== end($all)) {
+        $readline->addHistory($line);
+    }
+});
+```
+
 The `listHistory(): string[]` method can be used to
 return an array with all lines in the history.
 This will be an empty array until you add new entries via `addHistory()`.
