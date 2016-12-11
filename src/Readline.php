@@ -319,16 +319,13 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      *
      * @param string $line
      * @return self
+     * @uses self::limitHistory() to make sure list does not exceed limits
      */
     public function addHistory($line)
     {
         $this->historyLines []= $line;
 
-        if ($this->historyLimit !== null) {
-            $this->historyLines = array_slice($this->historyLines, -$this->historyLimit, $this->historyLimit);
-        }
-
-        return $this;
+        return $this->limitHistory($this->historyLimit);
     }
 
     /**
@@ -369,7 +366,20 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     {
         $this->historyLimit = $limit === null ? null : (int)$limit;
 
-        if ($this->historyLimit !== null) {
+        // limit send and currently exceeded
+        if ($this->historyLimit !== null && isset($this->historyLines[$this->historyLimit])) {
+            // adjust position in history according to new position after applying limit
+            if ($this->historyPosition !== null) {
+                $this->historyPosition -= count($this->historyLines) - $this->historyLimit;
+
+                // current position will drop off from list => restore original
+                if ($this->historyPosition < 0) {
+                    $this->setInput($this->historyUnsaved);
+                    $this->historyPosition = null;
+                    $this->historyUnsaved = null;
+                }
+            }
+
             $this->historyLines = array_slice($this->historyLines, -$this->historyLimit, $this->historyLimit);
         }
 
@@ -543,7 +553,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             return;
         }
 
-        if (($this->historyPosition + 1) < count($this->historyLines)) {
+        if (isset($this->historyLines[$this->historyPosition + 1])) {
             // this is still a valid position => advance by one and apply
             $this->historyPosition++;
             $this->setInput($this->historyLines[$this->historyPosition]);
@@ -551,6 +561,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             // moved beyond bottom => restore original unsaved input
             $this->setInput($this->historyUnsaved);
             $this->historyPosition = null;
+            $this->historyUnsaved = null;
         }
     }
 

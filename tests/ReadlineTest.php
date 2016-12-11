@@ -839,4 +839,67 @@ class ReadlineTest extends TestCase
 
         $this->assertCount(1000, $this->readline->listHistory());
     }
+
+    public function testHistoryLimitRestoresOriginalInputIfCurrentIsTruncated()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(0);
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitKeepsCurrentIfCurrentRemainsDespiteTruncation()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(1);
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitOnlyInBetweenTruncatesToLastAndKeepsInput()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(3);
+
+        $this->assertEquals('b', $this->readline->getInput());
+
+        $this->readline->addHistory('c');
+        $this->readline->addHistory('d');
+
+        $this->assertCount(3, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c', 'd'), $this->readline->listHistory());
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitRestoresOriginalIfCurrentIsTruncatedDueToAdding()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(1);
+
+        $this->readline->addHistory('c');
+        $this->readline->addHistory('d');
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
 }
