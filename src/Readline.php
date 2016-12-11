@@ -27,6 +27,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $historyLines = array();
     private $historyPosition = null;
     private $historyUnsaved = null;
+    private $historyLimit = 500;
 
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
@@ -323,6 +324,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     {
         $this->historyLines []= $line;
 
+        if ($this->historyLimit !== null) {
+            $this->historyLines = array_slice($this->historyLines, -$this->historyLimit, $this->historyLimit);
+        }
+
         return $this;
     }
 
@@ -352,6 +357,23 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     public function listHistory()
     {
         return $this->historyLines;
+    }
+
+    /**
+     * Limits the history to a maximum of N entries and truncates the current history list accordingly
+     *
+     * @param int|null $limit
+     * @return self
+     */
+    public function limitHistory($limit)
+    {
+        $this->historyLimit = $limit === null ? null : (int)$limit;
+
+        if ($this->historyLimit !== null) {
+            $this->historyLines = array_slice($this->historyLines, -$this->historyLimit, $this->historyLimit);
+        }
+
+        return $this;
     }
 
     /**

@@ -11,6 +11,16 @@ $readline = $stdio->getReadline();
 
 $readline->setPrompt('> ');
 
+// limit history to HISTSIZE env
+$limit = getenv('HISTSIZE');
+if ($limit === '' || $limit < 0) {
+    // empty string or negative value means unlimited
+    $readline->limitHistory(null);
+} elseif ($limit !== false) {
+    // apply any other value if given
+    $readline->limitHistory($limit);
+}
+
 // add all lines from input to history
 $readline->on('data', function ($line) use ($readline) {
     $all = $readline->listHistory();

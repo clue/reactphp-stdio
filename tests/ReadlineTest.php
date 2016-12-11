@@ -777,4 +777,66 @@ class ReadlineTest extends TestCase
 
         $this->assertEquals('hello', $this->readline->getInput());
     }
+
+    public function testHistoryLimitReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->limitHistory(100));
+    }
+
+    public function testHistoryLimitTruncatesCurrentListToLimit()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->readline->limitHistory(2);
+
+        $this->assertCount(2, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitToZeroEmptiesCurrentList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->readline->limitHistory(0);
+
+        $this->assertCount(0, $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitTruncatesAddingBeyondLimit()
+    {
+        $this->readline->limitHistory(2);
+
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertCount(2, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitZeroAlwaysReturnsEmpty()
+    {
+        $this->readline->limitHistory(0);
+
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertCount(0, $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitUnlimitedDoesNotTruncate()
+    {
+        $this->readline->limitHistory(null);
+
+        for ($i = 0; $i < 1000; ++$i) {
+            $this->readline->addHistory('line' . $i);
+        }
+
+        $this->assertCount(1000, $this->readline->listHistory());
+    }
 }

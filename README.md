@@ -346,6 +346,29 @@ $list = $readline->listHistory();
 assert(count($list) === 0);
 ```
 
+The `limitHistory(?int $limit): Readline` method can be used to
+set a limit of history lines to keep in memory.
+By default, only the last 500 lines will be kept in memory and everything else
+will be discarded.
+You can use an integer value to limit this to the given number of entries or
+use `null` for an unlimited number (not recommended, because everything is
+kept in RAM).
+If you set the limit to `0` (int zero), the history will effectively be
+disabled, as no lines can be added to or returned from the history list.
+If you're building a CLI application, you may also want to use something like
+this to obey the `HISTSIZE` environment variable:
+
+```php
+$limit = getenv('HISTSIZE');
+if ($limit === '' || $limit < 0) {
+    // empty string or negative value means unlimited
+    $readline->limitHistory(null);
+} elseif ($limit !== false) {
+    // apply any other value if given
+    $readline->limitHistory($limit);
+}
+```
+
 There is no such thing as a `readHistory()` or `writeHistory()` method
 because filesystem operations are inherently blocking and thus beyond the scope
 of this library.
