@@ -588,6 +588,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     protected function processLine()
     {
+        // reset history cycle position
+        $this->historyPosition = null;
+        $this->historyUnsaved = null;
+
         // store and reset/clear/redraw current input
         $line = $this->linebuffer;
         if ($line !== '') {

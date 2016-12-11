@@ -678,6 +678,20 @@ class ReadlineTest extends TestCase
         $this->assertEquals('a', $this->readline->getInput());
     }
 
+    public function testHistoryUpAndThenEnterRestoresCycleToBottom()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->onKeyEnter();
+
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
     public function testHistoryDownNotCyclingDoesNotChangeInput()
     {
         $this->readline->onKeyDown();
