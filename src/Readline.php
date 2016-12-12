@@ -17,13 +17,17 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $echo = true;
     private $autocomplete = null;
     private $move = true;
-    private $history = null;
     private $encoding = 'utf-8';
 
     private $input;
     private $output;
     private $sequencer;
     private $closed = false;
+
+    private $historyLines = array();
+    private $historyPosition = null;
+    private $historyUnsaved = null;
+    private $historyLimit = 500;
 
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
@@ -311,17 +315,73 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
-     * set history handler to use (or none)
+     * Adds a new line to the (bottom position of the) history list
      *
-     * The history handler will be called whenever the user hits the UP or DOWN
-     * arrow keys.
+     * @param string $line
+     * @return self
+     * @uses self::limitHistory() to make sure list does not exceed limits
+     */
+    public function addHistory($line)
+    {
+        $this->historyLines []= $line;
+
+        return $this->limitHistory($this->historyLimit);
+    }
+
+    /**
+     * Clears the complete history list
      *
-     * @param HistoryInterface|null $history
      * @return self
      */
-    public function setHistory(HistoryInterface $history = null)
+    public function clearHistory()
     {
-        $this->history = $history;
+        $this->historyLines = array();
+        $this->historyPosition = null;
+
+        if ($this->historyUnsaved !== null) {
+            $this->setInput($this->historyUnsaved);
+            $this->historyUnsaved = null;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns an array with all lines in the history
+     *
+     * @return string[]
+     */
+    public function listHistory()
+    {
+        return $this->historyLines;
+    }
+
+    /**
+     * Limits the history to a maximum of N entries and truncates the current history list accordingly
+     *
+     * @param int|null $limit
+     * @return self
+     */
+    public function limitHistory($limit)
+    {
+        $this->historyLimit = $limit === null ? null : (int)$limit;
+
+        // limit send and currently exceeded
+        if ($this->historyLimit !== null && isset($this->historyLines[$this->historyLimit])) {
+            // adjust position in history according to new position after applying limit
+            if ($this->historyPosition !== null) {
+                $this->historyPosition -= count($this->historyLines) - $this->historyLimit;
+
+                // current position will drop off from list => restore original
+                if ($this->historyPosition < 0) {
+                    $this->setInput($this->historyUnsaved);
+                    $this->historyPosition = null;
+                    $this->historyUnsaved = null;
+                }
+            }
+
+            $this->historyLines = array_slice($this->historyLines, -$this->historyLimit, $this->historyLimit);
+        }
 
         return $this;
     }
@@ -468,16 +528,40 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyUp()
     {
-        if ($this->history !== null) {
-            $this->history->up();
+        // ignore if already at top or history is empty
+        if ($this->historyPosition === 0 || !$this->historyLines) {
+            return;
         }
+
+        if ($this->historyPosition === null) {
+            // first time up => move to last entry
+            $this->historyPosition = count($this->historyLines) - 1;
+            $this->historyUnsaved = $this->getInput();
+        } else {
+            // somewhere in the list => move by one
+            $this->historyPosition--;
+        }
+
+        $this->setInput($this->historyLines[$this->historyPosition]);
     }
 
     /** @internal */
     public function onKeyDown()
     {
-        if ($this->history !== null) {
-            $this->history->down();
+        // ignore if not currently cycling through history
+        if ($this->historyPosition === null) {
+            return;
+        }
+
+        if (isset($this->historyLines[$this->historyPosition + 1])) {
+            // this is still a valid position => advance by one and apply
+            $this->historyPosition++;
+            $this->setInput($this->historyLines[$this->historyPosition]);
+        } else {
+            // moved beyond bottom => restore original unsaved input
+            $this->setInput($this->historyUnsaved);
+            $this->historyPosition = null;
+            $this->historyUnsaved = null;
         }
     }
 
@@ -537,6 +621,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     protected function processLine()
     {
+        // reset history cycle position
+        $this->historyPosition = null;
+        $this->historyUnsaved = null;
+
         // store and reset/clear/redraw current input
         $line = $this->linebuffer;
         if ($line !== '') {
@@ -548,9 +636,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         }
 
         // process stored input buffer
-        if ($this->history !== null) {
-            $this->history->addLine($line);
-        }
         $this->emit('data', array($line));
     }
 

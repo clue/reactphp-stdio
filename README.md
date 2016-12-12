@@ -14,6 +14,7 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
     * [Echo](#echo)
     * [Input buffer](#input-buffer)
     * [Cursor](#cursor)
+    * [History](#history)
   * [Advanced](#advanced)
     * [Stdout](#stdout)
     * [Stdin](#stdin)
@@ -282,6 +283,99 @@ For example, to move the cursor one character to the left, simply call:
 ```php
 $readline->moveCursorBy(-1);
 ```
+
+#### History
+
+By default, users can access the history of previous commands by using their
+UP and DOWN cursor keys on the keyboard.
+The history will start with an empty state, thus this feature is effectively
+disabled, as the UP and DOWN cursor keys have no function then.
+
+Note that the history is not maintained automatically.
+Any input the user submits by hitting enter will *not* be added to the history
+automatically.
+This may seem inconvenient at first, but it actually gives you more control over
+what (and when) lines should be added to the history.
+If you want to automatically add everything from the user input to the history,
+you may want to use something like this:
+
+```php
+$readline->on('data', function ($line) use ($readline) {
+    $all = $readline->listHistory();
+    
+    // skip empty line and duplicate of previous line
+    if (trim($line) !== '' && $line !== end($all)) {
+        $readline->addHistory($line);
+    }
+});
+```
+
+The `listHistory(): string[]` method can be used to
+return an array with all lines in the history.
+This will be an empty array until you add new entries via `addHistory()`.
+
+```php
+$list = $readline->listHistory();
+
+assert(count($list) === 0);
+```
+
+The `addHistory(string $line): Readline` method can be used to
+add a new line to the (bottom position of the) history list.
+A following `listHistory()` call will return this line as the last element.
+
+```php
+$readline->addHistory('a');
+$readline->addHistory('b');
+
+$list = $readline->listHistory();
+assert($list === array('a', 'b'));
+```
+
+The `clearHistory(): Readline` method can be used to
+clear the complete history list.
+A following `listHistory()` call will return an empty array until you add new
+entries via `addHistory()` again.
+Note that the history feature will effectively be disabled if the history is
+empty, as the UP and DOWN cursor keys have no function then.
+
+```php
+$readline->clearHistory();
+
+$list = $readline->listHistory();
+assert(count($list) === 0);
+```
+
+The `limitHistory(?int $limit): Readline` method can be used to
+set a limit of history lines to keep in memory.
+By default, only the last 500 lines will be kept in memory and everything else
+will be discarded.
+You can use an integer value to limit this to the given number of entries or
+use `null` for an unlimited number (not recommended, because everything is
+kept in RAM).
+If you set the limit to `0` (int zero), the history will effectively be
+disabled, as no lines can be added to or returned from the history list.
+If you're building a CLI application, you may also want to use something like
+this to obey the `HISTSIZE` environment variable:
+
+```php
+$limit = getenv('HISTSIZE');
+if ($limit === '' || $limit < 0) {
+    // empty string or negative value means unlimited
+    $readline->limitHistory(null);
+} elseif ($limit !== false) {
+    // apply any other value if given
+    $readline->limitHistory($limit);
+}
+```
+
+There is no such thing as a `readHistory()` or `writeHistory()` method
+because filesystem operations are inherently blocking and thus beyond the scope
+of this library.
+Using your favorite filesystem API and an appropriate number of `addHistory()`
+or a single `listHistory()` call respectively should be fairly straight
+forward and is left up as an exercise for the reader of this documentation
+(i.e. *you*).
 
 ### Advanced
 

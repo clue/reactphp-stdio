@@ -629,4 +629,277 @@ class ReadlineTest extends TestCase
 
         $this->assertEquals($dest, $ret);
     }
+
+    public function testHistoryStartsEmpty()
+    {
+        $this->assertEquals(array(), $this->readline->listHistory());
+    }
+
+    public function testHistoryAddReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->addHistory('hello'));
+    }
+
+    public function testHistoryAddEndsUpInList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertEquals(array('a', 'b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryUpEmptyDoesNotChangeInput()
+    {
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryUpCyclesToLast()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryUpBeyondTopCyclesToFirst()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('a', $this->readline->getInput());
+    }
+
+    public function testHistoryUpAndThenEnterRestoresCycleToBottom()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->onKeyEnter();
+
+        $this->readline->onKeyUp();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryDownNotCyclingDoesNotChangeInput()
+    {
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpRestoresEmpty()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpToTopRestoresBottom()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryDownAfterUpRestoresOriginal()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryDownBeyondAfterUpStillRestoresOriginal()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+        $this->readline->onKeyDown();
+        $this->readline->onKeyDown();
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryClearReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->clearHistory());
+    }
+
+    public function testHistoryClearResetsToEmptyList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->clearHistory();
+
+        $this->assertEquals(array(), $this->readline->listHistory());
+    }
+
+    public function testHistoryClearWhileCyclingRestoresOriginalInput()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->clearHistory();
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->limitHistory(100));
+    }
+
+    public function testHistoryLimitTruncatesCurrentListToLimit()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->readline->limitHistory(2);
+
+        $this->assertCount(2, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitToZeroEmptiesCurrentList()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->readline->limitHistory(0);
+
+        $this->assertCount(0, $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitTruncatesAddingBeyondLimit()
+    {
+        $this->readline->limitHistory(2);
+
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertCount(2, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c'), $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitZeroAlwaysReturnsEmpty()
+    {
+        $this->readline->limitHistory(0);
+
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+        $this->readline->addHistory('c');
+
+        $this->assertCount(0, $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitUnlimitedDoesNotTruncate()
+    {
+        $this->readline->limitHistory(null);
+
+        for ($i = 0; $i < 1000; ++$i) {
+            $this->readline->addHistory('line' . $i);
+        }
+
+        $this->assertCount(1000, $this->readline->listHistory());
+    }
+
+    public function testHistoryLimitRestoresOriginalInputIfCurrentIsTruncated()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(0);
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitKeepsCurrentIfCurrentRemainsDespiteTruncation()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(1);
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitOnlyInBetweenTruncatesToLastAndKeepsInput()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(3);
+
+        $this->assertEquals('b', $this->readline->getInput());
+
+        $this->readline->addHistory('c');
+        $this->readline->addHistory('d');
+
+        $this->assertCount(3, $this->readline->listHistory());
+        $this->assertEquals(array('b', 'c', 'd'), $this->readline->listHistory());
+
+        $this->assertEquals('b', $this->readline->getInput());
+    }
+
+    public function testHistoryLimitRestoresOriginalIfCurrentIsTruncatedDueToAdding()
+    {
+        $this->readline->addHistory('a');
+        $this->readline->addHistory('b');
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyUp();
+
+        $this->readline->limitHistory(1);
+
+        $this->readline->addHistory('c');
+        $this->readline->addHistory('d');
+
+        $this->assertEquals('hello', $this->readline->getInput());
+    }
 }
