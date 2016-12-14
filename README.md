@@ -213,7 +213,7 @@ The `setInput($buffer)` method can be used to control the *user input buffer*.
 The user will be able to delete and/or rewrite the buffer at any time.
 Changing the *user input buffer* can be useful for presenting a preset input to the user
 (like the last password attempt).
-Simple pass an input string like this:
+Simply pass an input string like this:
 
 ```php
 $readline->setInput('lastpass');
