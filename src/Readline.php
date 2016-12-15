@@ -8,8 +8,6 @@ use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 use Clue\React\Utf8\Sequencer as Utf8Sequencer;
 use Clue\React\Term\ControlCodeParser;
-use Clue\React\Stdio\Readline\Autocomplete;
-use Clue\React\Stdio\Readline\NullAutocomplete;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
@@ -31,15 +29,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $historyUnsaved = null;
     private $historyLimit = 500;
 
-    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output, Autocomplete $autocomplete = null)
+    public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
-        if ($autocomplete === null) {
-            $autocomplete = new NullAutocomplete();
-        }
-
         $this->input = $input;
         $this->output = $output;
-        $this->autocomplete = $autocomplete;
 
         if (!$this->input->isReadable()) {
             return $this->close();
@@ -398,28 +391,20 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      * The autocomplete handler will be called whenever the user hits the TAB
      * key.
      *
-     * If you do not want to use autocomplet support, simply pass a `NullAutocomplete` object.
-     *
-     * @param Autocomplete $autocomplete
+     * @param callable|null $autocomplete
      * @return self
+     * @throws InvalidArgumentException if the given callable is invalid
      */
 
-    public function setAutocomplete(Autocomplete $autocomplete)
+    public function setAutocomplete($autocomplete)
     {
+        if ($autocomplete !== null && !is_callable($autocomplete)) {
+            throw new \InvalidArgumentException('Invalid autocomplete function given');
+        }
+
         $this->autocomplete = $autocomplete;
 
         return $this;
-    }
-
-    /**
-     * Gets the current autocomplete handler in use
-     *
-     * @return Autocomplete
-     * @see self::setAutocomplete()
-     */
-    public function getAutocomplete()
-    {
-        return $this->autocomplete;
     }
 
     /**
@@ -515,7 +500,61 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyTab()
     {
-        $this->autocomplete->go($this);
+        if ($this->autocomplete === null) {
+            return;
+        }
+
+        // current word prefix and offset for start of word in input buffer
+        // "echo foo|bar world" will return just "foo" with word offset 5
+        $word = $this->substr($this->linebuffer, 0, $this->linepos);
+        $offset = 0;
+
+        // buffer prefix and postfix for everything that will *not* be matched
+        // above example will return "echo " and "bar world"
+        $prefix = '';
+        $postfix = (string)$this->substr($this->linebuffer, $this->linepos);
+
+        // skip everything before last space
+        $pos = strrpos($word, ' ');
+        if ($pos !== false) {
+            $offset = $pos + 1;
+            $prefix = (string)substr($word, 0, $pos + 1);
+            $word = (string)substr($word, $pos + 1);
+        }
+
+        // invoke automcomplete callback
+        $words = call_user_func($this->autocomplete, $word, $offset);
+
+        // return early if autocomplete does not return anything
+        if ($words === null) {
+            return;
+        }
+
+        // remove all from list of possible words that do not start with $word
+        $len = strlen($word);
+        foreach ($words as $i => $w) {
+            if ($word !== substr($w, 0, $len)) {
+                unset($words[$i]);
+            }
+        }
+
+        // return if neither of the possible words match
+        if (!$words) {
+            return;
+        }
+
+        // TODO: find the BEST match
+        // TODO: always picks first match for now
+        $found = reset($words);
+
+        // append single space after this argument unless there's a postfix
+        if ($postfix === '') {
+            $found .= ' ';
+        }
+
+        // replace word in input with best match and adjust cursor
+        $this->linebuffer = $prefix . $found . $postfix;
+        $this->moveCursorBy($this->strlen($found) - $this->strlen($word));
     }
 
     /** @internal */

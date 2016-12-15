@@ -495,23 +495,115 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
-    public function testAutocompleteGetterReturnsSameFromSetter()
+    public function testAutocompleteReturnsSelf()
     {
-        $autocomplete = $this->getMock('Clue\React\Stdio\Readline\Autocomplete');
-
-        $this->assertSame($this->readline, $this->readline->setAutocomplete($autocomplete));
-
-        $this->assertSame($autocomplete, $this->readline->getAutocomplete());
+        $this->assertSame($this->readline, $this->readline->setAutocomplete(function () { }));
     }
 
-    public function testKeysTabInvokesAutocompleteHandler()
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testAutocompleteThrowsIfNotCallable()
     {
-        $autocomplete = $this->getMock('Clue\React\Stdio\Readline\Autocomplete');
-        $autocomplete->expects($this->once())->method('go')->with($this->equalTo($this->readline));
+        $this->assertSame($this->readline, $this->readline->setAutocomplete(123));
+    }
 
-        $this->readline->setAutocomplete($autocomplete);
+    public function testAutocompleteKeyDoesNothingIfUnused()
+    {
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledOnTab()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnce());
 
         $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillNotBeCalledAfterUnset()
+    {
+        $this->readline->setAutocomplete($this->expectCallableNever());
+        $this->readline->setAutocomplete(null);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithEmptyBuffer()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('', 0));
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithCompleteWord()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('hello', 0));
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithWordPrefix()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('he', 0));
+
+        $this->readline->setInput('hello');
+        $this->readline->moveCursorTo(2);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWord()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('world', 6));
+
+        $this->readline->setInput('hello world');
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefix()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wo', 6));
+
+        $this->readline->setInput('hello world');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompletePicksFirstWhenEmpty()
+    {
+        $this->markTestIncomplete();
+
+        $this->readline->setAutocomplete(function () { return array('first', 'second'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksFirstComplete()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('e');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteIgnoresNonMatching()
+    {
+        $this->readline->setAutocomplete(function () { return array('quit'); });
+
+        $this->readline->setInput('e');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('e', $this->readline->getInput());
     }
 
     public function testEmitEmptyInputOnEnter()

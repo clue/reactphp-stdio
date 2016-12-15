@@ -1,7 +1,6 @@
 <?php
 
 use Clue\React\Stdio\Stdio;
-use Clue\React\Stdio\Readline\WordAutocomplete;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -32,15 +31,17 @@ $readline->on('data', function ($line) use ($readline) {
     }
 });
 
-$autocomplete = new WordAutocomplete(array('exit', 'quit', 'hello', 'test', 'help', 'here'));
-$stdio->getReadline()->setAutocomplete($autocomplete);
+// autocomplete the following commands (at offset=0 only)
+$readline->setAutocomplete(function ($_, $offset) {
+    return $offset ? array() : array('exit', 'quit', 'help');
+});
 
 $stdio->writeln('Will print periodic messages until you type "quit" or "exit"');
 
 $stdio->on('line', function ($line) use ($stdio, $loop, &$timer) {
     $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
 
-    if ($line === 'quit' || $line === 'exit') {
+    if (in_array(trim($line), array('quit', 'exit'))) {
         $timer->cancel();
         $stdio->end();
     }

@@ -15,6 +15,7 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
     * [Input buffer](#input-buffer)
     * [Cursor](#cursor)
     * [History](#history)
+    * [Autocomplete](#autocomplete)
   * [Advanced](#advanced)
     * [Stdout](#stdout)
     * [Stdin](#stdin)
@@ -376,6 +377,83 @@ Using your favorite filesystem API and an appropriate number of `addHistory()`
 or a single `listHistory()` call respectively should be fairly straight
 forward and is left up as an exercise for the reader of this documentation
 (i.e. *you*).
+
+#### Autocomplete
+
+By default, users can use autocompletion by using their TAB keys on the keyboard.
+The autocomplete function is not registered by default, thus this feature is
+effectively disabled, as the TAB key has no function then.
+
+The `setAutocomplete(?callable $autocomplete): Readline` method can be used to
+register a new autocomplete handler.
+In its most simple form, you won't need to assign any arguments and can simply
+return an array of possible word matches from a callable like this:
+
+```php
+$readline->setAutocomplete(function () {
+    return array(
+        'exit',
+        'help',
+    );
+});
+```
+
+If the user types `he [TAB]`, the first match will be skipped as it does not
+match the current word prefix and the second one will be picked automatically,
+so that the resulting input buffer is `hello `.
+
+Unless otherwise specified, the matches will be performed against the current
+word boundaries in the input buffer.
+This means that if the user types `hello [SPACE] e [TAB]`, then the resulting
+input buffer is `hello exit `, which may or may not be what you need depending
+on your particular use case.
+
+In order to give your more control over this behavior, the autocomplete function
+actually receives two arguments (similar to `ext-readline`'s
+[`readline_completion_function()`](http://php.net/manual/en/function.readline-completion-function.php)):
+The first argument will be the current incomplete word according to current
+cursor position and word boundaries, while the second argument will be the
+offset of this word within the complete input buffer.
+The first example will thus be invoked as `$fn('he', 0)`, while the second one
+will be invoked as `$fn('e', 6)`.
+You may want to use the `$offset` argument to check if the current word is an
+argument or a root command and the `$word` argument to autocomplete partial
+filename matches like this:
+
+```php
+$readline->setAutocomplete(function ($word, $offset) {
+    if ($offset === 0) {
+        // autocomplete root commands at offset=0 only
+        return array('cat', 'rm', 'stat');
+    } else {
+        // autocomplete all command arguments as glob pattern
+        return glob($word . '*', GLOB_MARK);
+    }
+});
+```
+
+If you need even more control over autocompletion, you may also want to access
+and/or manipulate the [input buffer](#input-buffer) and [cursor](#cursor)
+directly like this:
+
+```php
+$readline->setAutocomplete(function () use ($readline) {
+    if ($readline->getInput() === 'run') {
+        $readline->setInput('run --test --value=42');
+        $readline->moveCursorBy(-2);
+    }
+
+    // return empty array so normal autocompletion doesn't kick in
+    return array();
+});
+```
+
+You can use a `null` value to remove the autocomplete function again and thus
+disable the autocomplete function:
+
+```php
+$readline->setAutocomplete(null);
+```
 
 ### Advanced
 
