@@ -573,15 +573,15 @@ class ReadlineTest extends TestCase
         $this->readline->onKeyTab();
     }
 
-    public function testAutocompletePicksFirstWhenEmpty()
+    public function testAutocompleteAddsSpaceAfterComplete()
     {
-        $this->markTestIncomplete();
+        $this->readline->setAutocomplete(function () { return array('exit'); });
 
-        $this->readline->setAutocomplete(function () { return array('first', 'second'); });
+        $this->readline->setInput('exit');
 
         $this->readline->onKeyTab();
 
-        $this->assertEquals('first ', $this->readline->getInput());
+        $this->assertEquals('exit ', $this->readline->getInput());
     }
 
     public function testAutocompletePicksFirstComplete()
@@ -604,6 +604,51 @@ class ReadlineTest extends TestCase
         $this->readline->onKeyTab();
 
         $this->assertEquals('e', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksNoneWhenEmptyAndMultipleMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'second'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksOnlyEntryWhenEmpty()
+    {
+        $this->readline->setAutocomplete(function () { return array('first'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixWhenMultipleMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('fir', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesExactMatchWhenDuplicateMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'first'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixWhenMultipleMatchAndEnd()
+    {
+        $this->readline->setAutocomplete(function () { return array('counter', 'count'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('count', $this->readline->getInput());
     }
 
     public function testEmitEmptyInputOnEnter()

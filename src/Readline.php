@@ -530,8 +530,9 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             return;
         }
 
-        // remove all from list of possible words that do not start with $word
+        // remove all from list of possible words that do not start with $word or are duplicates
         $len = strlen($word);
+        $words = array_unique($words);
         foreach ($words as $i => $w) {
             if ($word !== substr($w, 0, $len)) {
                 unset($words[$i]);
@@ -543,12 +544,32 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             return;
         }
 
-        // TODO: find the BEST match
-        // TODO: always picks first match for now
+        // search longest common prefix among all possible matches
         $found = reset($words);
+        array_shift($words);
+        $others = count($words);
+        while ($found !== $word) {
+            // count all words that start with $found
+            $matches = count(array_filter($words, function ($word) use ($found) {
+                return strpos($word, $found) === 0;
+            }));
 
-        // append single space after this argument unless there's a postfix
-        if ($postfix === '') {
+            // ALL words match $found => common substring found
+            if ($others === $matches) {
+                break;
+            }
+
+            // remove last letter from $found and try again
+            $found = (string)substr($found, 0, -1);
+        }
+
+        // current prefix has multiple possible completions => abort
+        if ($found === $word && $others) {
+            return;
+        }
+
+        // append single space after match unless there's a postfix or there are multiple completions
+        if ($postfix === '' && $others === 0) {
             $found .= ' ';
         }
 
