@@ -651,6 +651,64 @@ class ReadlineTest extends TestCase
         $this->assertEquals('count', $this->readline->getInput());
     }
 
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('a', 'b'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWord()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('hello', 'hellö'); });
+
+        $this->readline->setInput('hell');
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\nhello  hellö\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWithoutDuplicatesWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('a', 'b', 'b', 'a'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b\n", $buffer);
+    }
+
+    public function testAutocompleteShowsLimitedNumberOfAvailableOptionsWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return range('a', 'z'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));

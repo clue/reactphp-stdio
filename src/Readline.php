@@ -15,7 +15,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $linebuffer = '';
     private $linepos = 0;
     private $echo = true;
-    private $autocomplete = null;
     private $move = true;
     private $encoding = 'utf-8';
 
@@ -28,6 +27,9 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $historyPosition = null;
     private $historyUnsaved = null;
     private $historyLimit = 500;
+
+    private $autocomplete = null;
+    private $autocompleteSuggestions = 8;
 
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
@@ -546,8 +548,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 
         // search longest common prefix among all possible matches
         $found = reset($words);
-        array_shift($words);
-        $others = count($words);
+        $all = count($words);
         while ($found !== $word) {
             // count all words that start with $found
             $matches = count(array_filter($words, function ($word) use ($found) {
@@ -555,7 +556,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             }));
 
             // ALL words match $found => common substring found
-            if ($others === $matches) {
+            if ($all === $matches) {
                 break;
             }
 
@@ -563,13 +564,23 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             $found = (string)substr($found, 0, -1);
         }
 
-        // current prefix has multiple possible completions => abort
-        if ($found === $word && $others) {
+        // found more than once possible match with this prefix => print options
+        if ($found === $word && $all > 1) {
+            // limit number of possible matches
+            if (count($words) > $this->autocompleteSuggestions) {
+                $more = count($words) - ($this->autocompleteSuggestions - 1);
+                $words = array_slice($words, 0, $this->autocompleteSuggestions - 1);
+                $words []= '(+' . $more . ' others)';
+            }
+
+            $this->output->write("\n" . implode('  ', $words) . "\n");
+            $this->redraw();
+
             return;
         }
 
         // append single space after match unless there's a postfix or there are multiple completions
-        if ($postfix === '' && $others === 0) {
+        if ($postfix === '' && $all === 1) {
             $found .= ' ';
         }
 

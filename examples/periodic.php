@@ -33,7 +33,7 @@ $readline->on('data', function ($line) use ($readline) {
 
 // autocomplete the following commands (at offset=0 only)
 $readline->setAutocomplete(function ($_, $offset) {
-    return $offset ? array() : array('exit', 'quit', 'help');
+    return $offset ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
 });
 
 $stdio->writeln('Will print periodic messages until you type "quit" or "exit"');

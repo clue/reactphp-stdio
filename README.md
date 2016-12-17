@@ -393,6 +393,7 @@ return an array of possible word matches from a callable like this:
 $readline->setAutocomplete(function () {
     return array(
         'exit',
+        'echo',
         'help',
     );
 });
@@ -402,9 +403,19 @@ If the user types `he [TAB]`, the first match will be skipped as it does not
 match the current word prefix and the second one will be picked automatically,
 so that the resulting input buffer is `hello `.
 
+If the user types `e [TAB]`, then this will match multiple entries and the user
+will be presented with a list of up to 8 available word completions to choose
+from like this:
+
+```php
+> e [TAB]
+exit  echo
+> e
+```
+
 Unless otherwise specified, the matches will be performed against the current
 word boundaries in the input buffer.
-This means that if the user types `hello [SPACE] e [TAB]`, then the resulting
+This means that if the user types `hello [SPACE] ex [TAB]`, then the resulting
 input buffer is `hello exit `, which may or may not be what you need depending
 on your particular use case.
 
@@ -414,8 +425,8 @@ actually receives two arguments (similar to `ext-readline`'s
 The first argument will be the current incomplete word according to current
 cursor position and word boundaries, while the second argument will be the
 offset of this word within the complete input buffer.
-The first example will thus be invoked as `$fn('he', 0)`, while the second one
-will be invoked as `$fn('e', 6)`.
+The above examples will be invoked as `$fn('he', 0)`, `$fn('e', 0)` and
+`$fn('ex', 6)` respectively.
 You may want to use the `$offset` argument to check if the current word is an
 argument or a root command and the `$word` argument to autocomplete partial
 filename matches like this:
