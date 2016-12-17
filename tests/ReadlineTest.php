@@ -642,6 +642,15 @@ class ReadlineTest extends TestCase
         $this->assertEquals('first ', $this->readline->getInput());
     }
 
+    public function testAutocompleteUsesExactMatchWhenDuplicateOrEmptyMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('', 'first', '', 'first'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
     public function testAutocompleteUsesCommonPrefixWhenMultipleMatchAndEnd()
     {
         $this->readline->setAutocomplete(function () { return array('counter', 'count'); });
@@ -672,13 +681,29 @@ class ReadlineTest extends TestCase
             $buffer .= $data;
         }));
 
-        $this->readline->setAutocomplete(function () { return array('hello', 'hellö'); });
+        $this->readline->setAutocomplete(function () { return array('hello', 'hellu'); });
 
         $this->readline->setInput('hell');
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\nhello  hellö\n", $buffer);
+        $this->assertContains("\nhello  hellu\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWordWithUmlauts()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('hällö', 'hällü'); });
+
+        $this->readline->setInput('häll');
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\nhällö  hällü\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWithoutDuplicatesWhenMultipleMatch()

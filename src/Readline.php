@@ -514,7 +514,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         // buffer prefix and postfix for everything that will *not* be matched
         // above example will return "echo " and "bar world"
         $prefix = '';
-        $postfix = (string)$this->substr($this->linebuffer, $this->linepos);
+        $postfix = $this->substr($this->linebuffer, $this->linepos);
 
         // skip everything before last space
         $pos = strrpos($word, ' ');
@@ -524,7 +524,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             $word = (string)substr($word, $pos + 1);
         }
 
-        // invoke automcomplete callback
+        // invoke autocomplete callback
         $words = call_user_func($this->autocomplete, $word, $offset);
 
         // return early if autocomplete does not return anything
@@ -532,14 +532,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             return;
         }
 
-        // remove all from list of possible words that do not start with $word or are duplicates
-        $len = strlen($word);
-        $words = array_unique($words);
-        foreach ($words as $i => $w) {
-            if ($word !== substr($w, 0, $len)) {
-                unset($words[$i]);
-            }
-        }
+        // remove from list of possible words that do not start with $word or are duplicates
+        $words = array_filter(array_unique($words), function ($w) use ($word) {
+            return isset($w[0]) && (!isset($word[0]) || strpos($w, $word) === 0);
+        });
 
         // return if neither of the possible words match
         if (!$words) {
@@ -549,34 +545,36 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         // search longest common prefix among all possible matches
         $found = reset($words);
         $all = count($words);
-        while ($found !== $word) {
-            // count all words that start with $found
-            $matches = count(array_filter($words, function ($word) use ($found) {
-                return strpos($word, $found) === 0;
-            }));
+        if ($all > 1) {
+            while ($found !== '') {
+                // count all words that start with $found
+                $matches = count(array_filter($words, function ($w) use ($found) {
+                    return strpos($w, $found) === 0;
+                }));
 
-            // ALL words match $found => common substring found
-            if ($all === $matches) {
-                break;
+                // ALL words match $found => common substring found
+                if ($all === $matches) {
+                    break;
+                }
+
+                // remove last letter from $found and try again
+                $found = $this->substr($found, 0, -1);
             }
 
-            // remove last letter from $found and try again
-            $found = (string)substr($found, 0, -1);
-        }
+            // found more than one possible match with this prefix => print options
+            if ($found === $word || $found === '') {
+                // limit number of possible matches
+                if (count($words) > $this->autocompleteSuggestions) {
+                    $more = count($words) - ($this->autocompleteSuggestions - 1);
+                    $words = array_slice($words, 0, $this->autocompleteSuggestions - 1);
+                    $words []= '(+' . $more . ' others)';
+                }
 
-        // found more than once possible match with this prefix => print options
-        if ($found === $word && $all > 1) {
-            // limit number of possible matches
-            if (count($words) > $this->autocompleteSuggestions) {
-                $more = count($words) - ($this->autocompleteSuggestions - 1);
-                $words = array_slice($words, 0, $this->autocompleteSuggestions - 1);
-                $words []= '(+' . $more . ' others)';
+                $this->output->write("\n" . implode('  ', $words) . "\n");
+                $this->redraw();
+
+                return;
             }
-
-            $this->output->write("\n" . implode('  ', $words) . "\n");
-            $this->redraw();
-
-            return;
         }
 
         // append single space after match unless there's a postfix or there are multiple completions
