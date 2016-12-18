@@ -420,16 +420,17 @@ input buffer is `hello exit `, which may or may not be what you need depending
 on your particular use case.
 
 In order to give your more control over this behavior, the autocomplete function
-actually receives two arguments (similar to `ext-readline`'s
+actually receives three arguments (similar to `ext-readline`'s
 [`readline_completion_function()`](http://php.net/manual/en/function.readline-completion-function.php)):
 The first argument will be the current incomplete word according to current
-cursor position and word boundaries, while the second argument will be the
-offset of this word within the complete input buffer.
-The above examples will be invoked as `$fn('he', 0)`, `$fn('e', 0)` and
-`$fn('ex', 6)` respectively.
-You may want to use the `$offset` argument to check if the current word is an
-argument or a root command and the `$word` argument to autocomplete partial
-filename matches like this:
+cursor position and word boundaries, while the second and third argument will be
+the start and end offset of this word within the complete input buffer measured
+in (Unicode) characters.
+The above examples will be invoked as `$fn('he', 0, 2)`, `$fn('e', 0, 1)` and
+`$fn('ex', 6, 8)` respectively.
+You may want to use this as an `$offset` argument to check if the current word
+is an argument or a root command and the `$word` argument to autocomplete
+partial filename matches like this:
 
 ```php
 $readline->setAutocomplete(function ($word, $offset) {
@@ -445,7 +446,7 @@ $readline->setAutocomplete(function ($word, $offset) {
 
 > Note that the user may also use quotes and/or leading whitespace around the
 root command, for example `"hell [TAB]`, in which case the offset will be
-advanced such as this will be invoked as `$fn('hell', 1)`.
+advanced such as this will be invoked as `$fn('hell', 1, 4)`.
 Unless you use a more sophisticated argument parser, a decent approximation may
 be using `$offset <= 1` to check this is a root command. 
 

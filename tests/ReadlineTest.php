@@ -530,14 +530,14 @@ class ReadlineTest extends TestCase
 
     public function testAutocompleteWillBeCalledWithEmptyBuffer()
     {
-        $this->readline->setAutocomplete($this->expectCallableOnceWith('', 0));
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('', 0, 0));
 
         $this->readline->onKeyTab();
     }
 
     public function testAutocompleteWillBeCalledWithCompleteWord()
     {
-        $this->readline->setAutocomplete($this->expectCallableOnceWith('hello', 0));
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('hello', 0, 5));
 
         $this->readline->setInput('hello');
 
@@ -546,7 +546,7 @@ class ReadlineTest extends TestCase
 
     public function testAutocompleteWillBeCalledWithWordPrefix()
     {
-        $this->readline->setAutocomplete($this->expectCallableOnceWith('he', 0));
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('he', 0, 2));
 
         $this->readline->setInput('hello');
         $this->readline->moveCursorTo(2);
@@ -556,7 +556,7 @@ class ReadlineTest extends TestCase
 
     public function testAutocompleteWillBeCalledWithLastWord()
     {
-        $this->readline->setAutocomplete($this->expectCallableOnceWith('world', 6));
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('world', 6, 11));
 
         $this->readline->setInput('hello world');
 
@@ -565,10 +565,30 @@ class ReadlineTest extends TestCase
 
     public function testAutocompleteWillBeCalledWithLastWordPrefix()
     {
-        $this->readline->setAutocomplete($this->expectCallableOnceWith('wo', 6));
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wo', 6, 8));
 
         $this->readline->setInput('hello world');
         $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefixUnicode()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wö', 6, 8));
+
+        $this->readline->setInput('hällö wörld');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefixQuotedUnicode()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wö', 9, 11));
+
+        $this->readline->setInput('"hällö" "wörld"');
+        $this->readline->moveCursorTo(11);
 
         $this->readline->onKeyTab();
     }

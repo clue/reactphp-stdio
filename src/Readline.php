@@ -509,7 +509,8 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         // current word prefix and offset for start of word in input buffer
         // "echo foo|bar world" will return just "foo" with word offset 5
         $word = $this->substr($this->linebuffer, 0, $this->linepos);
-        $offset = 0;
+        $start = 0;
+        $end = $this->linepos;
 
         // buffer prefix and postfix for everything that will *not* be matched
         // above example will return "echo " and "bar world"
@@ -519,22 +520,22 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         // skip everything before last space
         $pos = strrpos($word, ' ');
         if ($pos !== false) {
-            $offset = $pos + 1;
-            $prefix = (string)substr($word, 0, $offset);
-            $word = (string)substr($word, $offset);
+            $prefix = (string)substr($word, 0, $pos + 1);
+            $word = (string)substr($word, $pos + 1);
+            $start = $this->strlen($prefix);
         }
 
         // skip double quote (") or single quote (') from argument
         $quote = null;
         if (isset($word[0]) && ($word[0] === '"' || $word[0] === '\'')) {
             $quote = $word[0];
-            ++$offset;
+            ++$start;
             $prefix .= $word[0];
             $word = (string)substr($word, 1);
         }
 
         // invoke autocomplete callback
-        $words = call_user_func($this->autocomplete, $word, $offset);
+        $words = call_user_func($this->autocomplete, $word, $start, $end);
 
         // return early if autocomplete does not return anything
         if ($words === null) {
