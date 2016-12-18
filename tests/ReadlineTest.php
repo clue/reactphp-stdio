@@ -584,6 +584,109 @@ class ReadlineTest extends TestCase
         $this->assertEquals('exit ', $this->readline->getInput());
     }
 
+    public function testAutocompleteAddsSpaceAfterSecondWordIsComplete()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('exit ex');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit exit ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterCompleteWithClosingDoubleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('"exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"exit" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterCompleteWithClosingSingleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('\'exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'exit\' ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterSecondWordIsCompleteWithClosingDoubleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('exit "exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteStaysInQuotedStringAtEnd()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        // move cursor before closing quote
+        $this->readline->setInput('exit "ex"');
+        $this->readline->moveCursorBy(-1);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit"', $this->readline->getInput());
+        $this->assertEquals(10, $this->readline->getCursorPosition());
+    }
+
+    public function testAutocompleteStaysInQuotedStringInMiddle()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        // move cursor before closing quote
+        $this->readline->setInput('exit "ex" exit');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit" exit', $this->readline->getInput());
+        $this->assertEquals(10, $this->readline->getCursorPosition());
+    }
+
+    public function testAutocompleteAddsClosingSingleQuoteAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->setInput('\'');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'\' ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsClosingDoubleQuoteAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->setInput('"');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSingleQuotesAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'\' ', $this->readline->getInput());
+    }
+
     public function testAutocompletePicksFirstComplete()
     {
         $this->readline->setAutocomplete(function () { return array('exit'); });
@@ -633,18 +736,32 @@ class ReadlineTest extends TestCase
         $this->assertEquals('fir', $this->readline->getInput());
     }
 
-    public function testAutocompleteUsesExactMatchWhenDuplicateMatch()
+    public function testAutocompleteUsesCommonPrefixWithoutClosingQUotesWhenMultipleMatchAfterQuotes()
     {
-        $this->readline->setAutocomplete(function () { return array('first', 'first'); });
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->setInput('"');
 
         $this->readline->onKeyTab();
 
-        $this->assertEquals('first ', $this->readline->getInput());
+        $this->assertEquals('"fir', $this->readline->getInput());
     }
 
-    public function testAutocompleteUsesExactMatchWhenDuplicateOrEmptyMatch()
+    public function testAutocompleteUsesCommonPrefixBetweenQuotesWhenMultipleMatchBetweenQuotes()
     {
-        $this->readline->setAutocomplete(function () { return array('', 'first', '', 'first'); });
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->setInput('""');
+        $this->readline->moveCursorBy(-1);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"fir"', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesExactMatchWhenDuplicateMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'first'); });
 
         $this->readline->onKeyTab();
 
@@ -672,6 +789,20 @@ class ReadlineTest extends TestCase
         $this->readline->onKeyTab();
 
         $this->assertContains("\na  b\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchWithEmptyWord()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('', 'a'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\n  a\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWord()

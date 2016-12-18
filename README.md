@@ -433,8 +433,8 @@ filename matches like this:
 
 ```php
 $readline->setAutocomplete(function ($word, $offset) {
-    if ($offset === 0) {
-        // autocomplete root commands at offset=0 only
+    if ($offset <= 1) {
+        // autocomplete root commands at offset=0/1 only
         return array('cat', 'rm', 'stat');
     } else {
         // autocomplete all command arguments as glob pattern
@@ -442,6 +442,12 @@ $readline->setAutocomplete(function ($word, $offset) {
     }
 });
 ```
+
+> Note that the user may also use quotes and/or leading whitespace around the
+root command, for example `"hell [TAB]`, in which case the offset will be
+advanced such as this will be invoked as `$fn('hell', 1)`.
+Unless you use a more sophisticated argument parser, a decent approximation may
+be using `$offset <= 1` to check this is a root command. 
 
 If you need even more control over autocompletion, you may also want to access
 and/or manipulate the [input buffer](#input-buffer) and [cursor](#cursor)

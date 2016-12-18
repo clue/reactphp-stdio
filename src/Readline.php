@@ -520,8 +520,17 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $pos = strrpos($word, ' ');
         if ($pos !== false) {
             $offset = $pos + 1;
-            $prefix = (string)substr($word, 0, $pos + 1);
-            $word = (string)substr($word, $pos + 1);
+            $prefix = (string)substr($word, 0, $offset);
+            $word = (string)substr($word, $offset);
+        }
+
+        // skip double quote (") or single quote (') from argument
+        $quote = null;
+        if (isset($word[0]) && ($word[0] === '"' || $word[0] === '\'')) {
+            $quote = $word[0];
+            ++$offset;
+            $prefix .= $word[0];
+            $word = (string)substr($word, 1);
         }
 
         // invoke autocomplete callback
@@ -533,9 +542,12 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         }
 
         // remove from list of possible words that do not start with $word or are duplicates
-        $words = array_filter(array_unique($words), function ($w) use ($word) {
-            return isset($w[0]) && (!isset($word[0]) || strpos($w, $word) === 0);
-        });
+        $words = array_unique($words);
+        if ($word !== '' && $words) {
+            $words = array_filter($words, function ($w) use ($word) {
+                return strpos($w, $word) === 0;
+            });
+        }
 
         // return if neither of the possible words match
         if (!$words) {
@@ -577,8 +589,16 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             }
         }
 
-        // append single space after match unless there's a postfix or there are multiple completions
+        if ($quote !== null && $all === 1 && (strpos($postfix, $quote) === false || strpos($postfix, $quote) > strpos($postfix, ' '))) {
+            // add closing quote if word started in quotes and postfix does not already contain closing quote before next space
+            $found .= $quote;
+        } elseif ($found === '') {
+            // add single quotes around empty match
+            $found = '\'\'';
+        }
+
         if ($postfix === '' && $all === 1) {
+            // append single space after match unless there's a postfix or there are multiple completions
             $found .= ' ';
         }
 
