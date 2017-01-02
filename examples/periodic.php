@@ -31,12 +31,17 @@ $readline->on('data', function ($line) use ($readline) {
     }
 });
 
+// autocomplete the following commands (at offset=0/1 only)
+$readline->setAutocomplete(function ($_, $offset) {
+    return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
+});
+
 $stdio->writeln('Will print periodic messages until you type "quit" or "exit"');
 
 $stdio->on('line', function ($line) use ($stdio, $loop, &$timer) {
     $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
 
-    if ($line === 'quit' || $line === 'exit') {
+    if (in_array(trim($line), array('quit', 'exit'))) {
         $timer->cancel();
         $stdio->end();
     }

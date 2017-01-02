@@ -15,7 +15,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $linebuffer = '';
     private $linepos = 0;
     private $echo = true;
-    private $autocomplete = null;
     private $move = true;
     private $encoding = 'utf-8';
 
@@ -29,6 +28,9 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $historyUnsaved = null;
     private $historyLimit = 500;
 
+    private $autocomplete = null;
+    private $autocompleteSuggestions = 8;
+
     public function __construct(ReadableStreamInterface $input, WritableStreamInterface $output)
     {
         $this->input = $input;
@@ -37,7 +39,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         if (!$this->input->isReadable()) {
             return $this->close();
         }
-
         // push input through control code parser
         $parser = new ControlCodeParser($input);
 
@@ -387,16 +388,22 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
-     * set autocompletion handler to use (or none)
+     * set autocompletion handler to use
      *
      * The autocomplete handler will be called whenever the user hits the TAB
      * key.
      *
-     * @param AutocompleteInterface|null $autocomplete
+     * @param callable|null $autocomplete
      * @return self
+     * @throws InvalidArgumentException if the given callable is invalid
      */
-    public function setAutocomplete(AutocompleteInterface $autocomplete = null)
+
+    public function setAutocomplete($autocomplete)
     {
+        if ($autocomplete !== null && !is_callable($autocomplete)) {
+            throw new \InvalidArgumentException('Invalid autocomplete function given');
+        }
+
         $this->autocomplete = $autocomplete;
 
         return $this;
@@ -495,9 +502,110 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyTab()
     {
-        if ($this->autocomplete !== null) {
-            $this->autocomplete->run();
+        if ($this->autocomplete === null) {
+            return;
         }
+
+        // current word prefix and offset for start of word in input buffer
+        // "echo foo|bar world" will return just "foo" with word offset 5
+        $word = $this->substr($this->linebuffer, 0, $this->linepos);
+        $start = 0;
+        $end = $this->linepos;
+
+        // buffer prefix and postfix for everything that will *not* be matched
+        // above example will return "echo " and "bar world"
+        $prefix = '';
+        $postfix = $this->substr($this->linebuffer, $this->linepos);
+
+        // skip everything before last space
+        $pos = strrpos($word, ' ');
+        if ($pos !== false) {
+            $prefix = (string)substr($word, 0, $pos + 1);
+            $word = (string)substr($word, $pos + 1);
+            $start = $this->strlen($prefix);
+        }
+
+        // skip double quote (") or single quote (') from argument
+        $quote = null;
+        if (isset($word[0]) && ($word[0] === '"' || $word[0] === '\'')) {
+            $quote = $word[0];
+            ++$start;
+            $prefix .= $word[0];
+            $word = (string)substr($word, 1);
+        }
+
+        // invoke autocomplete callback
+        $words = call_user_func($this->autocomplete, $word, $start, $end);
+
+        // return early if autocomplete does not return anything
+        if ($words === null) {
+            return;
+        }
+
+        // remove from list of possible words that do not start with $word or are duplicates
+        $words = array_unique($words);
+        if ($word !== '' && $words) {
+            $words = array_filter($words, function ($w) use ($word) {
+                return strpos($w, $word) === 0;
+            });
+        }
+
+        // return if neither of the possible words match
+        if (!$words) {
+            return;
+        }
+
+        // search longest common prefix among all possible matches
+        $found = reset($words);
+        $all = count($words);
+        if ($all > 1) {
+            while ($found !== '') {
+                // count all words that start with $found
+                $matches = count(array_filter($words, function ($w) use ($found) {
+                    return strpos($w, $found) === 0;
+                }));
+
+                // ALL words match $found => common substring found
+                if ($all === $matches) {
+                    break;
+                }
+
+                // remove last letter from $found and try again
+                $found = $this->substr($found, 0, -1);
+            }
+
+            // found more than one possible match with this prefix => print options
+            if ($found === $word || $found === '') {
+                // limit number of possible matches
+                if (count($words) > $this->autocompleteSuggestions) {
+                    $more = count($words) - ($this->autocompleteSuggestions - 1);
+                    $words = array_slice($words, 0, $this->autocompleteSuggestions - 1);
+                    $words []= '(+' . $more . ' others)';
+                }
+
+                $this->output->write("\n" . implode('  ', $words) . "\n");
+                $this->redraw();
+
+                return;
+            }
+        }
+
+        if ($quote !== null && $all === 1 && (strpos($postfix, $quote) === false || strpos($postfix, $quote) > strpos($postfix, ' '))) {
+            // add closing quote if word started in quotes and postfix does not already contain closing quote before next space
+            $found .= $quote;
+        } elseif ($found === '') {
+            // add single quotes around empty match
+            $found = '\'\'';
+        }
+
+        if ($postfix === '' && $all === 1) {
+            // append single space after match unless there's a postfix or there are multiple completions
+            $found .= ' ';
+        }
+
+        // replace word in input with best match and adjust cursor
+        $this->linebuffer = $prefix . $found . $postfix;
+        $this->moveCursorBy($this->strlen($found) - $this->strlen($word));
     }
 
     /** @internal */

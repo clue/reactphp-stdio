@@ -495,6 +495,396 @@ class ReadlineTest extends TestCase
         $this->assertEquals(3, $readline->getCursorCell());
     }
 
+    public function testAutocompleteReturnsSelf()
+    {
+        $this->assertSame($this->readline, $this->readline->setAutocomplete(function () { }));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testAutocompleteThrowsIfNotCallable()
+    {
+        $this->assertSame($this->readline, $this->readline->setAutocomplete(123));
+    }
+
+    public function testAutocompleteKeyDoesNothingIfUnused()
+    {
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledOnTab()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnce());
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillNotBeCalledAfterUnset()
+    {
+        $this->readline->setAutocomplete($this->expectCallableNever());
+        $this->readline->setAutocomplete(null);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithEmptyBuffer()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('', 0, 0));
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithCompleteWord()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('hello', 0, 5));
+
+        $this->readline->setInput('hello');
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithWordPrefix()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('he', 0, 2));
+
+        $this->readline->setInput('hello');
+        $this->readline->moveCursorTo(2);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWord()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('world', 6, 11));
+
+        $this->readline->setInput('hello world');
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefix()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wo', 6, 8));
+
+        $this->readline->setInput('hello world');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefixUnicode()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wö', 6, 8));
+
+        $this->readline->setInput('hällö wörld');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteWillBeCalledWithLastWordPrefixQuotedUnicode()
+    {
+        $this->readline->setAutocomplete($this->expectCallableOnceWith('wö', 9, 11));
+
+        $this->readline->setInput('"hällö" "wörld"');
+        $this->readline->moveCursorTo(11);
+
+        $this->readline->onKeyTab();
+    }
+
+    public function testAutocompleteAddsSpaceAfterComplete()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterSecondWordIsComplete()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('exit ex');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit exit ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterCompleteWithClosingDoubleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('"exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"exit" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterCompleteWithClosingSingleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('\'exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'exit\' ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSpaceAfterSecondWordIsCompleteWithClosingDoubleQuote()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('exit "exit');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteStaysInQuotedStringAtEnd()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        // move cursor before closing quote
+        $this->readline->setInput('exit "ex"');
+        $this->readline->moveCursorBy(-1);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit"', $this->readline->getInput());
+        $this->assertEquals(10, $this->readline->getCursorPosition());
+    }
+
+    public function testAutocompleteStaysInQuotedStringInMiddle()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        // move cursor before closing quote
+        $this->readline->setInput('exit "ex" exit');
+        $this->readline->moveCursorTo(8);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit "exit" exit', $this->readline->getInput());
+        $this->assertEquals(10, $this->readline->getCursorPosition());
+    }
+
+    public function testAutocompleteAddsClosingSingleQuoteAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->setInput('\'');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'\' ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsClosingDoubleQuoteAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->setInput('"');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"" ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteAddsSingleQuotesAndSpaceWhenMatchingEmptyString()
+    {
+        $this->readline->setAutocomplete(function () { return array(''); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('\'\' ', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksFirstComplete()
+    {
+        $this->readline->setAutocomplete(function () { return array('exit'); });
+
+        $this->readline->setInput('e');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('exit ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteIgnoresNonMatching()
+    {
+        $this->readline->setAutocomplete(function () { return array('quit'); });
+
+        $this->readline->setInput('e');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('e', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksNoneWhenEmptyAndMultipleMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'second'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testAutocompletePicksOnlyEntryWhenEmpty()
+    {
+        $this->readline->setAutocomplete(function () { return array('first'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixWhenMultipleMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('fir', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixWithoutClosingQUotesWhenMultipleMatchAfterQuotes()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->setInput('"');
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"fir', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixBetweenQuotesWhenMultipleMatchBetweenQuotes()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'firm'); });
+
+        $this->readline->setInput('""');
+        $this->readline->moveCursorBy(-1);
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('"fir"', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesExactMatchWhenDuplicateMatch()
+    {
+        $this->readline->setAutocomplete(function () { return array('first', 'first'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('first ', $this->readline->getInput());
+    }
+
+    public function testAutocompleteUsesCommonPrefixWhenMultipleMatchAndEnd()
+    {
+        $this->readline->setAutocomplete(function () { return array('counter', 'count'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertEquals('count', $this->readline->getInput());
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('a', 'b'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchWithEmptyWord()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('', 'a'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\n  a\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWord()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('hello', 'hellu'); });
+
+        $this->readline->setInput('hell');
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\nhello  hellu\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWordWithUmlauts()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('hällö', 'hällü'); });
+
+        $this->readline->setInput('häll');
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\nhällö  hällü\n", $buffer);
+    }
+
+    public function testAutocompleteShowsAvailableOptionsWithoutDuplicatesWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return array('a', 'b', 'b', 'a'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b\n", $buffer);
+    }
+
+    public function testAutocompleteShowsLimitedNumberOfAvailableOptionsWhenMultipleMatch()
+    {
+        $buffer = '';
+        $this->output->expects($this->atLeastOnce())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
+            $buffer .= $data;
+        }));
+
+        $this->readline->setAutocomplete(function () { return range('a', 'z'); });
+
+        $this->readline->onKeyTab();
+
+        $this->assertContains("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith(''));
