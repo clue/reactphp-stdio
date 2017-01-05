@@ -228,7 +228,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
     private function width($str)
     {
-        return mb_strwidth($str, 'utf-8') - 2 * substr_count($str, "\x08");
+        return $this->readline->strwidth($str) - 2 * substr_count($str, "\x08");
     }
 
     /** @internal */

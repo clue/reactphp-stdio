@@ -747,22 +747,57 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->emit('data', array($line));
     }
 
-    protected function strlen($str)
+    private function strlen($str)
     {
-        return mb_strlen($str, $this->encoding);
+        // prefer mb_strlen() if available
+        if (function_exists('mb_strlen')) {
+            return mb_strlen($str, $this->encoding);
+        }
+
+        // otherwise replace all unicode chars with dots and count dots
+        return strlen(preg_replace('/./us', '.', $str));
     }
 
-    protected function substr($str, $start = 0, $len = null)
+    private function substr($str, $start = 0, $len = null)
     {
         if ($len === null) {
             $len = $this->strlen($str) - $start;
         }
-        return (string)mb_substr($str, $start, $len, $this->encoding);
+
+        // prefer mb_substr() if available
+        if (function_exists('mb_substr')) {
+            return (string)mb_substr($str, $start, $len, $this->encoding);
+        }
+
+        // otherwise build array with all unicode chars and slice array
+        preg_match_all('/./us', $str, $matches);
+
+        return implode('', array_slice($matches[0], $start, $len));
     }
 
-    private function strwidth($str)
+    /** @internal */
+    public function strwidth($str)
     {
-        return mb_strwidth($str, $this->encoding);
+        // prefer mb_strwidth() if available
+        if (function_exists('mb_strwidth')) {
+            return mb_strwidth($str, $this->encoding);
+        }
+
+        // otherwise replace each double-width unicode graphemes with two dots, all others with single dot and count number of dots
+        // mbstring's list of double-width graphemes is *very* long: https://3v4l.org/GEg3u
+        // let's use symfony's list from https://github.com/symfony/polyfill-mbstring/blob/e79d363049d1c2128f133a2667e4f4190904f7f4/Mbstring.php#L523
+        // which looks like they originally came from http://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c
+        return strlen(preg_replace(
+            array(
+                '/[\x{1100}-\x{115F}\x{2329}\x{232A}\x{2E80}-\x{303E}\x{3040}-\x{A4CF}\x{AC00}-\x{D7A3}\x{F900}-\x{FAFF}\x{FE10}-\x{FE19}\x{FE30}-\x{FE6F}\x{FF00}-\x{FF60}\x{FFE0}-\x{FFE6}\x{20000}-\x{2FFFD}\x{30000}-\x{3FFFD}]/u',
+                '/./us',
+            ),
+            array(
+                '..',
+                '.',
+            ),
+            $str
+        ));
     }
 
     /** @internal */
