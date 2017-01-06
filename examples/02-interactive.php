@@ -36,20 +36,15 @@ $readline->setAutocomplete(function ($_, $offset) {
     return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
 });
 
-$stdio->writeln('Will print periodic messages until you type "quit" or "exit"');
+$stdio->writeln('Welcome to this interactive demo');
 
-$stdio->on('line', function ($line) use ($stdio, $loop, &$timer) {
+// react to commands the user entered
+$stdio->on('line', function ($line) use ($stdio) {
     $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
 
     if (in_array(trim($line), array('quit', 'exit'))) {
-        $timer->cancel();
         $stdio->end();
     }
-});
-
-// add some periodic noise
-$timer = $loop->addPeriodicTimer(2.0, function () use ($stdio) {
-    $stdio->writeln('hello');
 });
 
 $loop->run();
