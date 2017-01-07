@@ -22,5 +22,9 @@
     },
     "autoload": {
         "psr-4": { "Clue\\React\\Stdio\\": "src/" }
+    },
+    "require-dev": {
+        "clue/commander": "^1.2",
+        "clue/arguments": "^2.0"
     }
 }
