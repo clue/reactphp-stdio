@@ -549,7 +549,7 @@ The recommended way to install this library is [through Composer](https://getcom
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^0.5
+$ composer require clue/stdio-react:^1.0
 ```
 
 More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
