@@ -6,7 +6,7 @@
 
 > Contains no other changes, so it's actually fully compatible with the v0.5.0 release.
 
-## 0.5.0 (2016-01-08)
+## 0.5.0 (2017-01-08)
 
 *   Feature: Add history support
     (#40 by @clue)
