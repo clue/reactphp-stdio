@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.0 (2016-01-08)
+
+*   Feature: Add history support
+    (#40 by @clue)
+
+*   Feature: Add autocomplete support
+    (#41 by @clue)
+
+*   Feature: Suggest using ext-mbstring, otherwise use regex fallback
+    (#42 by @clue)
+
+*   Remove / BC break: Remove undocumented and low quality skeletons/helpers for
+    `Buffer`, `ProgressBar` and `Spinner` (mostly dead code)
+    (#39, #43 by @clue)
+
+*   First class support for PHP 5.3 through PHP 7 and HHVM
+    (#44 by @clue)
+
+*   Simplify and restructure examples
+    (#45 by @clue)
+
 ## 0.4.0 (2016-09-27)
 
 *   Feature / BC break: The `Stdio` is now a well-behaving duplex stream

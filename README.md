@@ -1,6 +1,6 @@
 # clue/stdio-react [![Build Status](https://travis-ci.org/clue/php-stdio-react.svg?branch=master)](https://travis-ci.org/clue/php-stdio-react)
 
-Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDOUT) for React PHP
+Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT), built on top of for React PHP
 
 **Table of Contents**
 
@@ -23,8 +23,6 @@ Async, event-driven and UTF-8 aware standard console input & output (STDIN, STDO
 * [Install](#install)
 * [License](#license)
 * [More](#more)
-
-> Note: This project is in beta stage! Feel free to report any issues you encounter.
 
 ## Quickstart example
 
@@ -551,7 +549,7 @@ The recommended way to install this library is [through Composer](https://getcom
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^0.4
+$ composer require clue/stdio-react:^0.5
 ```
 
 More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
