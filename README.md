@@ -564,3 +564,8 @@ MIT
 
 * If you want to learn more about processing streams of data, refer to the documentation of
   the underlying [react/stream](https://github.com/reactphp/stream) component.
+* If you build an interactive CLI tool that reads a command line from STDIN, you
+  may want to use [clue/arguments](https://github.com/clue/php-arguments) in
+  order to split this string up into its individual arguments and then use
+  [clue/commander](https://github.com/clue/php-commander) to route to registered
+  commands and their required arguments.
