@@ -12,7 +12,7 @@ class ReadlineTest extends TestCase
     public function setUp()
     {
         $this->input = new ReadableStream();
-        $this->output = $this->getMock('React\Stream\WritableStreamInterface');
+        $this->output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         $this->readline = new Readline($this->input, $this->output);
     }
@@ -983,7 +983,7 @@ class ReadlineTest extends TestCase
 
     public function testClosedStdinWillCloseReadline()
     {
-        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $this->input->expects($this->once())->method('isReadable')->willReturn(false);
 
         $this->readline = new Readline($this->input, $this->output);
@@ -993,7 +993,7 @@ class ReadlineTest extends TestCase
 
     public function testPauseWillBeForwarded()
     {
-        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $this->input->expects($this->once())->method('pause');
 
         $this->readline = new Readline($this->input, $this->output);
@@ -1003,7 +1003,7 @@ class ReadlineTest extends TestCase
 
     public function testResumeWillBeForwarded()
     {
-        $this->input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $this->input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $this->input->expects($this->once())->method('resume');
 
         $this->readline = new Readline($this->input, $this->output);
@@ -1013,7 +1013,7 @@ class ReadlineTest extends TestCase
 
     public function testPipeWillReturnDest()
     {
-        $dest = $this->getMock('React\Stream\WritableStreamInterface');
+        $dest = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         $ret = $this->readline->pipe($dest);
 
