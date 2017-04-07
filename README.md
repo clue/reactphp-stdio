@@ -21,6 +21,7 @@ Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT), buil
     * [Stdin](#stdin)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
+* [Tests](#tests)
 * [License](#license)
 * [More](#more)
 
@@ -553,6 +554,21 @@ $ composer require clue/stdio-react:^1.0
 ```
 
 More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
+
+## Tests
+
+To run the test suite, you first need to clone this repo and then install all
+dependencies [through Composer](http://getcomposer.org):
+
+```bash
+$ composer install
+```
+
+To run the test suite, go to the project root and run:
+
+```bash
+$ php vendor/bin/phpunit
+```
 
 ## License
 

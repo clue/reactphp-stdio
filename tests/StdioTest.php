@@ -23,8 +23,8 @@ class StdioTest extends TestCase
 
     public function testCtorArgsWillBeReturnedByGetters()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -38,8 +38,8 @@ class StdioTest extends TestCase
 
     public function testWriteEmptyStringWillNotWriteToOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -55,8 +55,8 @@ class StdioTest extends TestCase
 
     public function testWriteWillClearReadlineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -77,8 +77,8 @@ class StdioTest extends TestCase
 
     public function testWriteAgainWillMoveToPreviousLineWriteOutputAndRestoreReadlinePosition()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -101,8 +101,8 @@ class StdioTest extends TestCase
 
     public function testWriteAgainWithBackspaceWillMoveToPreviousLineWriteOutputAndRestoreReadlinePosition()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -125,8 +125,8 @@ class StdioTest extends TestCase
 
     public function testWriteAgainWithNewlinesWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -149,8 +149,8 @@ class StdioTest extends TestCase
 
     public function testWriteAfterReadlineInputWillClearReadlineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -175,8 +175,8 @@ class StdioTest extends TestCase
 
     public function testOverwriteWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -199,8 +199,8 @@ class StdioTest extends TestCase
 
     public function testOverwriteAfterNewlineWillClearReadlineAndWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -223,8 +223,8 @@ class StdioTest extends TestCase
 
     public function testWriteLineWillClearReadlineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -245,8 +245,8 @@ class StdioTest extends TestCase
 
     public function testWriteTwoLinesWillClearReadlineWriteOutputAndRestoreReadline()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -268,8 +268,8 @@ class StdioTest extends TestCase
 
     public function testPauseWillBeForwardedToInput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -283,8 +283,8 @@ class StdioTest extends TestCase
 
     public function testResumeWillBeForwardedToInput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -298,8 +298,8 @@ class StdioTest extends TestCase
 
     public function testReadableWillBeForwardedToInput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -313,15 +313,15 @@ class StdioTest extends TestCase
 
     public function testPipeWillReturnDestStream()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
 
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
-        $dest = $this->getMock('React\Stream\WritableStreamInterface');
+        $dest = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         $ret = $stdio->pipe($dest);
 
@@ -330,8 +330,8 @@ class StdioTest extends TestCase
 
     public function testWritableWillBeForwardedToOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -345,8 +345,8 @@ class StdioTest extends TestCase
 
     public function testCloseWillCloseInputAndOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -361,8 +361,8 @@ class StdioTest extends TestCase
 
     public function testCloseTwiceWillCloseInputAndOutputOnlyOnce()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -378,8 +378,8 @@ class StdioTest extends TestCase
 
     public function testEndWillCloseInputAndEndOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -394,8 +394,8 @@ class StdioTest extends TestCase
 
     public function testEndWithDataWillWriteAndCloseInputAndEndOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -412,8 +412,8 @@ class StdioTest extends TestCase
 
     public function testWriteAfterEndWillNotWriteToOutput()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -428,8 +428,8 @@ class StdioTest extends TestCase
 
     public function testEndTwiceWillCloseInputAndEndOutputOnce()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -445,8 +445,8 @@ class StdioTest extends TestCase
 
     public function testDataEventWillBeForwarded()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -462,7 +462,7 @@ class StdioTest extends TestCase
     public function testEndEventWillBeForwarded()
     {
         $input = new ReadableStream();
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -477,7 +477,7 @@ class StdioTest extends TestCase
     public function testErrorEventFromInputWillBeForwarded()
     {
         $input = new ReadableStream();
-        $output = $this->getMock('React\Stream\WritableStreamInterface');
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
@@ -491,7 +491,7 @@ class StdioTest extends TestCase
 
     public function testErrorEventFromOutputWillBeForwarded()
     {
-        $input = $this->getMock('React\Stream\ReadableStreamInterface');
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $output = new WritableStream();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
