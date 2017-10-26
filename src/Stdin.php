@@ -2,18 +2,23 @@
 
 namespace Clue\React\Stdio;
 
-use React\Stream\ReadableStream;
-use React\Stream\Stream;
+use Evenement\EventEmitter;
+use React\Stream\ReadableResourceStream;
+use React\Stream\ReadableStreamInterface;
 use React\EventLoop\LoopInterface;
+use React\Stream\Util;
+use React\Stream\WritableStreamInterface;
 
-// TODO: only implement ReadableStream
-class Stdin extends Stream
+class Stdin extends EventEmitter implements ReadableStreamInterface
 {
     private $oldMode = null;
 
+    private $stream;
+
     public function __construct(LoopInterface $loop)
     {
-        parent::__construct(STDIN, $loop);
+        $this->stream = new ReadableResourceStream(STDIN, $loop);
+        Util::forwardEvents($this->stream, $this, array('data', 'error', 'end', 'close'));
     }
 
     public function resume()
@@ -24,7 +29,7 @@ class Stdin extends Stream
             // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
             shell_exec('stty -icanon -echo');
 
-            parent::resume();
+            $this->stream->resume();
         }
     }
 
@@ -35,14 +40,23 @@ class Stdin extends Stream
             shell_exec(sprintf('stty %s', $this->oldMode));
 
             $this->oldMode = null;
-            parent::pause();
+            $this->stream->pause();
         }
     }
 
     public function close()
     {
-        $this->pause();
-        parent::close();
+        $this->stream->close();
+    }
+
+    public function isReadable()
+    {
+        return $this->stream->isReadable();
+    }
+
+    public function pipe(WritableStreamInterface $dest, array $options = array())
+    {
+        return $this->stream->pipe($dest, $options);
     }
 
     public function __destruct()
