@@ -2,7 +2,6 @@
 
 namespace Clue\React\Stdio;
 
-use React\Stream\ReadableStream;
 use React\Stream\Stream;
 use React\EventLoop\LoopInterface;
 
@@ -43,8 +42,35 @@ class Stdin extends Stream
         }
     }
 
+    /**
+     * @return bool
+     * @codeCoverageIgnore
+     */
     private function isTty()
     {
-        return (is_resource(STDIN) && function_exists('posix_isatty') && posix_isatty(STDIN));
+        if (PHP_VERSION_ID >= 70200) {
+            // Prefer `stream_isatty()` (available as of PHP 7.2 only)
+            return stream_isatty(STDIN);
+        } elseif (function_exists('posix_isatty')) {
+            // Otherwise use `posix_isatty` if available (requires `ext-posix`)
+            return posix_isatty(STDIN);
+        }
+
+        // otherwise try to guess based on stat file mode and device major number
+        // Must be special character device: ($mode & S_IFMT) === S_IFCHR
+        // And device major number must be allocated to TTYs (2-5 and 128-143)
+        // For what it's worth, checking for device gid 5 (tty) is less reliable.
+        // @link http://man7.org/linux/man-pages/man7/inode.7.html
+        // @link https://www.kernel.org/doc/html/v4.11/admin-guide/devices.html#terminal-devices
+        if (is_resource(STDIN)) {
+            $stat = fstat(STDIN);
+            $mode = isset($stat['mode']) ? ($stat['mode'] & 0170000) : 0;
+            $major = isset($stat['dev']) ? (($stat['dev'] >> 8) & 0xff) : 0;
+
+            if ($mode === 0020000 && $major >= 2 && $major <= 143 && ($major <=5 || $major >= 128)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
