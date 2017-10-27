@@ -14,8 +14,8 @@
         "php": ">=5.3",
         "react/event-loop": "0.3.*|0.4.*",
         "react/stream": "^0.4.2",
-        "clue/utf8-react": "^0.1",
-        "clue/term-react": "^0.1.1"
+        "clue/utf8-react": "^1.0 || ^0.1",
+        "clue/term-react": "^1.0 || ^0.1.1"
     },
     "suggest": {
         "ext-mbstring": "Using ext-mbstring should provide slightly better performance for handling I/O"
