@@ -21,11 +21,13 @@ class StdioTest extends TestCase
         $stdio = new Stdio($this->loop);
 
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $input->expects($this->once())->method('close');
         $inputProperty = new ReflectionProperty($stdio, 'input');
         $inputProperty->setAccessible(true);
         $inputProperty->setValue($stdio, $input);
 
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $output->expects($this->once())->method('close');
         $outputProperty = new ReflectionProperty($stdio, 'output');
         $outputProperty->setAccessible(true);
         $outputProperty->setValue($stdio, $output);
