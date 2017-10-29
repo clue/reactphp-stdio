@@ -89,11 +89,12 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-The `overwrite($text)` method can be used to overwrite/replace the last
+[Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
 incomplete line with the given text:
 
 ```php
 $stdio->write('Loading…');
+// deprecated
 $stdio->overwrite('Done!');
 ```
 

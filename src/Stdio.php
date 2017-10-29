@@ -167,6 +167,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->write($line . PHP_EOL);
     }
 
+    /**
+     * @deprecated
+     */
     public function overwrite($data = '')
     {
         if ($this->incompleteLine !== '') {
