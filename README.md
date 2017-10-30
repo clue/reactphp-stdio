@@ -479,7 +479,7 @@ $readline->setAutocomplete(null);
 
 #### Stdout
 
-The `Stdout` represents a `WritableStream` and is responsible for handling console output.
+[Deprecated] The `Stdout` represents a `WritableStream` and is responsible for handling console output.
 
 Interfacing with it directly is *not recommended* and considered *advanced usage*.
 
@@ -492,6 +492,7 @@ $stdio->write('hello');
 Should you need to interface with the `Stdout`, you can access the current instance through the [`Stdio`](#stdio):
 
 ```php
+// deprecated
 $stdout = $stdio->getOutput();
 ```
 
