@@ -39,8 +39,8 @@ $readline->setAutocomplete(function ($_, $offset) {
 $stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
-$stdio->on('line', function ($line) use ($stdio) {
-    $stdio->write('you just said: ' . $line . ' (' . strlen($line) . ')' . PHP_EOL);
+$stdio->on('data', function ($line) use ($stdio) {
+    $stdio->write('you just said: ' . addcslashes($line, "\0..\037") . ' (' . strlen($line) . ')' . PHP_EOL);
 
     if (in_array(trim($line), array('quit', 'exit'))) {
         $stdio->end();

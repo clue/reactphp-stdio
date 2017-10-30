@@ -36,9 +36,10 @@ $stdio = new Stdio($loop);
 
 $stdio->getReadline()->setPrompt('Input > ');
 
-$stdio->on('line', function ($line) use ($stdio) {
+$stdio->on('data', function ($line) use ($stdio) {
+    $line = rtrim($line, "\r\n");
     var_dump($line);
-    
+
     if ($line === 'quit') {
         $stdio->end();
     }
@@ -64,10 +65,9 @@ $stdio = new Stdio($loop);
 ```
 
 See below for waiting for user input and writing output.
-Alternatively, the `Stdio` is also a well-behaving duplex stream
+The `Stdio` class is a well-behaving duplex stream
 (implementing ReactPHP's `DuplexStreamInterface`) that emits each complete
-line as a `data` event (including the trailing newline). This is considered
-advanced usage.
+line as a `data` event (including the trailing newline).
 
 #### Output
 
@@ -107,28 +107,37 @@ You can `pipe()` any readable stream into this stream.
 The `Stdio` is a well-behaving readable stream
 implementing ReactPHP's `ReadableStreamInterface`.
 
-It will emit a `line` event for every line read from console input.
+It will emit a `data` event for every line read from console input.
+The event will contain the input buffer as-is, including the trailing newline.
+You can register any number of event handlers like this:
+
+```php
+$stdio->on('data', function ($line) {
+    if ($line === "start\n") {
+        doSomething();
+    }
+});
+```
+
+Because the `Stdio` is a well-behaving redable stream that will emit incoming
+data as-is, you can also use this to `pipe()` this stream into other writable
+streams.
+
+You can control various aspects of the console input through the [`Readline`](#readline),
+so read on..
+
+[Deprecated] It will emit a `line` event for every line read from console input.
 The event will contain the input buffer as-is, without the trailing newline.
 You can register any number of event handlers like this:
 
 ```php
+// deprecated
 $stdio->on('line', function ($line) {
     if ($line === 'start') {
         doSomething();
     }
 });
 ```
-
-You can control various aspects of the console input through the [`Readline`](#readline),
-so read on..
-
-Using the `line` event is the recommended way to wait for user input.
-Alternatively, using the `Readline` as a readable stream is considered advanced
-usage.
-
-Alternatively, you can also use the `Stdio` as a readable stream, which emits
-each complete line as a `data` event (including the trailing newline).
-This can be used to `pipe()` this stream into other writable streams.
 
 ### Readline
 
@@ -505,7 +514,8 @@ Interfacing with it directly is *not recommended* and considered *advanced usage
 If you want to read a line from console input, use the [`Stdio::on()`](#input) instead:
 
 ```php
-$stdio->on('line', function ($line) use ($stdio) {
+$stdio->on('data', function ($line) use ($stdio) {
+    $line = rtrim($line, "\r\n");
     $stdio->write('You said "' . $line . '"' . PHP_EOL);
 });
 ```

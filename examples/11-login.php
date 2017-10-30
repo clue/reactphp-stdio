@@ -14,7 +14,8 @@ $first = true;
 $username = null;
 $password = null;
 
-$stdio->on('line', function ($line) use ($stdio, &$first, &$username, &$password) {
+$stdio->on('data', function ($line) use ($stdio, &$first, &$username, &$password) {
+    $line = rtrim($line, "\r\n");
     if ($first) {
         $stdio->getReadline()->setPrompt('Password: ');
         $stdio->getReadline()->setEcho('*');

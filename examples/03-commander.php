@@ -46,11 +46,13 @@ $readline->setAutocomplete(function ($_, $offset) {
 $stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
-$stdio->on('line', function ($line) use ($router, $stdio, $readline) {
+$stdio->on('data', function ($line) use ($router, $stdio, $readline) {
+    $line = rtrim($line, "\r\n");
+
     // add all lines from input to history
     // skip empty line and duplicate of previous line
     $all = $readline->listHistory();
-    if (trim($line) !== '' && $line !== end($all)) {
+    if ($line !== '' && $line !== end($all)) {
         $readline->addHistory($line);
     }
 
