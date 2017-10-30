@@ -36,11 +36,11 @@ $readline->setAutocomplete(function ($_, $offset) {
     return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
 });
 
-$stdio->writeln('Welcome to this interactive demo');
+$stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
 $stdio->on('line', function ($line) use ($stdio) {
-    $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
+    $stdio->write('you just said: ' . $line . ' (' . strlen($line) . ')' . PHP_EOL);
 
     if (in_array(trim($line), array('quit', 'exit'))) {
         $stdio->end();

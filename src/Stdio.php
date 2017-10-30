@@ -162,6 +162,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function writeln($line)
     {
         $this->write($line . PHP_EOL);

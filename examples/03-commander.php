@@ -29,13 +29,13 @@ $router->add('exit | quit', function() use ($stdio) {
     $stdio->end();
 });
 $router->add('help', function () use ($stdio) {
-    $stdio->writeln('Use TAB-completion or use "exit"');
+    $stdio->write('Use TAB-completion or use "exit"' . PHP_EOL);
 });
 $router->add('(echo | print) <words>...', function (array $args) use ($stdio) {
-    $stdio->writeln(implode(' ', $args['words']));
+    $stdio->write(implode(' ', $args['words']) . PHP_EOL);
 });
 $router->add('printf <format> <args>...', function (array $args) use ($stdio) {
-    $stdio->writeln(vsprintf($args['format'],$args['args']));
+    $stdio->write(vsprintf($args['format'],$args['args']) . PHP_EOL);
 });
 
 // autocomplete the following commands (at offset=0/1 only)
@@ -43,7 +43,7 @@ $readline->setAutocomplete(function ($_, $offset) {
     return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
 });
 
-$stdio->writeln('Welcome to this interactive demo');
+$stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
 $stdio->on('line', function ($line) use ($router, $stdio, $readline) {
@@ -57,7 +57,7 @@ $stdio->on('line', function ($line) use ($router, $stdio, $readline) {
     try {
         $args = Arguments\split($line);
     } catch (Arguments\UnclosedQuotesException $e) {
-        $stdio->writeln('Error: Invalid command syntax (unclosed quotes)');
+        $stdio->write('Error: Invalid command syntax (unclosed quotes)' . PHP_EOL);
         return;
     }
 
@@ -69,7 +69,7 @@ $stdio->on('line', function ($line) use ($router, $stdio, $readline) {
     try {
         $router->handleArgs($args);
     } catch (NoRouteFoundException $e) {
-        $stdio->writeln('Error: Invalid command usage');
+        $stdio->write('Error: Invalid command usage' . PHP_EOL);
     }
 });
 

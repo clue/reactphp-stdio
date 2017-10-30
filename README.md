@@ -74,19 +74,20 @@ advanced usage.
 The `Stdio` is a well-behaving writable stream
 implementing ReactPHP's `WritableStreamInterface`.
 
-The `writeln($line)` method can be used to print a line to console output.
-A trailing newline will be added automatically.
-
-```php
-$stdio->writeln('hello world');
-```
-
 The `write($text)` method can be used to print the given text characters to console output.
 This is useful if you need more control or want to output individual bytes or binary output:
 
 ```php
 $stdio->write('hello');
 $stdio->write(" world\n");
+```
+
+[Deprecated] The `writeln($line)` method can be used to print a line to console output.
+A trailing newline will be added automatically.
+
+```php
+// deprecated
+$stdio->writeln('hello world');
 ```
 
 [Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
@@ -504,7 +505,7 @@ If you want to read a line from console input, use the [`Stdio::on()`](#input) i
 
 ```php
 $stdio->on('line', function ($line) use ($stdio) {
-    $stdio->writeln('You said "' . $line . '"');
+    $stdio->write('You said "' . $line . '"' . PHP_EOL);
 });
 ```
 
