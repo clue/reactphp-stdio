@@ -563,6 +563,9 @@ is unlikely to happen any time soon), there's little we can do in this library.
 A work-around for this remains unknown.
 Your only option would be to entirely
 [disable interactive input for Microsoft Windows](https://github.com/clue/psocksd/commit/c2f2f90ffc8ebf8233839ba2f3553f2698930125).
+However this package does work on [`Windows Subsystem for Linux`](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) 
+(or WSL) without issues. We suggest [installing WSL](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) 
+when you want to run this package on Windows.
 See also [#18](https://github.com/clue/php-stdio-react/issues/18) for more details.
 
 ## Tests
