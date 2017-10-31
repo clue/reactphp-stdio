@@ -555,6 +555,16 @@ $ composer require clue/stdio-react:^1.0
 
 More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
 
+Note that *Microsoft Windows is not supported*.
+Due to platform inconsistencies, PHP does not provide support for reading from
+standard console input without blocking.
+Unfortunately, until the underlying PHP feature request is implemented (which
+is unlikely to happen any time soon), there's little we can do in this library.
+A work-around for this remains unknown.
+Your only option would be to entirely
+[disable interactive input for Microsoft Windows](https://github.com/clue/psocksd/commit/c2f2f90ffc8ebf8233839ba2f3553f2698930125).
+See also [#18](https://github.com/clue/php-stdio-react/issues/18) for more details.
+
 ## Tests
 
 To run the test suite, you first need to clone this repo and then install all
