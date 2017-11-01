@@ -12,6 +12,12 @@ class Stdin extends Stream
 
     public function __construct(LoopInterface $loop)
     {
+        // STDIN not defined ("php -a") or already closed (`fclose(STDIN)`)
+        if (!defined('STDIN') || !is_resource(STDIN)) {
+            parent::__construct(fopen('php://memory', 'r'), $loop);
+            return $this->close();
+        }
+
         parent::__construct(STDIN, $loop);
 
         // support starting program with closed STDIN ("example.php 0<&-")

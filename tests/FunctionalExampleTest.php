@@ -41,6 +41,20 @@ class FunctionalExampleTest extends TestCase
         $this->assertNotContains('you just said:', $output);
     }
 
+    public function testStubShowStdinIsReadableByDefault()
+    {
+        $output = $this->execExample('php ../tests/stub/01-check-stdin.php');
+
+        $this->assertContains('YES', $output);
+    }
+
+    public function testStubCanCloseStdinAndIsNotReadable()
+    {
+        $output = $this->execExample('php ../tests/stub/02-close-stdin.php');
+
+        $this->assertContains('NO', $output);
+    }
+
     private function execExample($command)
     {
         chdir(__DIR__ . '/../examples/');
