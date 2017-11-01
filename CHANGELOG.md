@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.0 (2017-11-01)
+
+*   Feature: Explicitly end stream on CTRL+D and emit final data on EOF without EOL
+    (#56 by @clue)
+
+*   Feature: Support running on non-TTY and closing STDIN and STDOUT streams
+    (#57 by @clue)
+
+*   Feature / Fix: Restore blocking mode before closing and restore TTY mode on unclean shutdown
+    (#58 by @clue)
+
+*   Improve documentation to detail why async console I/O is not supported on Microsoft Windows
+    (#54 by @clue)
+
+*   Improve test suite by adding PHPUnit to require-dev,
+    fix HHVM build for now again and ignore future HHVM build errors and
+    lock Travis distro so future defaults will not break the build
+    (#46, #48 and #52 by @clue)
+
 ## 1.0.0 (2017-01-08)
 
 *   First stable release, now following SemVer
