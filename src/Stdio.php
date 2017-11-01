@@ -26,7 +26,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
 
         if ($output === null) {
-            $output = new Stdout(STDOUT);
+            $output = new Stdout();
         }
 
         if ($readline === null) {

@@ -29,4 +29,10 @@ $stdio->on('end', function () use ($stdio, $loop, $timer) {
     $stdio->end();
 });
 
+// input already closed on program start, exit immediately
+if (!$stdio->isReadable()) {
+    $loop->cancelTimer($timer);
+    $stdio->end();
+}
+
 $loop->run();
