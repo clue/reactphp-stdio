@@ -56,6 +56,11 @@ class Stdin extends Stream
             shell_exec(sprintf('stty %s', $this->oldMode));
             $this->oldMode = null;
         }
+
+        // restore blocking mode so following programs behave normally
+        if (defined('STDIN') && is_resource(STDIN)) {
+            stream_set_blocking(STDIN, true);
+        }
     }
 
     /**
