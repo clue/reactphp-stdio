@@ -223,6 +223,24 @@ class ReadlineTest extends TestCase
         $this->input->emit('data', array("\n"));
     }
 
+    public function testEndInputWithoutDataOnCtrlD()
+    {
+        $this->readline->on('data', $this->expectCallableNever());
+        $this->readline->on('end', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('data', array("\x04"));
+    }
+
+    public function testEndInputWithIncompleteLineOnCtrlD()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith('hello'));
+        $this->readline->on('end', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('data', array("hello\x04"));
+    }
+
     public function testWriteSimpleCharWritesOnce()
     {
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "k"));
@@ -963,9 +981,22 @@ class ReadlineTest extends TestCase
 
     public function testEmitEndWillEmitEndAndClose()
     {
+        $this->readline->on('data', $this->expectCallableNever());
         $this->readline->on('end', $this->expectCallableOnce());
         $this->readline->on('close', $this->expectCallableOnce());
 
+        $this->input->emit('end');
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testEmitEndAfterDataWillEmitDataAndEndAndClose()
+    {
+        $this->readline->on('data', $this->expectCallableOnce('hello'));
+        $this->readline->on('end', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('data', array('hello'));
         $this->input->emit('end');
 
         $this->assertFalse($this->readline->isReadable());
