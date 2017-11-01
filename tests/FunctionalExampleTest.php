@@ -55,6 +55,26 @@ class FunctionalExampleTest extends TestCase
         $this->assertContains('NO', $output);
     }
 
+    public function testStubCanCloseStdoutAndIsNotWritable()
+    {
+        $output = $this->execExample('php ../tests/stub/03-close-stdout.php 2>&1');
+
+        $this->assertEquals('', $output);
+    }
+
+    public function testPeriodicExampleViaInteractiveModeQuitsImmediately()
+    {
+        if (defined('HHVM_VERSION')) {
+            $this->markTestSkipped('Skipped interactive mode on HHVM');
+        }
+
+        $output = $this->execExample('echo "require(\"01-periodic.php\");" | php -a');
+
+        // starts with either "Interactive mode enabled" or "Interactive shell"
+        $this->assertStringStartsWith('Interactive ', $output);
+        $this->assertNotContains('you just said:', $output);
+    }
+
     private function execExample($command)
     {
         chdir(__DIR__ . '/../examples/');
