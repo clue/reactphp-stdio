@@ -981,9 +981,22 @@ class ReadlineTest extends TestCase
 
     public function testEmitEndWillEmitEndAndClose()
     {
+        $this->readline->on('data', $this->expectCallableNever());
         $this->readline->on('end', $this->expectCallableOnce());
         $this->readline->on('close', $this->expectCallableOnce());
 
+        $this->input->emit('end');
+
+        $this->assertFalse($this->readline->isReadable());
+    }
+
+    public function testEmitEndAfterDataWillEmitDataAndEndAndClose()
+    {
+        $this->readline->on('data', $this->expectCallableOnce('hello'));
+        $this->readline->on('end', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->input->emit('data', array('hello'));
         $this->input->emit('end');
 
         $this->assertFalse($this->readline->isReadable());
