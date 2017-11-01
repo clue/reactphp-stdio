@@ -32,6 +32,10 @@ class Stdin extends Stream
             // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
             shell_exec('stty -icanon -echo');
         }
+
+        // register shutdown function to restore TTY mode in case of unclean shutdown (uncaught exception)
+        // this will not trigger on SIGKILL etc., but the terminal should take care of this
+        register_shutdown_function(array($this, 'close'));
     }
 
     public function close()
@@ -51,6 +55,11 @@ class Stdin extends Stream
             // Reset stty so it behaves normally again
             shell_exec(sprintf('stty %s', $this->oldMode));
             $this->oldMode = null;
+        }
+
+        // restore blocking mode so following programs behave normally
+        if (defined('STDIN') && is_resource(STDIN)) {
+            stream_set_blocking(STDIN, true);
         }
     }
 
