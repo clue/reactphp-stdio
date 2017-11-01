@@ -241,7 +241,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     /** @internal */
     public function handleEnd()
     {
-        $this->emit('end', array());
+        $this->emit('end');
     }
 
     /** @internal */

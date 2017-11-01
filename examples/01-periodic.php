@@ -16,10 +16,16 @@ $timer = $loop->addPeriodicTimer(0.5, function () use ($stdio) {
 });
 
 // react to commands the user entered
-$stdio->on('line', function ($line) use ($stdio, $timer) {
+$stdio->on('line', function ($line) use ($stdio, $loop, $timer) {
     $stdio->writeln('you just said: ' . $line . ' (' . strlen($line) . ')');
 
-    $timer->cancel();
+    $loop->cancelTimer($timer);
+    $stdio->end();
+});
+
+// cancel periodic timer if STDIN closed
+$stdio->on('end', function () use ($stdio, $loop, $timer) {
+    $loop->cancelTimer($timer);
     $stdio->end();
 });
 
