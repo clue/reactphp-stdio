@@ -50,7 +50,7 @@ class StdioTest extends TestCase
 
         $output->expects($this->never())->method('write');
 
-        $stdio->write('');
+        $this->assertTrue($stdio->write(''));
     }
 
     public function testWriteWillClearReadlineWriteOutputAndRestoreReadline()
@@ -423,7 +423,7 @@ class StdioTest extends TestCase
 
         $output->expects($this->never())->method('write');
 
-        $stdio->write('test');
+        $this->assertFalse($stdio->write('test'));
     }
 
     public function testEndTwiceWillCloseInputAndEndOutputOnce()
