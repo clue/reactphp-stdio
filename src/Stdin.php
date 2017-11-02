@@ -10,6 +10,10 @@ class Stdin extends Stream
 {
     private $oldMode = null;
 
+    /**
+     * @param LoopInterface $loop
+     * @codeCoverageIgnore this is covered by functional tests with/without ext-readline
+     */
     public function __construct(LoopInterface $loop)
     {
         // STDIN not defined ("php -a") or already closed (`fclose(STDIN)`)
@@ -24,6 +28,14 @@ class Stdin extends Stream
         // the stream is a valid resource and is not EOF, but fstat fails
         if (fstat(STDIN) === false) {
             return $this->close();
+        }
+
+        if (function_exists('readline_callback_handler_install')) {
+            // Prefer `ext-readline` to install dummy handler to turn on raw input mode.
+            // We will nevery actually feed the readline handler and instead
+            // handle all input in our `Readline` implementation.
+            readline_callback_handler_install('', function () { });
+            return;
         }
 
         if ($this->isTty()) {
@@ -49,9 +61,15 @@ class Stdin extends Stream
         $this->restore();
     }
 
+    /**
+     * @codeCoverageIgnore this is covered by functional tests with/without ext-readline
+     */
     private function restore()
     {
-        if ($this->oldMode !== null && $this->isTty()) {
+        if (function_exists('readline_callback_handler_remove')) {
+            // remove dummy readline handler to turn to default input mode
+            readline_callback_handler_remove();
+        } elseif ($this->oldMode !== null && $this->isTty()) {
             // Reset stty so it behaves normally again
             shell_exec(sprintf('stty %s', $this->oldMode));
             $this->oldMode = null;

@@ -567,6 +567,13 @@ If this extension is missing, then this library will use a slighty slower Regex
 work-around that should otherwise work equally well.
 Installing `ext-mbstring` is highly recommended.
 
+Internally, it will use the `ext-readline` to enable raw terminal input mode.
+If this extension is missing, then this library will manually set the required
+TTY settings on start and will try to restore previous settings on exit.
+Input line editing is handled entirely within this library and does not rely on
+`ext-readline`.
+Installing `ext-readline` is entirely optional.
+
 Note that *Microsoft Windows is not supported*.
 Due to platform inconsistencies, PHP does not provide support for reading from
 standard console input without blocking.
