@@ -4,6 +4,9 @@ namespace Clue\React\Stdio;
 
 use React\Stream\WritableStream;
 
+/**
+ * @deprecated
+ */
 class Stdout extends WritableStream
 {
     public function __construct()

@@ -74,13 +74,6 @@ advanced usage.
 The `Stdio` is a well-behaving writable stream
 implementing ReactPHP's `WritableStreamInterface`.
 
-The `writeln($line)` method can be used to print a line to console output.
-A trailing newline will be added automatically.
-
-```php
-$stdio->writeln('hello world');
-```
-
 The `write($text)` method can be used to print the given text characters to console output.
 This is useful if you need more control or want to output individual bytes or binary output:
 
@@ -89,11 +82,20 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-The `overwrite($text)` method can be used to overwrite/replace the last
+[Deprecated] The `writeln($line)` method can be used to print a line to console output.
+A trailing newline will be added automatically.
+
+```php
+// deprecated
+$stdio->writeln('hello world');
+```
+
+[Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
 incomplete line with the given text:
 
 ```php
 $stdio->write('Loading…');
+// deprecated
 $stdio->overwrite('Done!');
 ```
 
@@ -477,7 +479,7 @@ $readline->setAutocomplete(null);
 
 #### Stdout
 
-The `Stdout` represents a `WritableStream` and is responsible for handling console output.
+[Deprecated] The `Stdout` represents a `WritableStream` and is responsible for handling console output.
 
 Interfacing with it directly is *not recommended* and considered *advanced usage*.
 
@@ -490,6 +492,7 @@ $stdio->write('hello');
 Should you need to interface with the `Stdout`, you can access the current instance through the [`Stdio`](#stdio):
 
 ```php
+// deprecated
 $stdout = $stdio->getOutput();
 ```
 
@@ -503,7 +506,7 @@ If you want to read a line from console input, use the [`Stdio::on()`](#input) i
 
 ```php
 $stdio->on('line', function ($line) use ($stdio) {
-    $stdio->writeln('You said "' . $line . '"');
+    $stdio->write('You said "' . $line . '"' . PHP_EOL);
 });
 ```
 
