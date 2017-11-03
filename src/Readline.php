@@ -48,6 +48,8 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             "\x7f" => 'onKeyBackspace',
             "\t" => 'onKeyTab',
 
+            "\x04" => 'handleEnd', // CTRL+D
+
             "\033[A" => 'onKeyUp',
             "\033[B" => 'onKeyDown',
             "\033[C" => 'onKeyRight',
@@ -803,6 +805,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function handleEnd()
     {
+        if ($this->linebuffer !== '') {
+            $this->processLine();
+        }
+
         if (!$this->closed) {
             $this->emit('end');
             $this->close();

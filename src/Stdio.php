@@ -164,11 +164,17 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function writeln($line)
     {
         $this->write($line . PHP_EOL);
     }
 
+    /**
+     * @deprecated
+     */
     public function overwrite($data = '')
     {
         if ($this->incompleteLine !== '') {
@@ -218,6 +224,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         return $this->input;
     }
 
+    /**
+     * @deprecated
+     */
     public function getOutput()
     {
         return $this->output;
@@ -243,7 +252,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     /** @internal */
     public function handleEnd()
     {
-        $this->emit('end', array());
+        $this->emit('end');
     }
 
     /** @internal */

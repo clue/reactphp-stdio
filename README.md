@@ -1,8 +1,9 @@
 # clue/stdio-react [![Build Status](https://travis-ci.org/clue/php-stdio-react.svg?branch=master)](https://travis-ci.org/clue/php-stdio-react)
 
-Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT), built on top of for React PHP
+Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT),
+built on top of for [ReactPHP](https://reactphp.org).
 
-**Table of Contents**
+**Table of contents**
 
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
@@ -64,21 +65,14 @@ $stdio = new Stdio($loop);
 
 See below for waiting for user input and writing output.
 Alternatively, the `Stdio` is also a well-behaving duplex stream
-(implementing React's `DuplexStreamInterface`) that emits each complete
+(implementing ReactPHP's `DuplexStreamInterface`) that emits each complete
 line as a `data` event (including the trailing newline). This is considered
 advanced usage.
 
 #### Output
 
 The `Stdio` is a well-behaving writable stream
-implementing React's `WritableStreamInterface`.
-
-The `writeln($line)` method can be used to print a line to console output.
-A trailing newline will be added automatically.
-
-```php
-$stdio->writeln('hello world');
-```
+implementing ReactPHP's `WritableStreamInterface`.
 
 The `write($text)` method can be used to print the given text characters to console output.
 This is useful if you need more control or want to output individual bytes or binary output:
@@ -88,11 +82,20 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-The `overwrite($text)` method can be used to overwrite/replace the last
+[Deprecated] The `writeln($line)` method can be used to print a line to console output.
+A trailing newline will be added automatically.
+
+```php
+// deprecated
+$stdio->writeln('hello world');
+```
+
+[Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
 incomplete line with the given text:
 
 ```php
 $stdio->write('Loading…');
+// deprecated
 $stdio->overwrite('Done!');
 ```
 
@@ -102,7 +105,7 @@ You can `pipe()` any readable stream into this stream.
 #### Input
 
 The `Stdio` is a well-behaving readable stream
-implementing React's `ReadableStreamInterface`.
+implementing ReactPHP's `ReadableStreamInterface`.
 
 It will emit a `line` event for every line read from console input.
 The event will contain the input buffer as-is, without the trailing newline.
@@ -143,7 +146,7 @@ $readline = $stdio->getReadline();
 
 See above for waiting for user input.
 Alternatively, the `Readline` is also a well-behaving readable stream
-(implementing React's `ReadableStreamInterface`) that emits each complete
+(implementing ReactPHP's `ReadableStreamInterface`) that emits each complete
 line as a `data` event (without the trailing newline). This is considered
 advanced usage.
 
@@ -476,7 +479,7 @@ $readline->setAutocomplete(null);
 
 #### Stdout
 
-The `Stdout` represents a `WritableStream` and is responsible for handling console output.
+[Deprecated] The `Stdout` represents a `WritableStream` and is responsible for handling console output.
 
 Interfacing with it directly is *not recommended* and considered *advanced usage*.
 
@@ -489,6 +492,7 @@ $stdio->write('hello');
 Should you need to interface with the `Stdout`, you can access the current instance through the [`Stdio`](#stdio):
 
 ```php
+// deprecated
 $stdout = $stdio->getOutput();
 ```
 
@@ -502,7 +506,7 @@ If you want to read a line from console input, use the [`Stdio::on()`](#input) i
 
 ```php
 $stdio->on('line', function ($line) use ($stdio) {
-    $stdio->writeln('You said "' . $line . '"');
+    $stdio->write('You said "' . $line . '"' . PHP_EOL);
 });
 ```
 
@@ -547,18 +551,42 @@ ob_start(function ($chunk) use ($stdio) {
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
+This project follows [SemVer](http://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^1.0
+$ composer require clue/stdio-react:^1.1
 ```
 
-More details and upgrade guides can be found in the [CHANGELOG](CHANGELOG.md).
+See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
+
+This project aims to run on any platform and thus does not require any PHP
+extensions and supports running on legacy PHP 5.3 through current PHP 7+ and
+HHVM.
+It's *highly recommended to use PHP 7+* for this project.
+
+Internally, it will use the `ext-mbstring` to count and measure string sizes.
+If this extension is missing, then this library will use a slighty slower Regex
+work-around that should otherwise work equally well.
+Installing `ext-mbstring` is highly recommended.
+
+Note that *Microsoft Windows is not supported*.
+Due to platform inconsistencies, PHP does not provide support for reading from
+standard console input without blocking.
+Unfortunately, until the underlying PHP feature request is implemented (which
+is unlikely to happen any time soon), there's little we can do in this library.
+A work-around for this remains unknown.
+Your only option would be to entirely
+[disable interactive input for Microsoft Windows](https://github.com/clue/psocksd/commit/c2f2f90ffc8ebf8233839ba2f3553f2698930125).
+However this package does work on [`Windows Subsystem for Linux`](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) 
+(or WSL) without issues. We suggest [installing WSL](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) 
+when you want to run this package on Windows.
+See also [#18](https://github.com/clue/php-stdio-react/issues/18) for more details.
 
 ## Tests
 
 To run the test suite, you first need to clone this repo and then install all
-dependencies [through Composer](http://getcomposer.org):
+dependencies [through Composer](https://getcomposer.org):
 
 ```bash
 $ composer install

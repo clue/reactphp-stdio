@@ -1,6 +1,6 @@
 {
     "name": "clue/stdio-react",
-    "description": "Async, event-driven console input & output (STDIN, STDOUT), built on top of React PHP",
+    "description": "Async, event-driven console input & output (STDIN, STDOUT), built on top of ReactPHP",
     "keywords": ["stdio", "stdin", "stdout", "readline", "autocomplete", "autocompletion", "history", "ReactPHP", "async"],
     "homepage": "https://github.com/clue/php-stdio-react",
     "license": "MIT",
