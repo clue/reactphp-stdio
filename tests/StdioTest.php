@@ -72,7 +72,7 @@ class StdioTest extends TestCase
 
         $stdio->write('test');
 
-        $this->assertEquals("\r\033[K" . "test\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
     }
 
     public function testWriteAgainWillMoveToPreviousLineWriteOutputAndRestoreReadlinePosition()
@@ -144,7 +144,7 @@ class StdioTest extends TestCase
 
         $stdio->write("ond" . "\n" . "third");
 
-        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[3C" . "ond\nthird\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[3C" . "ond\nthird\n" . "> input", $buffer);
     }
 
     public function testWriteAfterReadlineInputWillClearReadlineWriteOutputAndRestoreReadline()
@@ -170,7 +170,7 @@ class StdioTest extends TestCase
 
         $stdio->writeln('test');
 
-        $this->assertEquals("\r\033[K" . "test\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
     }
 
     public function testOverwriteWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
@@ -194,7 +194,7 @@ class StdioTest extends TestCase
 
         $stdio->overwrite('overwrite');
 
-        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[K" . "overwrite\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[K" . "overwrite\n" . "> input", $buffer);
     }
 
     public function testOverwriteAfterNewlineWillClearReadlineAndWriteOutputAndRestoreReadline()
@@ -218,7 +218,7 @@ class StdioTest extends TestCase
 
         $stdio->overwrite('overwrite');
 
-        $this->assertEquals("\r\033[K" . "overwrite\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "overwrite\n" . "> input", $buffer);
     }
 
     public function testWriteLineWillClearReadlineWriteOutputAndRestoreReadline()
@@ -240,7 +240,7 @@ class StdioTest extends TestCase
 
         $stdio->writeln('test');
 
-        $this->assertEquals("\r\033[K" . "test\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
     }
 
     public function testWriteTwoLinesWillClearReadlineWriteOutputAndRestoreReadline()
@@ -263,7 +263,7 @@ class StdioTest extends TestCase
         $stdio->writeln('hello');
         $stdio->writeln('world');
 
-        $this->assertEquals("\r\033[K" . "hello\n" . "\r\033[K" . "> input" . "\r\033[K" . "world\n" . "\r\033[K" . "> input", $buffer);
+        $this->assertEquals("\r\033[K" . "hello\n" . "> input" . "\r\033[K" . "world\n" . "> input", $buffer);
     }
 
     public function testPauseWillBeForwardedToInput()

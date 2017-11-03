@@ -427,16 +427,21 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     public function redraw()
     {
-        $this->output->write($this->__toString());
+        // Erase characters from cursor to end of line and then redraw actual input
+        $this->output->write("\r\033[K" . $this->getDrawString());
 
         return $this;
     }
 
-    /** @internal */
-    public function __toString()
+    /**
+     * Returns the string that is used to draw the input prompt
+     *
+     * @return string
+     * @internal
+     */
+    public function getDrawString()
     {
-        // Erase characters from cursor to end of line
-        $output = "\r\033[K" . $this->prompt;
+        $output = $this->prompt;
         if ($this->echo !== false) {
             if ($this->echo === true) {
                 $buffer = $this->linebuffer;

@@ -148,7 +148,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
         if ($restoreReadline) {
             // write output and restore original readline prompt and line buffer
-            return $this->output->write($out . $this->readline->__toString());
+            return $this->output->write($out . $this->readline->getDrawString());
         } else {
             // restore original cursor position in readline prompt
             $pos = $this->width($this->readline->getPrompt()) + $this->readline->getCursorCell();
