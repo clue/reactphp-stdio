@@ -427,8 +427,21 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     public function redraw()
     {
-        // Erase characters from cursor to end of line
-        $output = "\r\033[K" . $this->prompt;
+        // Erase characters from cursor to end of line and then redraw actual input
+        $this->output->write("\r\033[K" . $this->getDrawString());
+
+        return $this;
+    }
+
+    /**
+     * Returns the string that is used to draw the input prompt
+     *
+     * @return string
+     * @internal
+     */
+    public function getDrawString()
+    {
+        $output = $this->prompt;
         if ($this->echo !== false) {
             if ($this->echo === true) {
                 $buffer = $this->linebuffer;
@@ -439,9 +452,8 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             // write output, then move back $reverse chars (by sending backspace)
             $output .= $buffer . str_repeat("\x08", $this->strwidth($buffer) - $this->getCursorCell());
         }
-        $this->output->write($output);
 
-        return $this;
+        return $output;
     }
 
     /**

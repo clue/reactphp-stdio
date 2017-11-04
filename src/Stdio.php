@@ -91,8 +91,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
     public function write($data)
     {
-        if ($this->ending || (string)$data === '') {
-            return;
+        // return false if already ended, return true if writing empty string
+        if ($this->ending || $data === '') {
+            return !$this->ending;
         }
 
         $out = $data;
@@ -147,8 +148,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
         if ($restoreReadline) {
             // write output and restore original readline prompt and line buffer
-            $this->output->write($out);
-            $this->readline->redraw();
+            return $this->output->write($out . $this->readline->getDrawString());
         } else {
             // restore original cursor position in readline prompt
             $pos = $this->width($this->readline->getPrompt()) + $this->readline->getCursorCell();
@@ -158,7 +158,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
             }
 
             // write to actual output stream
-            $this->output->write($out);
+            return $this->output->write($out);
         }
     }
 
