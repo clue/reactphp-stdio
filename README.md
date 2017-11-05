@@ -154,10 +154,11 @@ $readline = $stdio->getReadline();
 ```
 
 See above for waiting for user input.
+
 Alternatively, the `Readline` is also a well-behaving readable stream
 (implementing ReactPHP's `ReadableStreamInterface`) that emits each complete
-line as a `data` event (without the trailing newline). This is considered
-advanced usage.
+line as a `data` event (without the trailing newline).
+This is considered advanced usage.
 
 #### Prompt
 
@@ -312,11 +313,12 @@ If you want to automatically add everything from the user input to the history,
 you may want to use something like this:
 
 ```php
-$readline->on('data', function ($line) use ($readline) {
+$stdio->on('data', function ($line) use ($readline) {
+    $line = rtrim($line);
     $all = $readline->listHistory();
     
     // skip empty line and duplicate of previous line
-    if (trim($line) !== '' && $line !== end($all)) {
+    if ($line !== '' && $line !== end($all)) {
         $readline->addHistory($line);
     }
 });
