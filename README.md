@@ -507,7 +507,7 @@ $stdout = $stdio->getOutput();
 
 #### Stdin
 
-The `Stdin` represents a `ReadableStream` and is responsible for handling console input.
+[Deprecated] The `Stdin` represents a `ReadableStream` and is responsible for handling console input.
 
 Interfacing with it directly is *not recommended* and considered *advanced usage*.
 
@@ -525,6 +525,7 @@ Should you need to interface with the `Stdin`, you can access the current instan
 You can access the current instance through the [`Stdio`](#stdio):
 
 ```php
+// deprecated
 $stdin = $stdio->getInput();
 ```
 

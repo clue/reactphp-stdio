@@ -5,7 +5,9 @@ namespace Clue\React\Stdio;
 use React\Stream\Stream;
 use React\EventLoop\LoopInterface;
 
-// TODO: only implement ReadableStream
+/**
+ * @deprecated
+ */
 class Stdin extends Stream
 {
     private $oldMode = null;
