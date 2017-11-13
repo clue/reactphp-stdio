@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\TestCase as BaseTestCase;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(-1);
 
-class TestCase extends PHPUnit_Framework_TestCase
+class TestCase extends BaseTestCase
 {
     protected function expectCallableOnce()
     {
@@ -70,4 +72,3 @@ class CallableStub
     {
     }
 }
-
