@@ -2,6 +2,7 @@
 
 use Clue\React\Stdio\Readline;
 use React\Stream\ReadableStream;
+use React\Stream\ThroughStream;
 
 class ReadlineTest extends TestCase
 {
@@ -11,7 +12,7 @@ class ReadlineTest extends TestCase
 
     public function setUp()
     {
-        $this->input = new ReadableStream();
+        $this->input = new ThroughStream();
         $this->output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         $this->readline = new Readline($this->input, $this->output);

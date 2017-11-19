@@ -5,7 +5,9 @@ namespace Clue\React\Stdio;
 use Evenement\EventEmitter;
 use React\Stream\DuplexStreamInterface;
 use React\EventLoop\LoopInterface;
+use React\Stream\ReadableResourceStream;
 use React\Stream\ReadableStreamInterface;
+use React\Stream\WritableResourceStream;
 use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
 
@@ -22,11 +24,11 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
         if ($input === null) {
-            $input = new Stdin($loop);
+            $input = new ReadableResourceStream(STDIN, $loop);
         }
 
         if ($output === null) {
-            $output = new Stdout();
+            $output = new WritableResourceStream(STDOUT, $loop);
         }
 
         if ($readline === null) {

@@ -4,6 +4,7 @@ use React\EventLoop\Factory;
 use Clue\React\Stdio\Stdio;
 use Clue\React\Stdio\Readline;
 use React\Stream\ReadableStream;
+use React\Stream\ThroughStream;
 use React\Stream\WritableStream;
 
 class StdioTest extends TestCase
@@ -18,6 +19,19 @@ class StdioTest extends TestCase
     public function testCtorDefaultArgs()
     {
         $stdio = new Stdio($this->loop);
+
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $input->expects($this->once())->method('close');
+        $inputProperty = new ReflectionProperty($stdio, 'input');
+        $inputProperty->setAccessible(true);
+        $inputProperty->setValue($stdio, $input);
+
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $output->expects($this->once())->method('close');
+        $outputProperty = new ReflectionProperty($stdio, 'output');
+        $outputProperty->setAccessible(true);
+        $outputProperty->setValue($stdio, $output);
+
         $stdio->close();
     }
 
@@ -461,7 +475,7 @@ class StdioTest extends TestCase
 
     public function testEndEventWillBeForwarded()
     {
-        $input = new ReadableStream();
+        $input = new ThroughStream();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
@@ -476,7 +490,7 @@ class StdioTest extends TestCase
 
     public function testErrorEventFromInputWillBeForwarded()
     {
-        $input = new ReadableStream();
+        $input = new ThroughStream();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
@@ -492,7 +506,7 @@ class StdioTest extends TestCase
     public function testErrorEventFromOutputWillBeForwarded()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
-        $output = new WritableStream();
+        $output = new ThroughStream();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
