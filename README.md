@@ -17,9 +17,6 @@ built on top of for [ReactPHP](https://reactphp.org).
     * [Cursor](#cursor)
     * [History](#history)
     * [Autocomplete](#autocomplete)
-  * [Advanced](#advanced)
-    * [Stdout](#stdout)
-    * [Stdin](#stdin)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
 * [Tests](#tests)
@@ -82,23 +79,6 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-[Deprecated] The `writeln($line)` method can be used to print a line to console output.
-A trailing newline will be added automatically.
-
-```php
-// deprecated
-$stdio->writeln('hello world');
-```
-
-[Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
-incomplete line with the given text:
-
-```php
-$stdio->write('Loading…');
-// deprecated
-$stdio->overwrite('Done!');
-```
-
 Alternatively, you can also use the `Stdio` as a writable stream.
 You can `pipe()` any readable stream into this stream.
 
@@ -125,19 +105,6 @@ streams.
 
 You can control various aspects of the console input through the [`Readline`](#readline),
 so read on..
-
-[Deprecated] It will emit a `line` event for every line read from console input.
-The event will contain the input buffer as-is, without the trailing newline.
-You can register any number of event handlers like this:
-
-```php
-// deprecated
-$stdio->on('line', function ($line) {
-    if ($line === 'start') {
-        doSomething();
-    }
-});
-```
 
 ### Readline
 
@@ -484,51 +451,6 @@ disable the autocomplete function:
 
 ```php
 $readline->setAutocomplete(null);
-```
-
-### Advanced
-
-#### Stdout
-
-[Deprecated] The `Stdout` represents a `WritableStream` and is responsible for handling console output.
-
-Interfacing with it directly is *not recommended* and considered *advanced usage*.
-
-If you want to print some text to console output, use the [`Stdio::write()`](#output) instead:
-
-```php
-$stdio->write('hello');
-```
-
-Should you need to interface with the `Stdout`, you can access the current instance through the [`Stdio`](#stdio):
-
-```php
-// deprecated
-$stdout = $stdio->getOutput();
-```
-
-#### Stdin
-
-[Deprecated] The `Stdin` represents a `ReadableStream` and is responsible for handling console input.
-
-Interfacing with it directly is *not recommended* and considered *advanced usage*.
-
-If you want to read a line from console input, use the [`Stdio::on()`](#input) instead:
-
-```php
-$stdio->on('data', function ($line) use ($stdio) {
-    $line = rtrim($line, "\r\n");
-    $stdio->write('You said "' . $line . '"' . PHP_EOL);
-});
-```
-
-Should you need to interface with the `Stdin`, you can access the current instance through the [`Stdio`](#stdio):
-
-You can access the current instance through the [`Stdio`](#stdio):
-
-```php
-// deprecated
-$stdin = $stdio->getInput();
 ```
 
 ## Pitfalls

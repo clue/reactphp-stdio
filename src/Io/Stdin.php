@@ -1,12 +1,12 @@
 <?php
 
-namespace Clue\React\Stdio;
+namespace Clue\React\Stdio\Io;
 
 use React\Stream\Stream;
 use React\EventLoop\LoopInterface;
 
 /**
- * @deprecated
+ * @internal
  */
 class Stdin extends Stream
 {

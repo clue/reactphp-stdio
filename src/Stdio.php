@@ -2,12 +2,14 @@
 
 namespace Clue\React\Stdio;
 
+use Clue\React\Stdio\Io\Stdin;
+use Clue\React\Stdio\Io\Stdout;
 use Evenement\EventEmitter;
-use React\Stream\DuplexStreamInterface;
 use React\EventLoop\LoopInterface;
+use React\Stream\DuplexStreamInterface;
 use React\Stream\ReadableStreamInterface;
-use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
+use React\Stream\WritableStreamInterface;
 
 class Stdio extends EventEmitter implements DuplexStreamInterface
 {
@@ -47,9 +49,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
             // emit data with trailing newline in order to preserve readable API
             $that->emit('data', array($line . PHP_EOL));
-
-            // emit custom line event for ease of use
-            $that->emit('line', array($line, $that));
         });
 
         // handle all input events (readline forwards all input events)
@@ -162,28 +161,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
     }
 
-    /**
-     * @deprecated
-     */
-    public function writeln($line)
-    {
-        $this->write($line . PHP_EOL);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function overwrite($data = '')
-    {
-        if ($this->incompleteLine !== '') {
-            // move one line up, move to start of line and clear everything
-            $data = "\033[A\r\033[K" . $data;
-            $this->incompleteLine = '';
-        }
-
-        $this->write($data);
-    }
-
     public function end($data = null)
     {
         if ($this->ending) {
@@ -215,22 +192,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->readline->setInput('')->setPrompt('')->clear()->close();
         $this->input->close();
         $this->output->close();
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getInput()
-    {
-        return $this->input;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getOutput()
-    {
-        return $this->output;
     }
 
     public function getReadline()
