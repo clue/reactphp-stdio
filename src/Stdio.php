@@ -217,6 +217,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->output->close();
     }
 
+    /**
+     * @deprecated
+     */
     public function getInput()
     {
         return $this->input;

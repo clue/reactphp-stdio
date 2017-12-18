@@ -21,16 +21,6 @@ if ($limit === '' || $limit < 0) {
     $readline->limitHistory($limit);
 }
 
-// add all lines from input to history
-$readline->on('data', function ($line) use ($readline) {
-    $all = $readline->listHistory();
-
-    // skip empty line and duplicate of previous line
-    if (trim($line) !== '' && $line !== end($all)) {
-        $readline->addHistory($line);
-    }
-});
-
 // autocomplete the following commands (at offset=0/1 only)
 $readline->setAutocomplete(function ($_, $offset) {
     return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
@@ -39,7 +29,16 @@ $readline->setAutocomplete(function ($_, $offset) {
 $stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
-$stdio->on('line', function ($line) use ($stdio) {
+$stdio->on('data', function ($line) use ($stdio, $readline) {
+    $line = rtrim($line, "\r\n");
+
+    // add all lines from input to history
+    // skip empty line and duplicate of previous line
+    $all = $readline->listHistory();
+    if ($line !== '' && $line !== end($all)) {
+        $readline->addHistory($line);
+    }
+
     $stdio->write('you just said: ' . $line . ' (' . strlen($line) . ')' . PHP_EOL);
 
     if (in_array(trim($line), array('quit', 'exit'))) {
