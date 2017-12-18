@@ -384,7 +384,6 @@ class StdioTest extends TestCase
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
         $stdio->on('data', $this->expectCallableOnceWith("hello\n"));
-        $stdio->on('line', $this->expectCallableOnceWith('hello'));
 
         $readline->emit('data', array('hello'));
     }

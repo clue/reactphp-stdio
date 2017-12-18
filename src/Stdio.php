@@ -47,9 +47,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
             // emit data with trailing newline in order to preserve readable API
             $that->emit('data', array($line . PHP_EOL));
-
-            // emit custom line event for ease of use
-            $that->emit('line', array($line, $that));
         });
 
         // handle all input events (readline forwards all input events)

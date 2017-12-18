@@ -109,19 +109,6 @@ streams.
 You can control various aspects of the console input through the [`Readline`](#readline),
 so read on..
 
-[Deprecated] It will emit a `line` event for every line read from console input.
-The event will contain the input buffer as-is, without the trailing newline.
-You can register any number of event handlers like this:
-
-```php
-// deprecated
-$stdio->on('line', function ($line) {
-    if ($line === 'start') {
-        doSomething();
-    }
-});
-```
-
 ### Readline
 
 The [`Readline`](#readline) class is responsible for reacting to user input and presenting a prompt to the user.
