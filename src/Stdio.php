@@ -46,9 +46,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->readline->on('data', function($line) use ($that, &$incomplete) {
             // readline emits a new line on enter, so start with a blank line
             $incomplete = '';
-
-            // emit data with trailing newline in order to preserve readable API
-            $that->emit('data', array($line . PHP_EOL));
+            $that->emit('data', array($line));
         });
 
         // handle all input events (readline forwards all input events)

@@ -383,7 +383,22 @@ class StdioTest extends TestCase
 
         $stdio->on('data', $this->expectCallableOnceWith("hello\n"));
 
-        $readline->emit('data', array('hello'));
+        $readline->emit('data', array("hello\n"));
+    }
+
+    public function testDataEventWithoutNewlineWillBeForwardedAsIs()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+
+        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+        $readline = new Readline($input, $output);
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $stdio->on('data', $this->expectCallableOnceWith("hello"));
+
+        $readline->emit('data', array("hello"));
     }
 
     public function testEndEventWillBeForwarded()

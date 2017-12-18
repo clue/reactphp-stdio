@@ -193,7 +193,7 @@ class ReadlineTest extends TestCase
 
     public function testDataEventWillBeEmittedForCompleteLine()
     {
-        $this->readline->on('data', $this->expectCallableOnceWith('hello'));
+        $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
 
         $this->input->emit('data', array("hello\n"));
     }
@@ -209,7 +209,7 @@ class ReadlineTest extends TestCase
 
     public function testDataEventWillBeEmittedForCompleteLineAndRemainingWillStayInInputBuffer()
     {
-        $this->readline->on('data', $this->expectCallableOnceWith('hello'));
+        $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
 
         $this->input->emit('data', array("hello\nworld"));
 
@@ -218,7 +218,7 @@ class ReadlineTest extends TestCase
 
     public function testDataEventWillBeEmittedForEmptyLine()
     {
-        $this->readline->on('data', $this->expectCallableOnceWith(''));
+        $this->readline->on('data', $this->expectCallableOnceWith("\n"));
 
         $this->input->emit('data', array("\n"));
     }
@@ -905,14 +905,14 @@ class ReadlineTest extends TestCase
 
     public function testEmitEmptyInputOnEnter()
     {
-        $this->readline->on('data', $this->expectCallableOnceWith(''));
+        $this->readline->on('data', $this->expectCallableOnceWith("\n"));
         $this->readline->onKeyEnter();
     }
 
     public function testEmitInputOnEnterAndClearsInput()
     {
         $this->readline->setInput('test');
-        $this->readline->on('data', $this->expectCallableOnceWith('test'));
+        $this->readline->on('data', $this->expectCallableOnceWith("test\n"));
         $this->readline->onKeyEnter();
 
         $this->assertEquals('', $this->readline->getInput());

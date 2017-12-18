@@ -628,7 +628,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         if ($this->echo !== false) {
             $this->output->write("\n");
         }
-        $this->processLine();
+        $this->processLine("\n");
     }
 
     /** @internal */
@@ -741,7 +741,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      *
      * @uses self::setInput()
      */
-    protected function processLine()
+    protected function processLine($eol)
     {
         // reset history cycle position
         $this->historyPosition = null;
@@ -758,7 +758,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         }
 
         // process stored input buffer
-        $this->emit('data', array($line));
+        $this->emit('data', array($line . $eol));
     }
 
     private function strlen($str)
@@ -818,7 +818,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     public function handleEnd()
     {
         if ($this->linebuffer !== '') {
-            $this->processLine();
+            $this->processLine('');
         }
 
         if (!$this->closed) {
