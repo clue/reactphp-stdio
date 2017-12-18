@@ -168,29 +168,7 @@ class StdioTest extends TestCase
             $buffer .= $data;
         }));
 
-        $stdio->writeln('test');
-
-        $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
-    }
-
-    public function testWriteLineWillClearReadlineWriteOutputAndRestoreReadline()
-    {
-        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
-        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
-
-        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
-        $readline = new Readline($input, $output);
-        $readline->setPrompt('> ');
-        $readline->setInput('input');
-
-        $stdio = new Stdio($this->loop, $input, $output, $readline);
-
-        $buffer = '';
-        $output->expects($this->any())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
-            $buffer .= $data;
-        }));
-
-        $stdio->writeln('test');
+        $stdio->write("test\n");
 
         $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
     }
@@ -212,8 +190,8 @@ class StdioTest extends TestCase
             $buffer .= $data;
         }));
 
-        $stdio->writeln('hello');
-        $stdio->writeln('world');
+        $stdio->write("hello\n");
+        $stdio->write("world\n");
 
         $this->assertEquals("\r\033[K" . "hello\n" . "> input" . "\r\033[K" . "world\n" . "> input", $buffer);
     }

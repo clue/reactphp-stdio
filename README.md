@@ -82,14 +82,6 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-[Deprecated] The `writeln($line)` method can be used to print a line to console output.
-A trailing newline will be added automatically.
-
-```php
-// deprecated
-$stdio->writeln('hello world');
-```
-
 Alternatively, you can also use the `Stdio` as a writable stream.
 You can `pipe()` any readable stream into this stream.
 
