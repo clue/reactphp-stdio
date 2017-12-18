@@ -1,11 +1,11 @@
 <?php
 
-namespace Clue\React\Stdio;
+namespace Clue\React\Stdio\Io;
 
 use React\Stream\WritableStream;
 
 /**
- * @deprecated
+ * @internal
  */
 class Stdout extends WritableStream
 {

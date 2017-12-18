@@ -17,9 +17,6 @@ built on top of for [ReactPHP](https://reactphp.org).
     * [Cursor](#cursor)
     * [History](#history)
     * [Autocomplete](#autocomplete)
-  * [Advanced](#advanced)
-    * [Stdout](#stdout)
-    * [Stdin](#stdin)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
 * [Tests](#tests)
@@ -454,35 +451,6 @@ disable the autocomplete function:
 
 ```php
 $readline->setAutocomplete(null);
-```
-
-### Advanced
-
-#### Stdout
-
-[Deprecated] The `Stdout` represents a `WritableStream` and is responsible for handling console output.
-
-Interfacing with it directly is *not recommended* and considered *advanced usage*.
-
-If you want to print some text to console output, use the [`Stdio::write()`](#output) instead:
-
-```php
-$stdio->write('hello');
-```
-
-#### Stdin
-
-[Deprecated] The `Stdin` represents a `ReadableStream` and is responsible for handling console input.
-
-Interfacing with it directly is *not recommended* and considered *advanced usage*.
-
-If you want to read a line from console input, use the [`Stdio::on()`](#input) instead:
-
-```php
-$stdio->on('data', function ($line) use ($stdio) {
-    $line = rtrim($line, "\r\n");
-    $stdio->write('You said "' . $line . '"' . PHP_EOL);
-});
 ```
 
 ## Pitfalls

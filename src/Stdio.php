@@ -2,12 +2,14 @@
 
 namespace Clue\React\Stdio;
 
+use Clue\React\Stdio\Io\Stdin;
+use Clue\React\Stdio\Io\Stdout;
 use Evenement\EventEmitter;
-use React\Stream\DuplexStreamInterface;
 use React\EventLoop\LoopInterface;
+use React\Stream\DuplexStreamInterface;
 use React\Stream\ReadableStreamInterface;
-use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
+use React\Stream\WritableStreamInterface;
 
 class Stdio extends EventEmitter implements DuplexStreamInterface
 {
