@@ -64,7 +64,7 @@ $stdio = new Stdio($loop);
 See below for waiting for user input and writing output.
 The `Stdio` class is a well-behaving duplex stream
 (implementing ReactPHP's `DuplexStreamInterface`) that emits each complete
-line as a `data` event (including the trailing newline).
+line as a `data` event, including the trailing newline.
 
 #### Output
 
@@ -79,8 +79,12 @@ $stdio->write('hello');
 $stdio->write(" world\n");
 ```
 
-Alternatively, you can also use the `Stdio` as a writable stream.
-You can `pipe()` any readable stream into this stream.
+Because the `Stdio` is a well-behaving writable stream,
+you can also `pipe()` any readable stream into this stream.
+
+```php
+$logger->pipe($stdio);
+```
 
 #### Input
 
@@ -99,9 +103,33 @@ $stdio->on('data', function ($line) {
 });
 ```
 
-Because the `Stdio` is a well-behaving redable stream that will emit incoming
+Note that this class takes care of buffering incomplete lines and will only emit
+complete lines.
+This means that the line will usually end with the trailing newline character.
+If the stream ends without a trailing newline character, it will not be present
+in the `data` event.
+As such, it's usually recommended to remove the trailing newline character
+before processing command line input like this:
+
+```php
+$stdio->on('data', function ($line) {
+    $line = rtrim($line, "\r\n");
+    if ($line === "start") {
+        doSomething();
+    }
+});
+```
+
+Similarly, if you copy and paste a larger chunk of text, it will properly emit
+multiple complete lines with a separate `data` event for each line.
+
+Because the `Stdio` is a well-behaving readable stream that will emit incoming
 data as-is, you can also use this to `pipe()` this stream into other writable
 streams.
+
+```
+$stdio->pipe($logger);
+```
 
 You can control various aspects of the console input through the [`Readline`](#readline),
 so read on..
@@ -124,7 +152,7 @@ See above for waiting for user input.
 
 Alternatively, the `Readline` is also a well-behaving readable stream
 (implementing ReactPHP's `ReadableStreamInterface`) that emits each complete
-line as a `data` event (without the trailing newline).
+line as a `data` event, including the trailing newline.
 This is considered advanced usage.
 
 #### Prompt
