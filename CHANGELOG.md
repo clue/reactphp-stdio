@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.2.0 (2017-12-18)
+
+*   Feature: Optionally use `ext-readline` to enable raw input mode if available.
+    This extension is entirely optional, but it is more efficient and reliable
+    than spawning the external `stty` command.
+    (#63 by @clue)
+
+*   Feature: Consistently return boolean success from `write()` and
+    avoid sending unneeded control codes between writes
+    (#60 by @clue)
+
+*   Deprecated: Deprecate input helpers and output helpers and
+    recommend using `Stdio` as a normal `DuplexStreamInterface` instead.
+    (#59 and #62 by @clue)
+
+    ```php
+    // deprecated
+    $stdio->on('line', function ($line) use ($stdio) {
+        $stdio->writeln("input: $line");
+    });
+
+    // recommended alternative
+    $stdio->on('data', function ($line) use ($stdio) {
+        $stdio->write("input: $line");
+    });
+    ```
+
+*   Improve test suite by adding forward compatibility with PHPUnit 6
+    (#61 by @carusogabriel)
+
 ## 1.1.0 (2017-11-01)
 
 *   Feature: Explicitly end stream on CTRL+D and emit final data on EOF without EOL
