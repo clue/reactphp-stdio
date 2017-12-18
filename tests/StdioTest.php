@@ -173,54 +173,6 @@ class StdioTest extends TestCase
         $this->assertEquals("\r\033[K" . "test\n" . "> input", $buffer);
     }
 
-    public function testOverwriteWillClearReadlineMoveToPreviousLineWriteOutputAndRestoreReadline()
-    {
-        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
-        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
-
-        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
-        $readline = new Readline($input, $output);
-        $readline->setPrompt('> ');
-        $readline->setInput('input');
-
-        $stdio = new Stdio($this->loop, $input, $output, $readline);
-
-        $stdio->write('first');
-
-        $buffer = '';
-        $output->expects($this->any())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
-            $buffer .= $data;
-        }));
-
-        $stdio->overwrite('overwrite');
-
-        $this->assertEquals("\r\033[K" . "\033[A" . "\r\033[K" . "overwrite\n" . "> input", $buffer);
-    }
-
-    public function testOverwriteAfterNewlineWillClearReadlineAndWriteOutputAndRestoreReadline()
-    {
-        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
-        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
-
-        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
-        $readline = new Readline($input, $output);
-        $readline->setPrompt('> ');
-        $readline->setInput('input');
-
-        $stdio = new Stdio($this->loop, $input, $output, $readline);
-
-        $stdio->write("first\n");
-
-        $buffer = '';
-        $output->expects($this->any())->method('write')->will($this->returnCallback(function ($data) use (&$buffer) {
-            $buffer .= $data;
-        }));
-
-        $stdio->overwrite('overwrite');
-
-        $this->assertEquals("\r\033[K" . "overwrite\n" . "> input", $buffer);
-    }
-
     public function testWriteLineWillClearReadlineWriteOutputAndRestoreReadline()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();

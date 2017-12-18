@@ -170,20 +170,6 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->write($line . PHP_EOL);
     }
 
-    /**
-     * @deprecated
-     */
-    public function overwrite($data = '')
-    {
-        if ($this->incompleteLine !== '') {
-            // move one line up, move to start of line and clear everything
-            $data = "\033[A\r\033[K" . $data;
-            $this->incompleteLine = '';
-        }
-
-        $this->write($data);
-    }
-
     public function end($data = null)
     {
         if ($this->ending) {

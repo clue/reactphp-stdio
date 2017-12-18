@@ -90,15 +90,6 @@ A trailing newline will be added automatically.
 $stdio->writeln('hello world');
 ```
 
-[Deprecated] The `overwrite($text)` method can be used to overwrite/replace the last
-incomplete line with the given text:
-
-```php
-$stdio->write('Loading…');
-// deprecated
-$stdio->overwrite('Done!');
-```
-
 Alternatively, you can also use the `Stdio` as a writable stream.
 You can `pipe()` any readable stream into this stream.
 
