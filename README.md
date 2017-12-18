@@ -470,13 +470,6 @@ If you want to print some text to console output, use the [`Stdio::write()`](#ou
 $stdio->write('hello');
 ```
 
-Should you need to interface with the `Stdout`, you can access the current instance through the [`Stdio`](#stdio):
-
-```php
-// deprecated
-$stdout = $stdio->getOutput();
-```
-
 #### Stdin
 
 [Deprecated] The `Stdin` represents a `ReadableStream` and is responsible for handling console input.
@@ -490,15 +483,6 @@ $stdio->on('data', function ($line) use ($stdio) {
     $line = rtrim($line, "\r\n");
     $stdio->write('You said "' . $line . '"' . PHP_EOL);
 });
-```
-
-Should you need to interface with the `Stdin`, you can access the current instance through the [`Stdio`](#stdio):
-
-You can access the current instance through the [`Stdio`](#stdio):
-
-```php
-// deprecated
-$stdin = $stdio->getInput();
 ```
 
 ## Pitfalls

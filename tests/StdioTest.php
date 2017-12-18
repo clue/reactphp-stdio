@@ -21,7 +21,7 @@ class StdioTest extends TestCase
         $stdio->close();
     }
 
-    public function testCtorArgsWillBeReturnedByGetters()
+    public function testCtorReadlineArgWillBeReturnedBygetReadline()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
@@ -31,8 +31,6 @@ class StdioTest extends TestCase
 
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
-        $this->assertSame($input, $stdio->getInput());
-        $this->assertSame($output, $stdio->getOutput());
         $this->assertSame($readline, $stdio->getReadline());
     }
 
