@@ -526,6 +526,9 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->setAutocomplete(123));
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testAutocompleteKeyDoesNothingIfUnused()
     {
         $this->readline->onKeyTab();

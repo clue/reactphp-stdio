@@ -15,10 +15,15 @@ class StdioTest extends TestCase
         $this->loop = Factory::create();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testCtorDefaultArgs()
     {
-        $stdio = new Stdio($this->loop);
-        $stdio->close();
+        new Stdio($this->loop);
+
+        // Closing STDIN/STDOUT is not a good idea for reproducible tests
+        // $stdio->close();
     }
 
     public function testCtorReadlineArgWillBeReturnedBygetReadline()

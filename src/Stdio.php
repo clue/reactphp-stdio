@@ -10,6 +10,7 @@ use React\Stream\DuplexStreamInterface;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
+use React\Stream\Stream;
 
 class Stdio extends EventEmitter implements DuplexStreamInterface
 {
@@ -28,7 +29,14 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
 
         if ($output === null) {
-            $output = new Stdout();
+            // STDOUT not defined ("php -a") or already closed (`fclose(STDOUT)`)
+            if (!defined('STDOUT') || !is_resource(STDOUT)) {
+                $output = new Stream(fopen('php://memory', 'r+'), $loop);
+                $output->close();
+            } else {
+                $output = new Stream(STDOUT, $loop);
+                $output->pause();
+            }
         }
 
         if ($readline === null) {

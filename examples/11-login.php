@@ -23,17 +23,16 @@ $stdio->on('data', function ($line) use ($stdio, &$first, &$username, &$password
         $first = false;
     } else {
         $password = $line;
-        $stdio->end();
-    }
-});
-
-$loop->run();
-
-echo <<<EOT
+        $stdio->end(<<<EOT
 ---------------------
 Confirmation:
 ---------------------
 Username: $username
 Password: $password
 
-EOT;
+EOT
+        );
+    }
+});
+
+$loop->run();
