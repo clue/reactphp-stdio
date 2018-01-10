@@ -21,22 +21,16 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     private $ending = false;
     private $closed = false;
     private $incompleteLine = '';
+    private $originalTtyMode = null;
 
     public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
         if ($input === null) {
-            $input = new Stdin($loop);
+            $input = $this->createStdin($loop);
         }
 
         if ($output === null) {
-            // STDOUT not defined ("php -a") or already closed (`fclose(STDOUT)`)
-            if (!defined('STDOUT') || !is_resource(STDOUT)) {
-                $output = new Stream(fopen('php://memory', 'r+'), $loop);
-                $output->close();
-            } else {
-                $output = new Stream(STDOUT, $loop);
-                $output->pause();
-            }
+            $output = $this->createStdout($loop);
         }
 
         if ($readline === null) {
@@ -65,6 +59,11 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         // handle all output events
         $this->output->on('error', array($this, 'handleError'));
         $this->output->on('close', array($this, 'handleCloseOutput'));
+    }
+
+    public function __destruct()
+    {
+        $this->restoreTtyMode();
     }
 
     public function pause()
@@ -181,6 +180,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
         // clear readline output, close input and end output
         $this->readline->setInput('')->setPrompt('')->clear();
+        $this->restoreTtyMode();
         $this->input->close();
         $this->output->end();
     }
@@ -196,6 +196,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
         // clear readline output and then close
         $this->readline->setInput('')->setPrompt('')->clear()->close();
+        $this->restoreTtyMode();
         $this->input->close();
         $this->output->close();
     }
@@ -237,5 +238,121 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         if (!$this->input->isReadable()) {
             $this->close();
         }
+    }
+
+    /**
+     * @codeCoverageIgnore this is covered by functional tests with/without ext-readline
+     */
+    private function restoreTtyMode()
+    {
+        if (function_exists('readline_callback_handler_remove')) {
+            // remove dummy readline handler to turn to default input mode
+            readline_callback_handler_remove();
+        } elseif ($this->originalTtyMode !== null && $this->isTty()) {
+            // Reset stty so it behaves normally again
+            shell_exec(sprintf('stty %s', $this->originalTtyMode));
+            $this->originalTtyMode = null;
+        }
+
+        // restore blocking mode so following programs behave normally
+        if (defined('STDIN') && is_resource(STDIN)) {
+            stream_set_blocking(STDIN, true);
+        }
+    }
+
+    /**
+     * @param LoopInterface $loop
+     * @return ReadableStreamInterface
+     * @codeCoverageIgnore this is covered by functional tests with/without ext-readline
+     */
+    private function createStdin(LoopInterface $loop)
+    {
+        // STDIN not defined ("php -a") or already closed (`fclose(STDIN)`)
+        if (!defined('STDIN') || !is_resource(STDIN)) {
+            $stream = new Stream(fopen('php://memory', 'r'), $loop);
+            $stream->close();
+            return $stream;
+        }
+
+        $stream = new Stream(STDIN, $loop);
+
+        // support starting program with closed STDIN ("example.php 0<&-")
+        // the stream is a valid resource and is not EOF, but fstat fails
+        if (fstat(STDIN) === false) {
+            $stream->close();
+            return $stream;
+        }
+
+        if (function_exists('readline_callback_handler_install')) {
+            // Prefer `ext-readline` to install dummy handler to turn on raw input mode.
+            // We will nevery actually feed the readline handler and instead
+            // handle all input in our `Readline` implementation.
+            readline_callback_handler_install('', function () { });
+            return $stream;
+        }
+
+        if ($this->isTty()) {
+            $this->originalTtyMode = shell_exec('stty -g');
+
+            // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
+            shell_exec('stty -icanon -echo');
+        }
+
+        // register shutdown function to restore TTY mode in case of unclean shutdown (uncaught exception)
+        // this will not trigger on SIGKILL etc., but the terminal should take care of this
+        register_shutdown_function(array($this, 'close'));
+
+        return $stream;
+    }
+
+    /**
+     * @param LoopInterface $loop
+     * @return WritableStreamInterface
+     * @codeCoverageIgnore this is covered by functional tests
+     */
+    private function createStdout(LoopInterface $loop)
+    {
+        // STDOUT not defined ("php -a") or already closed (`fclose(STDOUT)`)
+        if (!defined('STDOUT') || !is_resource(STDOUT)) {
+            $output = new Stream(fopen('php://memory', 'r+'), $loop);
+            $output->close();
+        } else {
+            $output = new Stream(STDOUT, $loop);
+            $output->pause();
+        }
+
+        return $output;
+    }
+
+    /**
+     * @return bool
+     * @codeCoverageIgnore
+     */
+    private function isTty()
+    {
+        if (PHP_VERSION_ID >= 70200) {
+            // Prefer `stream_isatty()` (available as of PHP 7.2 only)
+            return stream_isatty(STDIN);
+        } elseif (function_exists('posix_isatty')) {
+            // Otherwise use `posix_isatty` if available (requires `ext-posix`)
+            return posix_isatty(STDIN);
+        }
+
+        // otherwise try to guess based on stat file mode and device major number
+        // Must be special character device: ($mode & S_IFMT) === S_IFCHR
+        // And device major number must be allocated to TTYs (2-5 and 128-143)
+        // For what it's worth, checking for device gid 5 (tty) is less reliable.
+        // @link http://man7.org/linux/man-pages/man7/inode.7.html
+        // @link https://www.kernel.org/doc/html/v4.11/admin-guide/devices.html#terminal-devices
+        if (is_resource(STDIN)) {
+            $stat = fstat(STDIN);
+            $mode = isset($stat['mode']) ? ($stat['mode'] & 0170000) : 0;
+            $major = isset($stat['dev']) ? (($stat['dev'] >> 8) & 0xff) : 0;
+
+            if ($mode === 0020000 && $major >= 2 && $major <= 143 && ($major <=5 || $major >= 128)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
