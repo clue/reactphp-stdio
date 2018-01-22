@@ -277,6 +277,36 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /**
+     * Appends the given input to the current text input buffer at the current position
+     *
+     * This moves the cursor accordingly to the number of characters added.
+     *
+     * @param string $input
+     * @return self
+     * @uses self::redraw()
+     */
+    public function addInput($input)
+    {
+        if ($input === '') {
+            return $this;
+        }
+
+        // read everything up until before current position
+        $pre  = $this->substr($this->linebuffer, 0, $this->linepos);
+        $post = $this->substr($this->linebuffer, $this->linepos);
+
+        $this->linebuffer = $pre . $input . $post;
+        $this->linepos += $this->strlen($input);
+
+        // only redraw if input should be echo'ed (i.e. is not hidden anyway)
+        if ($this->echo !== false) {
+            $this->redraw();
+        }
+
+        return $this;
+    }
+
+    /**
      * set current text input buffer
      *
      * this moves the cursor to the end of the current
@@ -694,14 +724,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     public function onFallback($chars)
     {
-        // read everything up until before current position
-        $pre  = $this->substr($this->linebuffer, 0, $this->linepos);
-        $post = $this->substr($this->linebuffer, $this->linepos);
-
-        $this->linebuffer = $pre . $chars . $post;
-        $this->linepos += $this->strlen($chars);
-
-        $this->redraw();
+        $this->addInput($chars);
     }
 
     /**
