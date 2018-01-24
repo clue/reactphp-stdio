@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.0.0 (2017-09-20)
+
+A major compatibility release to update this package to support all latest
+ReactPHP components!
+
+This update involves a minor BC break due to dropped support for legacy
+versions. We've tried hard to avoid BC breaks where possible and minimize impact
+otherwise. We expect that most consumers of this package will actually not be
+affected by any BC breaks, see below for more details.
+
+*   BC break: Remove all deprecated APIs (individual `Stdin`, `Stdout`, `line` etc.)
+    (#64 and #68 by @clue)
+
+    >   All of this affects only what is considered "advanced usage".
+        If you're affected by this BC break, then it's recommended to first
+        update to the intermediary v1.2.0 release, which provides alternatives
+        to all deprecated APIs and then update to this version without causing a
+        BC break.
+
+*   Feature / BC break: Consistently emit incoming "data" event with trailing newline
+    unless stream ends without trailing newline (such as when piping).
+    (#65 by @clue)
+
+*   Feature: Forward compatibility with upcoming Stream v1.0 and EventLoop v1.0
+    and avoid blocking when `STDOUT` buffer is full.
+    (#68 by @clue)
+
 ## 1.2.0 (2017-12-18)
 
 *   Feature: Optionally use `ext-readline` to enable raw input mode if available.

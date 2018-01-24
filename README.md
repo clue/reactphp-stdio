@@ -3,6 +3,13 @@
 Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT),
 built on top of for [ReactPHP](https://reactphp.org).
 
+You can use this library to build truly interactive and responsive command
+line (CLI) applications, that immediately react when the user types in
+a line. Inspired by `readline`, but supports UTF-8 and interleaved I/O
+(typing while output is being printed), history and autocomplete support
+and takes care of proper TTY settings under the hood without requiring
+any extensions or special installation.
+
 **Table of contents**
 
 * [Quickstart example](#quickstart-example)
@@ -407,8 +414,8 @@ $readline->setAutocomplete(function () {
 });
 ```
 
-If the user types `he [TAB]`, the first match will be skipped as it does not
-match the current word prefix and the second one will be picked automatically,
+If the user types `he [TAB]`, the first two matches will be skipped as they do
+not match the current word prefix and the last one will be picked automatically,
 so that the resulting input buffer is `hello `.
 
 If the user types `e [TAB]`, then this will match multiple entries and the user
@@ -427,7 +434,7 @@ This means that if the user types `hello [SPACE] ex [TAB]`, then the resulting
 input buffer is `hello exit `, which may or may not be what you need depending
 on your particular use case.
 
-In order to give your more control over this behavior, the autocomplete function
+In order to give you more control over this behavior, the autocomplete function
 actually receives three arguments (similar to `ext-readline`'s
 [`readline_completion_function()`](http://php.net/manual/en/function.readline-completion-function.php)):
 The first argument will be the current incomplete word according to current
@@ -518,7 +525,7 @@ This project follows [SemVer](http://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^1.2
+$ composer require clue/stdio-react:^2.0
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
