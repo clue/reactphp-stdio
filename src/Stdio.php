@@ -7,10 +7,11 @@ use Clue\React\Stdio\Io\Stdout;
 use Evenement\EventEmitter;
 use React\EventLoop\LoopInterface;
 use React\Stream\DuplexStreamInterface;
+use React\Stream\ReadableResourceStream;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\Util;
+use React\Stream\WritableResourceStream;
 use React\Stream\WritableStreamInterface;
-use React\Stream\Stream;
 
 class Stdio extends EventEmitter implements DuplexStreamInterface
 {
@@ -268,20 +269,15 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     private function createStdin(LoopInterface $loop)
     {
         // STDIN not defined ("php -a") or already closed (`fclose(STDIN)`)
-        if (!defined('STDIN') || !is_resource(STDIN)) {
-            $stream = new Stream(fopen('php://memory', 'r'), $loop);
-            $stream->close();
-            return $stream;
-        }
-
-        $stream = new Stream(STDIN, $loop);
-
-        // support starting program with closed STDIN ("example.php 0<&-")
+        // also support starting program with closed STDIN ("example.php 0<&-")
         // the stream is a valid resource and is not EOF, but fstat fails
-        if (fstat(STDIN) === false) {
+        if (!defined('STDIN') || !is_resource(STDIN) || fstat(STDIN) === false) {
+            $stream = new ReadableResourceStream(fopen('php://memory', 'r'), $loop);
             $stream->close();
             return $stream;
         }
+
+        $stream = new ReadableResourceStream(STDIN, $loop);
 
         if (function_exists('readline_callback_handler_install')) {
             // Prefer `ext-readline` to install dummy handler to turn on raw input mode.
@@ -313,12 +309,13 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     private function createStdout(LoopInterface $loop)
     {
         // STDOUT not defined ("php -a") or already closed (`fclose(STDOUT)`)
-        if (!defined('STDOUT') || !is_resource(STDOUT)) {
-            $output = new Stream(fopen('php://memory', 'r+'), $loop);
+        // also support starting program with closed STDOUT ("example.php >&-")
+        // the stream is a valid resource and is not EOF, but fstat fails
+        if (!defined('STDOUT') || !is_resource(STDOUT) || fstat(STDOUT) === false) {
+            $output = new WritableResourceStream(fopen('php://memory', 'r+'), $loop);
             $output->close();
         } else {
-            $output = new Stream(STDOUT, $loop);
-            $output->pause();
+            $output = new WritableResourceStream(STDOUT, $loop);
         }
 
         return $output;

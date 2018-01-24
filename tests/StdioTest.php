@@ -1,10 +1,9 @@
 <?php
 
-use React\EventLoop\Factory;
 use Clue\React\Stdio\Stdio;
 use Clue\React\Stdio\Readline;
-use React\Stream\ReadableStream;
-use React\Stream\WritableStream;
+use React\EventLoop\Factory;
+use React\Stream\ThroughStream;
 
 class StdioTest extends TestCase
 {
@@ -408,7 +407,7 @@ class StdioTest extends TestCase
 
     public function testEndEventWillBeForwarded()
     {
-        $input = new ReadableStream();
+        $input = new ThroughStream();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
@@ -423,7 +422,7 @@ class StdioTest extends TestCase
 
     public function testErrorEventFromInputWillBeForwarded()
     {
-        $input = new ReadableStream();
+        $input = new ThroughStream();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
@@ -439,7 +438,7 @@ class StdioTest extends TestCase
     public function testErrorEventFromOutputWillBeForwarded()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
-        $output = new WritableStream();
+        $output = new ThroughStream();
 
         //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
         $readline = new Readline($input, $output);
