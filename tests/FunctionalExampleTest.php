@@ -52,6 +52,20 @@ class FunctionalExampleTest extends TestCase
         $this->assertEquals('', $output);
     }
 
+    public function testBindingsExampleWithPipedInputEndsBecauseInputEnds()
+    {
+        $output = $this->execExample('echo test | php 04-bindings.php');
+
+        $this->assertContains('you just said: test (4)' . PHP_EOL, $output);
+    }
+
+    public function testBindingsExampleWithPipedInputEndsWithSpecialBindingsReplacedBecauseInputEnds()
+    {
+        $output = $this->execExample('echo hello | php 04-bindings.php');
+
+        $this->assertContains('you just said: hellö (6)' . PHP_EOL, $output);
+    }
+
     public function testStubShowStdinIsReadableByDefault()
     {
         $output = $this->execExample('php ../tests/stub/01-check-stdin.php');

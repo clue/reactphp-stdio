@@ -943,6 +943,44 @@ class ReadlineTest extends TestCase
         $this->assertContains("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
     }
 
+    public function testBindCustomFunctionOverwritesInput()
+    {
+        $this->readline->on('a', $this->expectCallableOnceWith('a'));
+
+        $this->input->emit('data', array("a"));
+
+        $this->assertEquals('', $this->readline->getInput());
+    }
+
+    public function testBindCustomFunctionOverwritesInputButKeepsRest()
+    {
+        $this->readline->on('e', $this->expectCallableOnceWith('e'));
+
+        $this->input->emit('data', array("test"));
+
+        $this->assertEquals('tst', $this->readline->getInput());
+    }
+
+    public function testBindCustomFunctionCanOverwriteInput()
+    {
+        $readline = $this->readline;
+        $readline->on('a', function () use ($readline) {
+            $readline->addInput('ä');
+        });
+
+        $this->input->emit('data', array("hallo"));
+
+        $this->assertEquals('hällo', $this->readline->getInput());
+    }
+
+    public function testBindCustomFunctionCanOverwriteAutocompleteBehavior()
+    {
+        $this->readline->on("\t", $this->expectCallableOnceWith("\t"));
+        $this->readline->setAutocomplete($this->expectCallableNever());
+
+        $this->input->emit('data', array("\t"));
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith("\n"));
