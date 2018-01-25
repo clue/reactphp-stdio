@@ -40,6 +40,27 @@ class ReadlineTest extends TestCase
         $this->assertEquals(5, $this->readline->getCursorCell());
     }
 
+    public function testAddInputAfterSetting()
+    {
+        $this->readline->setInput('hello');
+
+        $this->assertSame($this->readline, $this->readline->addInput(' world'));
+        $this->assertEquals('hello world', $this->readline->getInput());
+        $this->assertEquals(11, $this->readline->getCursorPosition());
+        $this->assertEquals(11, $this->readline->getCursorCell());
+    }
+
+    public function testAddInputAfterSettingCurrentCursorPosition()
+    {
+        $this->readline->setInput('hello');
+        $this->readline->moveCursorTo(2);
+
+        $this->assertSame($this->readline, $this->readline->addInput('ha'));
+        $this->assertEquals('hehallo', $this->readline->getInput());
+        $this->assertEquals(4, $this->readline->getCursorPosition());
+        $this->assertEquals(4, $this->readline->getCursorCell());
+    }
+
     public function testPromptAfterSetting()
     {
         $this->assertSame($this->readline, $this->readline->setPrompt('> '));
@@ -178,6 +199,22 @@ class ReadlineTest extends TestCase
         $this->output->expects($this->never())->method('write');
 
         $this->assertSame($this->readline, $this->readline->setInput('test'));
+    }
+
+    public function testAddingEmptyInputDoesNotNeedToRedraw()
+    {
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->addInput(''));
+    }
+
+    public function testAddingInputWithoutEchoDoesNotNeedToRedraw()
+    {
+        $this->readline->setEcho(false);
+
+        $this->output->expects($this->never())->method('write');
+
+        $this->assertSame($this->readline, $this->readline->addInput('test'));
     }
 
     public function testMovingCursorWithoutEchoDoesNotNeedToRedraw()

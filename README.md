@@ -224,10 +224,25 @@ $readline->setEcho(true);
 Everything the user types will be buffered in the current *user input buffer*.
 Once the user hits enter, the *user input buffer* will be processed and cleared.
 
-The `setInput($buffer)` method can be used to control the *user input buffer*.
+The `addInput($input)` method can be used to add text to the *user input
+buffer* at the current cursor position.
+The given text will be inserted just like the user would type in a text and as
+such adjusts the current cursor position accordingly.
 The user will be able to delete and/or rewrite the buffer at any time.
-Changing the *user input buffer* can be useful for presenting a preset input to the user
-(like the last password attempt).
+Changing the *user input buffer* can be useful for presenting a preset input to
+the usser (like the last password attempt).
+Simply pass an input string like this:
+
+```php
+$readline->addInput('hello');
+```
+
+The `setInput($buffer)` method can be used to control the *user input buffer*.
+The given text will be used to replace the entire current *user input buffer*
+and as such adjusts the current cursor position to the end of the new buffer.
+The user will be able to delete and/or rewrite the buffer at any time.
+Changing the *user input buffer* can be useful for presenting a preset input to
+the user (like the last password attempt).
 Simply pass an input string like this:
 
 ```php
