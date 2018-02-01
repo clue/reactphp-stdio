@@ -24,6 +24,7 @@ any extensions or special installation.
     * [Cursor](#cursor)
     * [History](#history)
     * [Autocomplete](#autocomplete)
+    * [Keys](#keys)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
 * [Tests](#tests)
@@ -501,6 +502,57 @@ disable the autocomplete function:
 
 ```php
 $readline->setAutocomplete(null);
+```
+
+#### Keys
+
+The `Readline` class is responsible for reading user input from `STDIN` and
+registering appropriate key events.
+By default, `Readline` uses a hard-coded key mapping that resembles the one
+usually found in common terminals.
+This means that normal Unicode character keys ("a" and "b", but also "?", "ä",
+"µ" etc.) will be processed as user input, while special control keys can be
+used for [cursor movement](#cursor), [history](#history) and
+[autocomplete](#autocomplete) functions.
+Unknown special keys will be ignored and will not processed as part of the user
+input by default.
+
+Additionally, you can bind custom functions to any key code you want.
+If a custom function is bound to a certain key code, the default behavior will
+no longer trigger.
+This allows you to register entirely new functions to keys or to overwrite any
+of the existing behavior.
+
+For example, you can use the following code to print some help text when the
+user hits a certain key:
+
+```php
+$readline->on('?', function () use ($stdio) {
+     $stdio->write('Here\'s some help: …' . PHP_EOL);
+});
+```
+
+Similarly, this can be used to manipulate the user input and replace some of the
+input when the user hits a certain key:
+
+```php
+$readline->on('ä', function () use ($readline) {
+     $readline->addInput('a');
+});
+```
+
+The `Readline` uses raw binary key codes as emitted by the terminal.
+This means that you can use the normal UTF-8 character representation for normal
+Unicode characters.
+Special keys use binary control code sequences (refer to ANSI / VT100 control
+codes for more details).
+For example, the following code can be used to register a custom function to the
+UP arrow cursor key:
+
+```php
+$readline->on("\033[A", function () use ($readline) {
+     $readline->setInput(strtoupper($readline->getInput()));
+});
 ```
 
 ## Pitfalls

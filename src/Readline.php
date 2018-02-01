@@ -63,6 +63,11 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 //          "\033[20~" => 'onKeyF10',
         );
         $decode = function ($code) use ($codes, $that) {
+            if ($that->listeners($code)) {
+                $that->emit($code, array($code));
+                return;
+            }
+
             if (isset($codes[$code])) {
                 $method = $codes[$code];
                 $that->$method($code);
@@ -724,7 +729,26 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     public function onFallback($chars)
     {
-        $this->addInput($chars);
+        // check if there's any special key binding for any of the chars
+        $buffer = '';
+        foreach ($this->strsplit($chars) as $char) {
+            if ($this->listeners($char)) {
+                // special key binding for this character found
+                // process all characters before this one before invoking function
+                if ($buffer !== '') {
+                    $this->addInput($buffer);
+                    $buffer = '';
+                }
+                $this->emit($char, array($char));
+            } else {
+                $buffer .= $char;
+            }
+        }
+
+        // process remaining input characters after last special key binding
+        if ($buffer !== '') {
+            $this->addInput($buffer);
+        }
     }
 
     /**
@@ -835,6 +859,11 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             ),
             $str
         ));
+    }
+
+    private function strsplit($str)
+    {
+        return preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY);
     }
 
     /** @internal */
