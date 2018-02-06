@@ -1,6 +1,25 @@
 # Changelog
 
-## 2.0.0 (2017-09-20)
+## 2.1.0 (2018-02-05)
+
+*   Feature: Add support for binding custom functions to any key code
+    (#70 by @clue)
+
+    ```php
+    $readline->on('?', function () use ($stdio) {
+        $stdio->write('Do you need help?');
+    });
+    ```
+
+*   Feature: Add `addInput()` helper method
+    (#69 by @clue)
+
+    ```php
+    $readline->addInput('hello');
+    $readline->addInput(' world');
+    ```
+
+## 2.0.0 (2018-01-24)
 
 A major compatibility release to update this package to support all latest
 ReactPHP components!

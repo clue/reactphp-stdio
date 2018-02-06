@@ -1,14 +1,14 @@
 # clue/stdio-react [![Build Status](https://travis-ci.org/clue/php-stdio-react.svg?branch=master)](https://travis-ci.org/clue/php-stdio-react)
 
-Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT),
-built on top of for [ReactPHP](https://reactphp.org).
+Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT) for
+truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org).
 
 You can use this library to build truly interactive and responsive command
 line (CLI) applications, that immediately react when the user types in
-a line. Inspired by `readline`, but supports UTF-8 and interleaved I/O
-(typing while output is being printed), history and autocomplete support
-and takes care of proper TTY settings under the hood without requiring
-any extensions or special installation.
+a line or hits a certain key. Inspired by `ext-readline`, but supports UTF-8
+and interleaved I/O (typing while output is being printed), history and
+autocomplete support and takes care of proper TTY settings under the hood
+without requiring any extensions or special installation.
 
 **Table of contents**
 
@@ -43,7 +43,7 @@ $stdio->getReadline()->setPrompt('Input > ');
 
 $stdio->on('data', function ($line) use ($stdio) {
     $line = rtrim($line, "\r\n");
-    var_dump($line);
+    $stdio->write('Your input: ' . $line . PHP_EOL);
 
     if ($line === 'quit') {
         $stdio->end();
@@ -231,7 +231,7 @@ The given text will be inserted just like the user would type in a text and as
 such adjusts the current cursor position accordingly.
 The user will be able to delete and/or rewrite the buffer at any time.
 Changing the *user input buffer* can be useful for presenting a preset input to
-the usser (like the last password attempt).
+the user (like the last password attempt).
 Simply pass an input string like this:
 
 ```php
@@ -291,7 +291,7 @@ measured in number of monospace cells.
 Most *normal* characters (plain ASCII and most multi-byte UTF-8 sequences) take a single monospace cell.
 However, there are a number of characters that have no visual representation
 (and do not take a cell at all) or characters that do not fit within a single
-cell (like some asian glyphs).
+cell (like some Asian glyphs).
 This method is mostly useful for calculating the visual cursor position on screen,
 but you may also invoke it like this:
 
@@ -334,7 +334,7 @@ you may want to use something like this:
 $stdio->on('data', function ($line) use ($readline) {
     $line = rtrim($line);
     $all = $readline->listHistory();
-    
+
     // skip empty line and duplicate of previous line
     if ($line !== '' && $line !== end($all)) {
         $readline->addHistory($line);
@@ -592,7 +592,7 @@ This project follows [SemVer](http://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^2.0
+$ composer require clue/stdio-react:^2.1
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
