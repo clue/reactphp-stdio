@@ -1,4 +1,4 @@
-# clue/stdio-react [![Build Status](https://travis-ci.org/clue/php-stdio-react.svg?branch=master)](https://travis-ci.org/clue/php-stdio-react)
+# clue/reactphp-stdio [![Build Status](https://travis-ci.org/clue/reactphp-stdio.svg?branch=master)](https://travis-ci.org/clue/reactphp-stdio)
 
 Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT) for
 truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org).
@@ -625,7 +625,7 @@ Your only option would be to entirely
 However this package does work on [`Windows Subsystem for Linux`](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) 
 (or WSL) without issues. We suggest [installing WSL](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) 
 when you want to run this package on Windows.
-See also [#18](https://github.com/clue/php-stdio-react/issues/18) for more details.
+See also [#18](https://github.com/clue/reactphp-stdio/issues/18) for more details.
 
 ## Tests
 
