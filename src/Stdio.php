@@ -2,8 +2,6 @@
 
 namespace Clue\React\Stdio;
 
-use Clue\React\Stdio\Io\Stdin;
-use Clue\React\Stdio\Io\Stdout;
 use Evenement\EventEmitter;
 use React\EventLoop\LoopInterface;
 use React\Stream\DuplexStreamInterface;
@@ -23,6 +21,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     private $closed = false;
     private $incompleteLine = '';
     private $originalTtyMode = null;
+    private $usesExtReadlineHandler = false;
 
     public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
@@ -246,8 +245,9 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
      */
     private function restoreTtyMode()
     {
-        if (function_exists('readline_callback_handler_remove')) {
+        if ($this->usesExtReadlineHandler) {
             // remove dummy readline handler to turn to default input mode
+            $this->usesExtReadlineHandler = false;
             readline_callback_handler_remove();
         } elseif ($this->originalTtyMode !== null && $this->isTty()) {
             // Reset stty so it behaves normally again
@@ -279,11 +279,14 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
 
         $stream = new ReadableResourceStream(STDIN, $loop);
 
-        if (function_exists('readline_callback_handler_install')) {
+        if (PHP_OS === 'Linux' && function_exists('readline_callback_handler_install')) {
             // Prefer `ext-readline` to install dummy handler to turn on raw input mode.
+            // This is known to work on Linux and known to cause issues with CR/LF
+            // on Mac, so we only use this on Linux for now, see also issue #66.
             // We will nevery actually feed the readline handler and instead
             // handle all input in our `Readline` implementation.
             readline_callback_handler_install('', function () { });
+            $this->usesExtReadlineHandler = true;
             return $stream;
         }
 
