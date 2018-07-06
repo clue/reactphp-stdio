@@ -491,27 +491,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         return $output;
     }
 
-    /**
-     * Clears the current input prompt (if any)
-     *
-     * Usually, there should be no need to call this method manually. It will
-     * be invoked automatically whenever we detect that output needs to be
-     * written in place of the current prompt. The prompt will be rewritten
-     * after clearing the prompt and writing the output.
-     *
-     * @return self
-     * @see Stdio::write() which is responsible for invoking this method
-     * @internal
-     */
-    public function clear()
-    {
-        if ($this->prompt !== '' || ($this->echo !== false && $this->linebuffer !== '')) {
-            $this->output->write("\r\033[K");
-        }
-
-        return $this;
-    }
-
     /** @internal */
     public function onKeyBackspace()
     {
