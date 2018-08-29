@@ -291,7 +291,7 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         }
 
         if ($this->isTty()) {
-            $this->originalTtyMode = shell_exec('stty -g');
+            $this->originalTtyMode = rtrim(shell_exec('stty -g'), PHP_EOL);
 
             // Disable icanon (so we can fread each keypress) and echo (we'll do echoing here instead)
             shell_exec('stty -icanon -echo');
