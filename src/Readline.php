@@ -44,10 +44,16 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 
         $that = $this;
         $codes = array(
-            "\n" => 'onKeyEnter',
-            "\x7f" => 'onKeyBackspace',
-            "\t" => 'onKeyTab',
+            // The user confirms input with enter key which should usually
+            // generate a NL (`\n`) character. Common terminals also seem to
+            // accept a CR (`\r`) character in place and handle this just like a
+            // NL. Similarly `ext-readline` uses different `icrnl` and `igncr`
+            // TTY settings on some platforms, so we also accept both here.
+            "\n" => 'onKeyEnter', // ^J
+            "\r" => 'onKeyEnter', // ^M
 
+            "\x7f" => 'onKeyBackspace',
+            "\t"   => 'onKeyTab',
             "\x04" => 'handleEnd', // CTRL+D
 
             "\033[A" => 'onKeyUp',

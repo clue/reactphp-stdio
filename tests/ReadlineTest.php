@@ -228,11 +228,18 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->moveCursorBy(2));
     }
 
-    public function testDataEventWillBeEmittedForCompleteLine()
+    public function testDataEventWillBeEmittedForCompleteLineWithNl()
     {
         $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
 
         $this->input->emit('data', array("hello\n"));
+    }
+
+    public function testDataEventWillBeEmittedWithNlAlsoForCompleteLineWithCr()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
+
+        $this->input->emit('data', array("hello\r"));
     }
 
     public function testDataEventWillNotBeEmittedForIncompleteLineButWillStayInInputBuffer()
