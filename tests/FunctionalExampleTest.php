@@ -87,6 +87,20 @@ class FunctionalExampleTest extends TestCase
         $this->assertEquals('', $output);
     }
 
+    public function testStubCanEndWithoutOutput()
+    {
+        $output = $this->execExample('php ../tests/stub/04-end.php');
+
+        $this->assertEquals('', $output);
+    }
+
+    public function testStubCanEndWithoutExtensions()
+    {
+        $output = $this->execExample('php -n ../tests/stub/04-end.php');
+
+        $this->assertEquals('', $output);
+    }
+
     public function testPeriodicExampleViaInteractiveModeQuitsImmediately()
     {
         if (defined('HHVM_VERSION')) {
