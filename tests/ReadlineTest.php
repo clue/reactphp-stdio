@@ -988,6 +988,23 @@ class ReadlineTest extends TestCase
         $this->input->emit('data', array("\t"));
     }
 
+    public function testBindCustomFunctionToNlOverwritesDataEvent()
+    {
+        $this->readline->on("\n", $this->expectCallableOnceWith("\n"));
+        $this->readline->on('line', $this->expectCallableNever());
+
+        $this->input->emit('data', array("hello\n"));
+    }
+
+    public function testBindCustomFunctionToNlFiresOnCr()
+    {
+        $this->readline->on("\n", $this->expectCallableOnceWith("\n"));
+        $this->readline->on("\r", $this->expectCallableNever());
+        $this->readline->on('line', $this->expectCallableNever());
+
+        $this->input->emit('data', array("hello\r"));
+    }
+
     public function testEmitEmptyInputOnEnter()
     {
         $this->readline->on('data', $this->expectCallableOnceWith("\n"));

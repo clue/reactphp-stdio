@@ -44,17 +44,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 
         $that = $this;
         $codes = array(
-            // The user confirms input with enter key which should usually
-            // generate a NL (`\n`) character. Common terminals also seem to
-            // accept a CR (`\r`) character in place and handle this just like a
-            // NL. Similarly `ext-readline` uses different `icrnl` and `igncr`
-            // TTY settings on some platforms, so we also accept both here.
-            "\n" => 'onKeyEnter', // ^J
-            "\r" => 'onKeyEnter', // ^M
-
-            "\x7f" => 'onKeyBackspace',
-            "\t"   => 'onKeyTab',
-            "\x04" => 'handleEnd', // CTRL+D
+            "\n"   => 'onKeyEnter', // ^J
+            "\x7f" => 'onKeyBackspace', // ^?
+            "\t"   => 'onKeyTab', // ^I
+            "\x04" => 'handleEnd', // ^D
 
             "\033[A" => 'onKeyUp',
             "\033[B" => 'onKeyDown',
@@ -69,6 +62,16 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 //          "\033[20~" => 'onKeyF10',
         );
         $decode = function ($code) use ($codes, $that) {
+            // The user confirms input with enter key which should usually
+            // generate a NL (`\n`) character. Common terminals also seem to
+            // accept a CR (`\r`) character in place and handle this just like a
+            // NL. Similarly `ext-readline` uses different `icrnl` and `igncr`
+            // TTY settings on some platforms, so we also accept CR as an alias
+            // for NL here. This implies key binding for NL will also trigger.
+            if ($code === "\r") {
+                $code = "\n";
+            }
+
             if ($that->listeners($code)) {
                 $that->emit($code, array($code));
                 return;
