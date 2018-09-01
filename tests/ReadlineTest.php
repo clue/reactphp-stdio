@@ -228,11 +228,18 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->moveCursorBy(2));
     }
 
-    public function testDataEventWillBeEmittedForCompleteLine()
+    public function testDataEventWillBeEmittedForCompleteLineWithNl()
     {
         $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
 
         $this->input->emit('data', array("hello\n"));
+    }
+
+    public function testDataEventWillBeEmittedWithNlAlsoForCompleteLineWithCr()
+    {
+        $this->readline->on('data', $this->expectCallableOnceWith("hello\n"));
+
+        $this->input->emit('data', array("hello\r"));
     }
 
     public function testDataEventWillNotBeEmittedForIncompleteLineButWillStayInInputBuffer()
@@ -979,6 +986,23 @@ class ReadlineTest extends TestCase
         $this->readline->setAutocomplete($this->expectCallableNever());
 
         $this->input->emit('data', array("\t"));
+    }
+
+    public function testBindCustomFunctionToNlOverwritesDataEvent()
+    {
+        $this->readline->on("\n", $this->expectCallableOnceWith("\n"));
+        $this->readline->on('line', $this->expectCallableNever());
+
+        $this->input->emit('data', array("hello\n"));
+    }
+
+    public function testBindCustomFunctionToNlFiresOnCr()
+    {
+        $this->readline->on("\n", $this->expectCallableOnceWith("\n"));
+        $this->readline->on("\r", $this->expectCallableNever());
+        $this->readline->on('line', $this->expectCallableNever());
+
+        $this->input->emit('data', array("hello\r"));
     }
 
     public function testEmitEmptyInputOnEnter()
