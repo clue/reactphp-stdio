@@ -43,7 +43,7 @@ class FunctionalExampleTest extends TestCase
 
     public function testPeriodicExampleWithClosedInputAndOutputQuitsImmediatelyWithoutOutput()
     {
-        $output = $this->execExample('php 01-periodic.php <&- >&- 2>&1');
+        $output = $this->execExample('php 01-periodic.php <&- >&- 2>&-');
 
         if (strpos($output, 'said') !== false) {
             $this->markTestIncomplete('Your platform exhibits a closed STDIN bug, this may need some further debugging');
