@@ -2,12 +2,12 @@
 
 namespace Clue\React\Stdio;
 
+use Clue\React\Term\ControlCodeParser;
+use Clue\React\Utf8\Sequencer as Utf8Sequencer;
 use Evenement\EventEmitter;
 use React\Stream\ReadableStreamInterface;
-use React\Stream\WritableStreamInterface;
 use React\Stream\Util;
-use Clue\React\Utf8\Sequencer as Utf8Sequencer;
-use Clue\React\Term\ControlCodeParser;
+use React\Stream\WritableStreamInterface;
 
 class Readline extends EventEmitter implements ReadableStreamInterface
 {
@@ -37,7 +37,8 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->output = $output;
 
         if (!$this->input->isReadable()) {
-            return $this->close();
+            $this->close();
+            return;
         }
         // push input through control code parser
         $parser = new ControlCodeParser($input);
@@ -411,7 +412,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     public function limitHistory($limit)
     {
-        $this->historyLimit = $limit === null ? null : (int)$limit;
+        $this->historyLimit = $limit === null ? null : $limit;
 
         // limit send and currently exceeded
         if ($this->historyLimit !== null && isset($this->historyLines[$this->historyLimit])) {
@@ -441,9 +442,8 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      *
      * @param callable|null $autocomplete
      * @return self
-     * @throws InvalidArgumentException if the given callable is invalid
+     * @throws \InvalidArgumentException if the given callable is invalid
      */
-
     public function setAutocomplete($autocomplete)
     {
         if ($autocomplete !== null && !is_callable($autocomplete)) {
