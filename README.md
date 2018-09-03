@@ -588,11 +588,11 @@ ob_start(function ($chunk) use ($stdio) {
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
-This project follows [SemVer](http://semver.org/).
+This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^2.1
+$ composer require clue/stdio-react:^2.2
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -644,12 +644,16 @@ $ php vendor/bin/phpunit
 
 ## License
 
-MIT
+This project is released under the permissive [MIT license](LICENSE).
+
+> Did you know that I offer custom development services and issuing invoices for
+  sponsorships of releases and for contributions? Contact me (@clue) for details.
 
 ## More
 
 * If you want to learn more about processing streams of data, refer to the documentation of
   the underlying [react/stream](https://github.com/reactphp/stream) component.
+
 * If you build an interactive CLI tool that reads a command line from STDIN, you
   may want to use [clue/arguments](https://github.com/clue/php-arguments) in
   order to split this string up into its individual arguments and then use

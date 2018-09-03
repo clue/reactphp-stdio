@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.2.0 (2018-09-03)
+
+*   Feature / Fix: Accept CR as an alias for LF to support more platforms.
+    (#79 by @clue)
+
+    The <kbd>enter</kbd> key will usually end the line with a `\n` (LF)
+    character on most Unix platforms. Common terminals also accept the
+    <kbd>^M</kbd> (CR) key in place of the <kbd>^J</kbd> (LF) key.
+
+    By now allowing CR as an alias for LF in this library, we can significantly
+    improve compatibility with this common usage pattern and improve platform
+    support. In particular, some platforms use different TTY settings (`icrnl`,
+    `igncr` and family) and depending on these settings emit different EOL
+    characters. This fixes issues where <kbd>enter</kbd> was not properly
+    detected when using `ext-readline` on Mac OS X, Android and others.
+
+*   Fix: Fix and simplify restoring TTY mode when `ext-readline` is not in use.
+    (#74 and #78 by @clue)
+
+*   Update project homepage, minor code style improvements and sort dependencies.
+    (#72 and #81 by @clue and #75 by @localheinz)
+
 ## 2.1.0 (2018-02-05)
 
 *   Feature: Add support for binding custom functions to any key code
