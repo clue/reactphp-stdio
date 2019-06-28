@@ -25,15 +25,15 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
         if ($input === null) {
-            $input = $this->createStdin($loop);
+            $input = $this->createStdin($loop); // @codeCoverageIgnore
         }
 
         if ($output === null) {
-            $output = $this->createStdout($loop);
+            $output = $this->createStdout($loop); // @codeCoverageIgnore
         }
 
         if ($readline === null) {
-            $readline = new Readline($input, $output);
+            $readline = new Readline($input, $output, $this);
         }
 
         $this->input = $input;
@@ -198,9 +198,258 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->output->close();
     }
 
+    /**
+     * @deprecated
+     * @return Readline
+     */
     public function getReadline()
     {
         return $this->readline;
+    }
+
+
+    /**
+     * prompt to prepend to input line
+     *
+     * Will redraw the current input prompt with the current input buffer.
+     *
+     * @param string $prompt
+     * @return void
+     */
+    public function setPrompt($prompt)
+    {
+        $this->readline->setPrompt($prompt);
+    }
+
+    /**
+     * returns the prompt to prepend to input line
+     *
+     * @return string
+     * @see self::setPrompt()
+     */
+    public function getPrompt()
+    {
+        return $this->readline->getPrompt();
+    }
+
+    /**
+     * sets whether/how to echo text input
+     *
+     * The default setting is `true`, which means that every character will be
+     * echo'ed as-is, i.e. you can see what you're typing.
+     * For example: Typing "test" shows "test".
+     *
+     * You can turn this off by supplying `false`, which means that *nothing*
+     * will be echo'ed while you're typing. This could be a good idea for
+     * password prompts. Note that this could be confusing for users, so using
+     * a character replacement as following is often preferred.
+     * For example: Typing "test" shows "" (nothing).
+     *
+     * Alternative, you can supply a single character replacement character
+     * that will be echo'ed for each character in the text input. This could
+     * be a good idea for password prompts, where an asterisk character ("*")
+     * is often used to indicate typing activity and password length.
+     * For example: Typing "test" shows "****" (with asterisk replacement)
+     *
+     * Changing this setting will redraw the current prompt and echo the current
+     * input buffer according to the new setting.
+     *
+     * @param boolean|string $echo echo can be turned on (boolean true) or off (boolean true), or you can supply a single character replacement string
+     * @return void
+     */
+    public function setEcho($echo)
+    {
+        $this->readline->setEcho($echo);
+    }
+
+    /**
+     * whether or not to support moving cursor left and right
+     *
+     * switching cursor support moves the cursor to the end of the current
+     * input buffer (if any).
+     *
+     * @param boolean $move
+     * @return void
+     */
+    public function setMove($move)
+    {
+        $this->readline->setMove($move);
+    }
+
+    /**
+     * Gets current cursor position measured in number of text characters.
+     *
+     * Note that the number of text characters doesn't necessarily reflect the
+     * number of monospace cells occupied by the text characters. If you want
+     * to know the latter, use `self::getCursorCell()` instead.
+     *
+     * @return int
+     * @see self::getCursorCell() to get the position measured in monospace cells
+     * @see self::moveCursorTo() to move the cursor to a given character position
+     * @see self::moveCursorBy() to move the cursor by given number of characters
+     * @see self::setMove() to toggle whether the user can move the cursor position
+     */
+    public function getCursorPosition()
+    {
+        return $this->readline->getCursorPosition();
+    }
+
+    /**
+     * Gets current cursor position measured in monospace cells.
+     *
+     * Note that the cell position doesn't necessarily reflect the number of
+     * text characters. If you want to know the latter, use
+     * `self::getCursorPosition()` instead.
+     *
+     * Most "normal" characters occupy a single monospace cell, i.e. the ASCII
+     * sequence for "A" requires a single cell, as do most UTF-8 sequences
+     * like "Ä".
+     *
+     * However, there are a number of code points that do not require a cell
+     * (i.e. invisible surrogates) or require two cells (e.g. some asian glyphs).
+     *
+     * Also note that this takes the echo mode into account, i.e. the cursor is
+     * always at position zero if echo is off. If using a custom echo character
+     * (like asterisk), it will take its width into account instead of the actual
+     * input characters.
+     *
+     * @return int
+     * @see self::getCursorPosition() to get current cursor position measured in characters
+     * @see self::moveCursorTo() to move the cursor to a given character position
+     * @see self::moveCursorBy() to move the cursor by given number of characters
+     * @see self::setMove() to toggle whether the user can move the cursor position
+     * @see self::setEcho()
+     */
+    public function getCursorCell()
+    {
+        return $this->readline->getCursorCell();
+    }
+
+    /**
+     * Moves cursor to right by $n chars (or left if $n is negative).
+     *
+     * Zero value or values out of range (exceeding current input buffer) are
+     * simply ignored.
+     *
+     * Will redraw() the readline only if the visible cell position changes,
+     * see `self::getCursorCell()` for more details.
+     *
+     * @param int $n
+     * @return void
+     */
+    public function moveCursorBy($n)
+    {
+        $this->readline->moveCursorBy($n);
+    }
+
+    /**
+     * Moves cursor to given position in current line buffer.
+     *
+     * Values out of range (exceeding current input buffer) are simply ignored.
+     *
+     * Will redraw() the readline only if the visible cell position changes,
+     * see `self::getCursorCell()` for more details.
+     *
+     * @param int $n
+     * @return void
+     */
+    public function moveCursorTo($n)
+    {
+        $this->readline->moveCursorTo($n);
+    }
+
+    /**
+     * Appends the given input to the current text input buffer at the current position
+     *
+     * This moves the cursor accordingly to the number of characters added.
+     *
+     * @param string $input
+     * @return void
+     */
+    public function addInput($input)
+    {
+        $this->readline->addInput($input);
+    }
+
+    /**
+     * set current text input buffer
+     *
+     * this moves the cursor to the end of the current
+     * input buffer (if any).
+     *
+     * @param string $input
+     * @return void
+     */
+    public function setInput($input)
+    {
+        $this->readline->setInput($input);
+    }
+
+    /**
+     * get current text input buffer
+     *
+     * @return string
+     */
+    public function getInput()
+    {
+        return $this->readline->getInput();
+    }
+
+    /**
+     * Adds a new line to the (bottom position of the) history list
+     *
+     * @param string $line
+     * @return void
+     */
+    public function addHistory($line)
+    {
+        $this->readline->addHistory($line);
+    }
+
+    /**
+     * Clears the complete history list
+     *
+     * @return void
+     */
+    public function clearHistory()
+    {
+        $this->readline->clearHistory();
+    }
+
+    /**
+     * Returns an array with all lines in the history
+     *
+     * @return string[]
+     */
+    public function listHistory()
+    {
+        return $this->readline->listHistory();
+    }
+
+    /**
+     * Limits the history to a maximum of N entries and truncates the current history list accordingly
+     *
+     * @param int|null $limit
+     * @return void
+     */
+    public function limitHistory($limit)
+    {
+        $this->readline->limitHistory($limit);
+    }
+
+    /**
+     * set autocompletion handler to use
+     *
+     * The autocomplete handler will be called whenever the user hits the TAB
+     * key.
+     *
+     * @param callable|null $autocomplete
+     * @return void
+     * @throws \InvalidArgumentException if the given callable is invalid
+     */
+    public function setAutocomplete($autocomplete)
+    {
+        $this->readline->setAutocomplete($autocomplete);
     }
 
     private function width($str)
