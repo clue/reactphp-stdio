@@ -311,6 +311,27 @@ class ReadlineTest extends TestCase
         return $this->readline;
     }
 
+    public function testKeysHomeEmitsBellWhenAlreadyAtBeginningOfLine()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->onKeyHome();
+    }
+
+    public function testKeysHomeDoesNotEmitBellWhenAlreadyAtBeginningOfLineButBellIsDisabled()
+    {
+        $this->output->expects($this->never())->method('write');
+        $this->readline->setBell(false);
+        $this->readline->onKeyHome();
+    }
+
+    public function testKeysHomeEmitsBellWhenAlreadyAtBeginningOfLineAndBellIsEnabledAgain()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->setBell(false);
+        $this->readline->setBell(true);
+        $this->readline->onKeyHome();
+    }
+
     /**
      * @depends testKeysHomeMovesToFront
      * @param Readline $readline
@@ -322,6 +343,12 @@ class ReadlineTest extends TestCase
         $this->assertEquals(4, $readline->getCursorPosition());
 
         return $readline;
+    }
+
+    public function testKeysEndEmitsBellWhenAlreadyAtEndOfLine()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->onKeyEnd();
     }
 
     /**
@@ -337,6 +364,12 @@ class ReadlineTest extends TestCase
         return $readline;
     }
 
+    public function testKeysLeftEmitsBellWhenAlreadyAtBeginningOfLine()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->onKeyLeft();
+    }
+
     /**
      * @depends testKeysLeftMovesToLeft
      * @param Readline $readline
@@ -346,6 +379,12 @@ class ReadlineTest extends TestCase
         $readline->onKeyRight();
 
         $this->assertEquals(4, $readline->getCursorPosition());
+    }
+
+    public function testKeysRightEmitsBellWhenAlreadyAtEndOfLine()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->onKeyRight();
     }
 
     public function testKeysSimpleChars()
@@ -370,6 +409,12 @@ class ReadlineTest extends TestCase
         $this->assertEquals('hi', $readline->getInput());
         $this->assertEquals(2, $readline->getCursorPosition());
         $this->assertEquals(2, $readline->getCursorCell());
+    }
+
+    public function testKeysBackspaceEmitsBellWhenAlreadyAtBeginningOfLine()
+    {
+        $this->output->expects($this->once())->method('write')->with("\x07");
+        $this->readline->onKeyBackspace();
     }
 
     public function testKeysMultiByteInput()
@@ -430,10 +475,11 @@ class ReadlineTest extends TestCase
         $this->assertEquals(2, $this->readline->getCursorCell());
     }
 
-    public function testKeysDeleteEndDoesNothing()
+    public function testKeysDeleteEmitsBellWhenAlreadyAtEndOfLine()
     {
         $this->readline->setInput('test');
 
+        $this->output->expects($this->once())->method('write')->with("\x07");
         $this->readline->onKeyDelete();
 
         $this->assertEquals('test', $this->readline->getInput());
@@ -571,11 +617,9 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->setAutocomplete(123));
     }
 
-    /**
-     * @doesNotPerformAssertions
-     */
-    public function testAutocompleteKeyDoesNothingIfUnused()
+    public function testAutocompleteKeyEmitsBellWhenAutocompleteIsNotSet()
     {
+        $this->output->expects($this->once())->method('write')->with("\x07");
         $this->readline->onKeyTab();
     }
 
@@ -784,12 +828,13 @@ class ReadlineTest extends TestCase
         $this->assertEquals('exit ', $this->readline->getInput());
     }
 
-    public function testAutocompleteIgnoresNonMatching()
+    public function testAutocompleteIgnoresNonMatchingAndEmitsBell()
     {
         $this->readline->setAutocomplete(function () { return array('quit'); });
 
         $this->readline->setInput('e');
 
+        $this->output->expects($this->once())->method('write')->with("\x07");
         $this->readline->onKeyTab();
 
         $this->assertEquals('e', $this->readline->getInput());
@@ -1193,8 +1238,9 @@ class ReadlineTest extends TestCase
         $this->assertEquals(array('a', 'b', 'c'), $this->readline->listHistory());
     }
 
-    public function testHistoryUpEmptyDoesNotChangeInput()
+    public function testHistoryUpEmptyDoesNotChangeInputAndEmitsBell()
     {
+        $this->output->expects($this->once())->method('write')->with("\x07");
         $this->readline->onKeyUp();
 
         $this->assertEquals('', $this->readline->getInput());
@@ -1236,8 +1282,9 @@ class ReadlineTest extends TestCase
         $this->assertEquals('b', $this->readline->getInput());
     }
 
-    public function testHistoryDownNotCyclingDoesNotChangeInput()
+    public function testHistoryDownNotCyclingDoesNotChangeInputAndEmitsBell()
     {
+        $this->output->expects($this->once())->method('write')->with("\x07");
         $this->readline->onKeyDown();
 
         $this->assertEquals('', $this->readline->getInput());

@@ -560,4 +560,17 @@ class StdioTest extends TestCase
         $stdio->clearHistory();
         $this->assertEquals(array(), $stdio->listHistory());
     }
+
+    public function testSetBellWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $readline->expects($this->once())->method('setBell')->with(false);
+
+        $stdio->setBell(false);
+    }
 }
