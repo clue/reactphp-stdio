@@ -1012,5 +1012,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->input->close();
 
         $this->emit('close');
+        $this->removeAllListeners();
     }
 }
