@@ -26,7 +26,7 @@
     "require-dev": {
         "clue/arguments": "^2.0",
         "clue/commander": "^1.2",
-        "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
+        "phpunit/phpunit": "^7.0 || ^6.4 || ^5.7 || ^4.8.35"
     },
     "config": {
         "sort-packages": true

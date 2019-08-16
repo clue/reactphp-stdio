@@ -61,7 +61,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
             "\033[D" => 'onKeyLeft',
 
             "\033[1~" => 'onKeyHome',
-            "\033[2~" => 'onKeyInsert',
+//          "\033[2~" => 'onKeyInsert',
             "\033[3~" => 'onKeyDelete',
             "\033[4~" => 'onKeyEnd',
 
@@ -548,12 +548,6 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     }
 
     /** @internal */
-    public function onKeyInsert()
-    {
-        // TODO: toggle insert mode
-    }
-
-    /** @internal */
     public function onKeyHome()
     {
         if ($this->move) {
@@ -838,6 +832,11 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->emit('data', array($line . $eol));
     }
 
+    /**
+     * @param string $str
+     * @return int
+     * @codeCoverageIgnore
+     */
     private function strlen($str)
     {
         // prefer mb_strlen() if available
@@ -849,6 +848,13 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         return strlen(preg_replace('/./us', '.', $str));
     }
 
+    /**
+     * @param string $str
+     * @param int    $start
+     * @param ?int   $len
+     * @return string
+     * @codeCoverageIgnore
+     */
     private function substr($str, $start = 0, $len = null)
     {
         if ($len === null) {
@@ -866,7 +872,12 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         return implode('', array_slice($matches[0], $start, $len));
     }
 
-    /** @internal */
+    /**
+     * @internal
+     * @param string $str
+     * @return int
+     * @codeCoverageIgnore
+     */
     public function strwidth($str)
     {
         // prefer mb_strwidth() if available
@@ -891,6 +902,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         ));
     }
 
+    /**
+     * @param string $str
+     * @return string[]
+     */
     private function strsplit($str)
     {
         return preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY);
