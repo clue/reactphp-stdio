@@ -25,6 +25,16 @@ class StdioTest extends TestCase
         // $stdio->close();
     }
 
+    public function testCtorWithoutReadlineWillCreateNewReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+
+        $stdio = new Stdio($this->loop, $input, $output);
+
+        $this->assertInstanceOf('Clue\React\Stdio\Readline', $stdio->getReadline());
+    }
+
     public function testCtorReadlineArgWillBeReturnedBygetReadline()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
@@ -448,5 +458,106 @@ class StdioTest extends TestCase
         $stdio->on('error', $this->expectCallableOnce());
 
         $output->emit('error', array(new \RuntimeException()));
+    }
+
+    public function testPromptWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = new Readline($input, $output);
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $stdio->setPrompt('> ');
+
+        $this->assertEquals('> ', $stdio->getPrompt());
+    }
+
+    public function testSetAutocompleteWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $readline->expects($this->once())->method('setAutocomplete')->with(null);
+
+        $stdio->setAutocomplete(null);
+    }
+
+    public function testSetEchoWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $readline->expects($this->once())->method('setEcho')->with(false);
+
+        $stdio->setEcho(false);
+    }
+
+    public function testSetMoveWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $readline->expects($this->once())->method('setMove')->with(false);
+
+        $stdio->setMove(false);
+    }
+
+    public function testInputWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = new Readline($input, $output);
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $stdio->setInput('hello');
+        $stdio->addInput('!');
+
+        $this->assertEquals('hello!', $stdio->getInput());
+    }
+
+    public function testCursorWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = new Readline($input, $output);
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $stdio->setInput('hello');
+        $stdio->moveCursorTo(0);
+        $stdio->moveCursorBy(1);
+
+        $this->assertEquals(1, $stdio->getCursorPosition());
+        $this->assertEquals(1, $stdio->getCursorCell());
+    }
+
+    public function testHistoryWillBeForwardedToReadline()
+    {
+        $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
+        $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
+        $readline = new Readline($input, $output);
+
+        $stdio = new Stdio($this->loop, $input, $output, $readline);
+
+        $stdio->limitHistory(2);
+        $stdio->addHistory('hello');
+        $stdio->addHistory('world');
+        $stdio->addHistory('again');
+
+        $this->assertEquals(array('world', 'again'), $stdio->listHistory());
+
+        $stdio->clearHistory();
+        $this->assertEquals(array(), $stdio->listHistory());
     }
 }

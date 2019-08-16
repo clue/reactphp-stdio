@@ -10,17 +10,16 @@ require __DIR__ . '/../vendor/autoload.php';
 $loop = React\EventLoop\Factory::create();
 
 $stdio = new Stdio($loop);
-$readline = $stdio->getReadline();
-$readline->setPrompt('> ');
+$stdio->setPrompt('> ');
 
 // limit history to HISTSIZE env
 $limit = getenv('HISTSIZE');
 if ($limit === '' || $limit < 0) {
     // empty string or negative value means unlimited
-    $readline->limitHistory(null);
+    $stdio->limitHistory(null);
 } elseif ($limit !== false) {
     // apply any other value if given
-    $readline->limitHistory($limit);
+    $stdio->limitHistory($limit);
 }
 
 // register all available commands and their arguments
@@ -39,21 +38,21 @@ $router->add('printf <format> <args>...', function (array $args) use ($stdio) {
 });
 
 // autocomplete the following commands (at offset=0/1 only)
-$readline->setAutocomplete(function ($_, $offset) {
+$stdio->setAutocomplete(function ($_, $offset) {
     return $offset > 1 ? array() : array('exit', 'quit', 'help', 'echo', 'print', 'printf');
 });
 
 $stdio->write('Welcome to this interactive demo' . PHP_EOL);
 
 // react to commands the user entered
-$stdio->on('data', function ($line) use ($router, $stdio, $readline) {
+$stdio->on('data', function ($line) use ($router, $stdio) {
     $line = rtrim($line, "\r\n");
 
     // add all lines from input to history
     // skip empty line and duplicate of previous line
-    $all = $readline->listHistory();
+    $all = $stdio->listHistory();
     if ($line !== '' && $line !== end($all)) {
-        $readline->addHistory($line);
+        $stdio->addHistory($line);
     }
 
     try {

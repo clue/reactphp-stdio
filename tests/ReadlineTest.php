@@ -2,6 +2,7 @@
 
 use Clue\React\Stdio\Readline;
 use React\Stream\ThroughStream;
+use Evenement\EventEmitter;
 
 class ReadlineTest extends TestCase
 {
@@ -950,6 +951,15 @@ class ReadlineTest extends TestCase
         $this->assertContains("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
     }
 
+    public function testBindCustomFunctionFromBase()
+    {
+        $base = new EventEmitter();
+        $base->on('a', $this->expectCallableOnceWith('a'));
+
+        $this->readline = new Readline($this->input, $this->output, $base);
+        $this->input->emit('data', array('a'));
+    }
+
     public function testBindCustomFunctionOverwritesInput()
     {
         $this->readline->on('a', $this->expectCallableOnceWith('a'));
@@ -1003,6 +1013,17 @@ class ReadlineTest extends TestCase
         $this->readline->on('line', $this->expectCallableNever());
 
         $this->input->emit('data', array("hello\r"));
+    }
+
+    public function testBindCustomFunctionFromBaseCanOverwriteAutocompleteBehavior()
+    {
+        $base = new EventEmitter();
+        $base->on("\t", $this->expectCallableOnceWith("\t"));
+
+        $this->readline = new Readline($this->input, $this->output, $base);
+        $this->readline->setAutocomplete($this->expectCallableNever());
+
+        $this->input->emit('data', array("\t"));
     }
 
     public function testEmitEmptyInputOnEnter()
