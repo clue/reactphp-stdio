@@ -452,6 +452,25 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->readline->setAutocomplete($autocomplete);
     }
 
+    /**
+     * whether or not to emit a audible/visible BELL signal when using a disabled function
+     *
+     * By default, this class will emit a BELL signal when using a disable function,
+     * such as using the <kbd>left</kbd> or <kbd>backspace</kbd> keys when
+     * already at the beginning of the line.
+     *
+     * Whether or not the BELL is audible/visible depends on the termin and its
+     * settings, i.e. some terminals may "beep" or flash the screen or emit a
+     * short vibration.
+     *
+     * @param bool $bell
+     * @return void
+     */
+    public function setBell($bell)
+    {
+        $this->readline->setBell($bell);
+    }
+
     private function width($str)
     {
         return $this->readline->strwidth($str) - 2 * substr_count($str, "\x08");

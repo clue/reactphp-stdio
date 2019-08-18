@@ -21,6 +21,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private $linepos = 0;
     private $echo = true;
     private $move = true;
+    private $bell = true;
     private $encoding = 'utf-8';
 
     private $input;
@@ -472,10 +473,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      * @param callable|null $autocomplete
      * @return self
      * @throws \InvalidArgumentException if the given callable is invalid
-<<<<<<< HEAD
-=======
      * @deprecated use Stdio::setAutocomplete() instead
->>>>>>> Deprecate Readline and move all methods to Stdio
      */
     public function setAutocomplete($autocomplete)
     {
@@ -486,6 +484,26 @@ class Readline extends EventEmitter implements ReadableStreamInterface
         $this->autocomplete = $autocomplete;
 
         return $this;
+    }
+
+    /**
+     * Whether or not to emit a audible/visible BELL signal when using a disabled function
+     *
+     * By default, this class will emit a BELL signal when using a disable function,
+     * such as using the <kbd>left</kbd> or <kbd>backspace</kbd> keys when
+     * already at the beginning of the line.
+     *
+     * Whether or not the BELL is audible/visible depends on the termin and its
+     * settings, i.e. some terminals may "beep" or flash the screen or emit a
+     * short vibration.
+     *
+     * @param bool $bell
+     * @return void
+     * @internal use Stdio::setBell() instead
+     */
+    public function setBell($bell)
+    {
+        $this->bell = (bool)$bell;
     }
 
     /**
@@ -537,29 +555,41 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     public function onKeyBackspace()
     {
         // left delete only if not at the beginning
-        $this->deleteChar($this->linepos - 1);
+        if ($this->linepos === 0) {
+            $this->bell();
+        } else {
+            $this->deleteChar($this->linepos - 1);
+        }
     }
 
     /** @internal */
     public function onKeyDelete()
     {
         // right delete only if not at the end
-        $this->deleteChar($this->linepos);
+        if ($this->isEol()) {
+            $this->bell();
+        } else {
+            $this->deleteChar($this->linepos);
+        }
     }
 
     /** @internal */
     public function onKeyHome()
     {
-        if ($this->move) {
+        if ($this->move && $this->linepos !== 0) {
             $this->moveCursorTo(0);
+        } else {
+            $this->bell();
         }
     }
 
     /** @internal */
     public function onKeyEnd()
     {
-        if ($this->move) {
+        if ($this->move && !$this->isEol()) {
             $this->moveCursorTo($this->strlen($this->linebuffer));
+        } else {
+            $this->bell();
         }
     }
 
@@ -567,6 +597,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     public function onKeyTab()
     {
         if ($this->autocomplete === null) {
+            $this->bell();
             return;
         }
 
@@ -616,6 +647,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
 
         // return if neither of the possible words match
         if (!$words) {
+            $this->bell();
             return;
         }
 
@@ -684,16 +716,20 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     /** @internal */
     public function onKeyLeft()
     {
-        if ($this->move) {
+        if ($this->move && $this->linepos !== 0) {
             $this->moveCursorBy(-1);
+        } else {
+            $this->bell();
         }
     }
 
     /** @internal */
     public function onKeyRight()
     {
-        if ($this->move) {
+        if ($this->move && !$this->isEol()) {
             $this->moveCursorBy(1);
+        } else {
+            $this->bell();
         }
     }
 
@@ -702,6 +738,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     {
         // ignore if already at top or history is empty
         if ($this->historyPosition === 0 || !$this->historyLines) {
+            $this->bell();
             return;
         }
 
@@ -722,6 +759,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     {
         // ignore if not currently cycling through history
         if ($this->historyPosition === null) {
+            $this->bell();
             return;
         }
 
@@ -781,18 +819,10 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      * Removing a character left to the current cursor will also move the cursor
      * to the left.
      *
-     * indices out of range (exceeding current input buffer) are simply ignored
-     *
      * @param int $n
-     * @internal
      */
-    public function deleteChar($n)
+    private function deleteChar($n)
     {
-        $len = $this->strlen($this->linebuffer);
-        if ($n < 0 || $n >= $len) {
-            return;
-        }
-
         // read everything up until before current position
         $pre  = $this->substr($this->linebuffer, 0, $n);
         $post = $this->substr($this->linebuffer, $n + 1);
@@ -909,6 +939,24 @@ class Readline extends EventEmitter implements ReadableStreamInterface
     private function strsplit($str)
     {
         return preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isEol()
+    {
+        return $this->linepos === $this->strlen($this->linebuffer);
+    }
+
+    /**
+     * @return void
+     */
+    private function bell()
+    {
+        if ($this->bell) {
+            $this->output->write("\x07"); // BEL a.k.a. \a
+        }
     }
 
     /** @internal */
