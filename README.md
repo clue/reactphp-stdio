@@ -24,6 +24,7 @@ without requiring any extensions or special installation.
     * [History](#history)
     * [Autocomplete](#autocomplete)
     * [Keys](#keys)
+    * [Bell](#bell)
   * [Readline](#readline)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
@@ -532,6 +533,23 @@ UP arrow cursor key:
 $stdio->on("\033[A", function () use ($stdio) {
      $stdio->setInput(strtoupper($stdio->getInput()));
 });
+```
+
+#### Bell
+
+By default, this project will emit a audible/visible BELL signal when the user
+tries to execute an otherwise disabled function, such as using the
+<kbd>left</kbd> or <kbd>backspace</kbd> keys when already at the beginning of the line.
+
+Whether or not the BELL is audible/visible depends on the termin and its
+settings, i.e. some terminals may "beep" or flash the screen or emit a short
+vibration.
+
+The `setBell(bool $bell): void` method can be used to
+enable or disable emitting the BELL signal when using a disabled function:
+
+```php
+$stdio->setBell(false);
 ```
 
 ### Readline
