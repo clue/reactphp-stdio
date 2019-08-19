@@ -286,6 +286,16 @@ class ReadlineTest extends TestCase
         $this->input->emit('data', array("hello\x04"));
     }
 
+    public function testCloseWillEmitCloseEventAndCloseInputStream()
+    {
+        $this->input->on('close', $this->expectCallableOnce());
+        $this->readline->on('close', $this->expectCallableOnce());
+
+        $this->readline->close();
+
+        $this->assertEquals(array(), $this->readline->listeners('close'));
+    }
+
     public function testWriteSimpleCharWritesOnce()
     {
         $this->output->expects($this->once())->method('write')->with($this->equalTo("\r\033[K" . "k"));

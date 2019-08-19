@@ -192,10 +192,11 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
         $this->ending = true;
         $this->closed = true;
 
-        // clear readline output and then close
-        $this->readline->setInput('')->setPrompt('');
         $this->input->close();
         $this->output->close();
+
+        $this->emit('close');
+        $this->removeAllListeners();
     }
 
     /**

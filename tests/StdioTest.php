@@ -285,7 +285,7 @@ class StdioTest extends TestCase
         $this->assertTrue($stdio->isWritable());
     }
 
-    public function testCloseWillCloseInputAndOutput()
+    public function testCloseWillEmitCloseEventAndCloseInputAndOutput()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
@@ -295,13 +295,17 @@ class StdioTest extends TestCase
 
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
+        $stdio->on('close', $this->expectCallableOnce());
+
         $input->expects($this->once())->method('close');
         $output->expects($this->once())->method('close');
 
         $stdio->close();
+
+        $this->assertEquals(array(), $stdio->listeners('close'));
     }
 
-    public function testCloseTwiceWillCloseInputAndOutputOnlyOnce()
+    public function testCloseTwiceWillEmitCloseEventAndCloseInputAndOutputOnlyOnce()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
@@ -311,6 +315,8 @@ class StdioTest extends TestCase
 
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
+        $stdio->on('close', $this->expectCallableOnce());
+
         $input->expects($this->once())->method('close');
         $output->expects($this->once())->method('close');
 
@@ -318,13 +324,14 @@ class StdioTest extends TestCase
         $stdio->close();
     }
 
-    public function testEndWillCloseInputAndEndOutput()
+    public function testEndWillClearReadlineAndCloseInputAndEndOutput()
     {
         $input = $this->getMockBuilder('React\Stream\ReadableStreamInterface')->getMock();
         $output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
 
-        //$readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
-        $readline = new Readline($input, $output);
+        $readline = $this->getMockBuilder('Clue\React\Stdio\Readline')->disableOriginalConstructor()->getMock();
+        $readline->expects($this->once())->method('setPrompt')->with('')->willReturnSelf();
+        $readline->expects($this->once())->method('setInput')->with('')->willReturnSelf();
 
         $stdio = new Stdio($this->loop, $input, $output, $readline);
 
