@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.3.0 (2019-08-28)
+
+*   Feature: Emit audible/visible BELL signal when using a disabled function.
+    (#86 and #87 by @clue)
+
+    By default, this project will emit an audible/visible BELL signal when the user
+    tries to execute an otherwise disabled function, such as using the
+    <kbd>left</kbd> or <kbd>backspace</kbd> keys when already at the beginning of the line.
+
+*   Deprecated: Deprecate `Readline` class and move all methods to `Stdio`.
+    (#84 by @clue)
+
+    ```php
+    // deprecated:
+    $stdio->getReadline()->setPrompt('> ');
+
+    // recommended alternative:
+    $stdio->setPrompt('> ');
+    ```
+
+*   Fix: Fix closing to emit final `close` event and clean up all listeners.
+    (#88 by @clue)
+
+*   Improve test suite to test against legacy PHP 5.3 through PHP 7.3 and support PHPUnit 7.
+    (#85 by @clue)
+
 ## 2.2.0 (2018-09-03)
 
 *   Feature / Fix: Accept CR as an alias for LF to support more platforms.

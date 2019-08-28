@@ -432,7 +432,7 @@ on your particular use case.
 
 In order to give you more control over this behavior, the autocomplete function
 actually receives three arguments (similar to `ext-readline`'s
-[`readline_completion_function()`](http://php.net/manual/en/function.readline-completion-function.php)):
+[`readline_completion_function()`](https://www.php.net/manual/en/function.readline-completion-function.php)):
 The first argument will be the current incomplete word according to current
 cursor position and word boundaries, while the second and third argument will be
 the start and end offset of this word within the complete input buffer measured
@@ -537,7 +537,7 @@ $stdio->on("\033[A", function () use ($stdio) {
 
 #### Bell
 
-By default, this project will emit a audible/visible BELL signal when the user
+By default, this project will emit an audible/visible BELL signal when the user
 tries to execute an otherwise disabled function, such as using the
 <kbd>left</kbd> or <kbd>backspace</kbd> keys when already at the beginning of the line.
 
@@ -622,7 +622,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^2.2
+$ composer require clue/stdio-react:^2.3
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
