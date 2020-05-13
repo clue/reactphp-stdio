@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\Stdio;
+
 use Clue\React\Stdio\Stdio;
 use Clue\React\Stdio\Readline;
 use React\EventLoop\Factory;

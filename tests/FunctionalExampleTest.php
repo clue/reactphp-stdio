@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\Stdio;
+
 class FunctionalExampleTest extends TestCase
 {
     public function testPeriodicExampleWithPipedInputEndsBecauseInputEnds()

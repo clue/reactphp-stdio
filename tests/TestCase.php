@@ -1,5 +1,7 @@
 <?php
 
+namespace Clue\Tests\React\Stdio;
+
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -44,7 +46,7 @@ class TestCase extends BaseTestCase
      */
     protected function createCallableMock()
     {
-        return $this->getMockBuilder('CallableStub')->getMock();
+        return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
 
     protected function expectPromiseResolve($promise)
@@ -63,12 +65,5 @@ class TestCase extends BaseTestCase
         $promise->then($this->expectCallableNever(), $this->expectCallableOnce());
 
         return $promise;
-    }
-}
-
-class CallableStub
-{
-    public function __invoke()
-    {
     }
 }
