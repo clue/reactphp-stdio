@@ -8,28 +8,28 @@ class FunctionalExampleTest extends TestCase
     {
         $output = $this->execExample('echo hello | php 01-periodic.php');
 
-        $this->assertContains('you just said: hello\n', $output);
+        $this->assertContainsString('you just said: hello\n', $output);
     }
 
     public function testPeriodicExampleWithNullInputQuitsImmediately()
     {
         $output = $this->execExample('php 01-periodic.php < /dev/null');
 
-        $this->assertNotContains('you just said:', $output);
+        $this->assertNotContainsString('you just said:', $output);
     }
 
     public function testPeriodicExampleWithNoInputQuitsImmediately()
     {
         $output = $this->execExample('true | php 01-periodic.php');
 
-        $this->assertNotContains('you just said:', $output);
+        $this->assertNotContainsString('you just said:', $output);
     }
 
     public function testPeriodicExampleWithSleepNoInputQuitsOnEnd()
     {
         $output = $this->execExample('sleep 0.1 | php 01-periodic.php');
 
-        $this->assertNotContains('you just said:', $output);
+        $this->assertNotContainsString('you just said:', $output);
     }
 
     public function testPeriodicExampleWithClosedInputQuitsImmediately()
@@ -40,7 +40,7 @@ class FunctionalExampleTest extends TestCase
             $this->markTestIncomplete('Your platform exhibits a closed STDIN bug, this may need some further debugging');
         }
 
-        $this->assertNotContains('you just said:', $output);
+        $this->assertNotContainsString('you just said:', $output);
     }
 
     public function testPeriodicExampleWithClosedInputAndOutputQuitsImmediatelyWithoutOutput()
@@ -58,28 +58,28 @@ class FunctionalExampleTest extends TestCase
     {
         $output = $this->execExample('echo test | php 04-bindings.php');
 
-        $this->assertContains('you just said: test (4)' . PHP_EOL, $output);
+        $this->assertContainsString('you just said: test (4)' . PHP_EOL, $output);
     }
 
     public function testBindingsExampleWithPipedInputEndsWithSpecialBindingsReplacedBecauseInputEnds()
     {
         $output = $this->execExample('echo hello | php 04-bindings.php');
 
-        $this->assertContains('you just said: hellö (6)' . PHP_EOL, $output);
+        $this->assertContainsString('you just said: hellö (6)' . PHP_EOL, $output);
     }
 
     public function testStubShowStdinIsReadableByDefault()
     {
         $output = $this->execExample('php ../tests/stub/01-check-stdin.php');
 
-        $this->assertContains('YES', $output);
+        $this->assertContainsString('YES', $output);
     }
 
     public function testStubCanCloseStdinAndIsNotReadable()
     {
         $output = $this->execExample('php ../tests/stub/02-close-stdin.php');
 
-        $this->assertContains('NO', $output);
+        $this->assertContainsString('NO', $output);
     }
 
     public function testStubCanCloseStdoutAndIsNotWritable()
@@ -113,7 +113,7 @@ class FunctionalExampleTest extends TestCase
 
         // starts with either "Interactive mode enabled" or "Interactive shell"
         $this->assertStringStartsWith('Interactive ', $output);
-        $this->assertNotContains('you just said:', $output);
+        $this->assertNotContainsString('you just said:', $output);
     }
 
     private function execExample($command)
