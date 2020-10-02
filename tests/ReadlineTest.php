@@ -12,7 +12,10 @@ class ReadlineTest extends TestCase
     private $output;
     private $readline;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function setUpReadline()
     {
         $this->input = new ThroughStream();
         $this->output = $this->getMockBuilder('React\Stream\WritableStreamInterface')->getMock();
@@ -621,11 +624,9 @@ class ReadlineTest extends TestCase
         $this->assertSame($this->readline, $this->readline->setAutocomplete(function () { }));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testAutocompleteThrowsIfNotCallable()
     {
+        $this->setExpectedException('InvalidArgumentException');
         $this->assertSame($this->readline, $this->readline->setAutocomplete(123));
     }
 
@@ -931,7 +932,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\na  b\n", $buffer);
+        $this->assertContainsString("\na  b\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchWithEmptyWord()
@@ -945,7 +946,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\n  a\n", $buffer);
+        $this->assertContainsString("\n  a\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWord()
@@ -961,7 +962,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\nhello  hellu\n", $buffer);
+        $this->assertContainsString("\nhello  hellu\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWhenMultipleMatchIncompleteWordWithUmlauts()
@@ -977,7 +978,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\nhällö  hällü\n", $buffer);
+        $this->assertContainsString("\nhällö  hällü\n", $buffer);
     }
 
     public function testAutocompleteShowsAvailableOptionsWithoutDuplicatesWhenMultipleMatch()
@@ -991,7 +992,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\na  b\n", $buffer);
+        $this->assertContainsString("\na  b\n", $buffer);
     }
 
     public function testAutocompleteShowsLimitedNumberOfAvailableOptionsWhenMultipleMatch()
@@ -1005,7 +1006,7 @@ class ReadlineTest extends TestCase
 
         $this->readline->onKeyTab();
 
-        $this->assertContains("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
+        $this->assertContainsString("\na  b  c  d  e  f  g  (+19 others)\n", $buffer);
     }
 
     public function testBindCustomFunctionFromBase()
