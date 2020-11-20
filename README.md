@@ -12,6 +12,7 @@ without requiring any extensions or special installation.
 
 **Table of contents**
 
+* [Support us](#support-us)
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
   * [Stdio](#stdio)
@@ -31,6 +32,16 @@ without requiring any extensions or special installation.
 * [Tests](#tests)
 * [License](#license)
 * [More](#more)
+
+## Support us
+
+We invest a lot of time developing, maintaining and updating our awesome
+open-source projects. You can help us sustain this high-quality of our work by
+[becoming a sponsor on GitHub](https://github.com/sponsors/clue). Sponsors get
+numerous benefits in return, see our [sponsoring page](https://github.com/sponsors/clue)
+for details.
+
+Let's take these projects to the next level together! 🚀
 
 ## Quickstart example
 
@@ -622,7 +633,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/stdio-react:^2.3
+$ composer require clue/stdio-react:^2.4
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.

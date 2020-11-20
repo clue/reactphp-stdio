@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4.0 (2020-11-20)
+
+*   Fix: Refactor executing functional tests without ext-readline.
+    (#95 by @clue)
+
+*   Improve test suite and add `.gitattributes` to exclude dev files from export.
+    Prepare PHP 8 support, update to PHPUnit 9 and simplify test matrix.
+    (#93 and #94 by @SimonFrings)
+
 ## 2.3.0 (2019-08-28)
 
 *   Feature: Emit audible/visible BELL signal when using a disabled function.
