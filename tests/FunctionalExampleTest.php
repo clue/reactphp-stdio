@@ -96,9 +96,9 @@ class FunctionalExampleTest extends TestCase
         $this->assertEquals('', $output);
     }
 
-    public function testStubCanEndWithoutExtensions()
+    public function testStubCanEndWithoutReadlineFunctions()
     {
-        $output = $this->execExample('php -n ../tests/stub/04-end.php');
+        $output = $this->execExample('php -d disable_functions=readline_callback_handler_install,readline_callback_handler_remove ../tests/stub/04-end.php');
 
         $this->assertEquals('', $output);
     }
