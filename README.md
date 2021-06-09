@@ -1,4 +1,6 @@
-# clue/reactphp-stdio [![Build Status](https://travis-ci.org/clue/reactphp-stdio.svg?branch=master)](https://travis-ci.org/clue/reactphp-stdio)
+# clue/reactphp-stdio
+
+[![CI status](https://github.com/clue/reactphp-stdio/workflows/CI/badge.svg)](https://github.com/clue/reactphp-stdio/actions)
 
 Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT) for
 truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org).
