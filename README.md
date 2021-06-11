@@ -1,4 +1,6 @@
-# clue/reactphp-stdio [![Build Status](https://travis-ci.org/clue/reactphp-stdio.svg?branch=master)](https://travis-ci.org/clue/reactphp-stdio)
+# clue/reactphp-stdio
+
+[![CI status](https://github.com/clue/reactphp-stdio/workflows/CI/badge.svg)](https://github.com/clue/reactphp-stdio/actions)
 
 Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT) for
 truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org).
@@ -639,7 +641,7 @@ $ composer require clue/stdio-react:^2.4
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 
 This project aims to run on any platform and thus does not require any PHP
-extensions and supports running on legacy PHP 5.3 through current PHP 7+ and
+extensions and supports running on legacy PHP 5.3 through current PHP 8+ and
 HHVM.
 It's *highly recommended to use PHP 7+* for this project.
 
