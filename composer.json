@@ -14,24 +14,24 @@
         "php": ">=5.3",
         "clue/term-react": "^1.0 || ^0.1.1",
         "clue/utf8-react": "^1.0 || ^0.1",
-        "react/event-loop": "^1.0 || ^0.5 || ^0.4 || ^0.3",
-        "react/stream": "^1.0 || ^0.7 || ^0.6"
-    },
-    "suggest": {
-        "ext-mbstring": "Using ext-mbstring should provide slightly better performance for handling I/O"
-    },
-    "autoload": {
-        "psr-4": { "Clue\\React\\Stdio\\": "src/" }
-    },
-    "autoload-dev": {
-        "psr-4": { "Clue\\Tests\\React\\Stdio\\": "tests/" }
+        "react/event-loop": "^1.2",
+        "react/stream": "^1.2"
     },
     "require-dev": {
         "clue/arguments": "^2.0",
         "clue/commander": "^1.2",
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35"
     },
+    "suggest": {
+        "ext-mbstring": "Using ext-mbstring should provide slightly better performance for handling I/O"
+    },
     "config": {
         "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": { "Clue\\React\\Stdio\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Clue\\Tests\\React\\Stdio\\": "tests/" }
     }
 }

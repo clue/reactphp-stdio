@@ -4,9 +4,7 @@ use Clue\React\Stdio\Stdio;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
-$stdio = new Stdio($loop);
+$stdio = new Stdio();
 
 $value = 10;
 $stdio->on("\033[A", function () use (&$value, $stdio) {
@@ -40,5 +38,3 @@ Use cursor UP/DOWN to change value.
 
 Use "q" to quit
 ');
-
-$loop->run();

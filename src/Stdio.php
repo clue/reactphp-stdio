@@ -22,7 +22,20 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     private $incompleteLine = '';
     private $originalTtyMode = null;
 
-    public function __construct(LoopInterface $loop, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
+    /**
+     *
+     * This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+     * pass the event loop instance to use for this object. You can use a `null` value
+     * here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+     * This value SHOULD NOT be given unless you're sure you want to explicitly use a
+     * given event loop instance.
+     *
+     * @param ?LoopInterface           $loop
+     * @param ?ReadableStreamInterface $input
+     * @param ?WritableStreamInterface $output
+     * @param ?Readline                $readline
+     */
+    public function __construct(LoopInterface $loop = null, ReadableStreamInterface $input = null, WritableStreamInterface $output = null, Readline $readline = null)
     {
         if ($input === null) {
             $input = $this->createStdin($loop); // @codeCoverageIgnore
@@ -529,11 +542,11 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     }
 
     /**
-     * @param LoopInterface $loop
+     * @param ?LoopInterface $loop
      * @return ReadableStreamInterface
      * @codeCoverageIgnore this is covered by functional tests with/without ext-readline
      */
-    private function createStdin(LoopInterface $loop)
+    private function createStdin(LoopInterface $loop = null)
     {
         // STDIN not defined ("php -a") or already closed (`fclose(STDIN)`)
         // also support starting program with closed STDIN ("example.php 0<&-")
@@ -569,11 +582,11 @@ class Stdio extends EventEmitter implements DuplexStreamInterface
     }
 
     /**
-     * @param LoopInterface $loop
+     * @param ?LoopInterface $loop
      * @return WritableStreamInterface
      * @codeCoverageIgnore this is covered by functional tests
      */
-    private function createStdout(LoopInterface $loop)
+    private function createStdout(LoopInterface $loop = null)
     {
         // STDOUT not defined ("php -a") or already closed (`fclose(STDOUT)`)
         // also support starting program with closed STDOUT ("example.php >&-")

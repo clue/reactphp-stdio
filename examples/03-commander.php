@@ -7,9 +7,7 @@ use Clue\Commander\NoRouteFoundException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
-$stdio = new Stdio($loop);
+$stdio = new Stdio();
 $stdio->setPrompt('> ');
 
 // limit history to HISTSIZE env
@@ -73,5 +71,3 @@ $stdio->on('data', function ($line) use ($router, $stdio) {
         $stdio->write('Error: Invalid command usage' . PHP_EOL);
     }
 });
-
-$loop->run();
