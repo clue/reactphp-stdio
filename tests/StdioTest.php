@@ -24,7 +24,7 @@ class StdioTest extends TestCase
      */
     public function testCtorDefaultArgs()
     {
-        $stdio = new Stdio($this->loop);
+        $stdio = new Stdio();
 
         // Closing STDIN/STDOUT is not a good idea for reproducible tests
         // $stdio->close();

@@ -51,8 +51,7 @@ Let's take these projects to the next level together! 🚀
 Once [installed](#install), you can use the following code to present a prompt in a CLI program:
 
 ```php
-$loop = React\EventLoop\Factory::create();
-$stdio = new Stdio($loop);
+$stdio = new Stdio();
 
 $stdio->setPrompt('Input > ');
 
@@ -64,8 +63,6 @@ $stdio->on('data', function ($line) use ($stdio) {
         $stdio->end();
     }
 });
-
-$loop->run();
 ```
 
 See also the [examples](examples).
@@ -77,12 +74,16 @@ See also the [examples](examples).
 The `Stdio` is the main interface to this library.
 It is responsible for orchestrating the input and output streams
 by registering and forwarding the corresponding events.
-It also registers everything with the main [EventLoop](https://github.com/reactphp/event-loop#usage).
 
 ```php
-$loop = React\EventLoop\Factory::create();
-$stdio = new Stdio($loop);
+$stdio = new Stdio();
 ```
+
+This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+pass the event loop instance to use for this object. You can use a `null` value
+here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+This value SHOULD NOT be given unless you're sure you want to explicitly use a
+given event loop instance.
 
 See below for waiting for user input and writing output.
 The `Stdio` class is a well-behaving duplex stream

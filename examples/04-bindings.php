@@ -4,9 +4,7 @@ use Clue\React\Stdio\Stdio;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
-$stdio = new Stdio($loop);
+$stdio = new Stdio();
 $stdio->setPrompt('> ');
 
 // add some special key bindings
@@ -40,5 +38,3 @@ $stdio->on('data', function ($line) use ($stdio) {
     $line = rtrim($line, "\r\n");
     $stdio->end('you just said: ' . $line . ' (' . strlen($line) . ')' . PHP_EOL);
 });
-
-$loop->run();
