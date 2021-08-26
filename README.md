@@ -51,8 +51,11 @@ Let's take these projects to the next level together! 🚀
 Once [installed](#install), you can use the following code to present a prompt in a CLI program:
 
 ```php
-$stdio = new Stdio();
+<?php
 
+require __DIR__ . '/vendor/autoload.php';
+
+$stdio = new Clue\React\Stdio\Stdio();
 $stdio->setPrompt('Input > ');
 
 $stdio->on('data', function ($line) use ($stdio) {
@@ -76,7 +79,7 @@ It is responsible for orchestrating the input and output streams
 by registering and forwarding the corresponding events.
 
 ```php
-$stdio = new Stdio();
+$stdio = new Clue\React\Stdio\Stdio();
 ```
 
 This class takes an optional `LoopInterface|null $loop` parameter that can be used to

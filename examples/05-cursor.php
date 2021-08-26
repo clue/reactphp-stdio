@@ -1,10 +1,8 @@
 <?php
 
-use Clue\React\Stdio\Stdio;
-
 require __DIR__ . '/../vendor/autoload.php';
 
-$stdio = new Stdio();
+$stdio = new Clue\React\Stdio\Stdio();
 
 $value = 10;
 $stdio->on("\033[A", function () use (&$value, $stdio) {
