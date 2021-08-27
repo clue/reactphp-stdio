@@ -1,10 +1,10 @@
 # clue/reactphp-stdio
 
 [![CI status](https://github.com/clue/reactphp-stdio/workflows/CI/badge.svg)](https://github.com/clue/reactphp-stdio/actions)
-[![Packagist downloads](https://img.shields.io/packagist/dt/clue/stdio-react?color=blue&label=installs)](https://packagist.org/packages/clue/stdio-react)
+[![installs on Packagist](https://img.shields.io/packagist/dt/clue/stdio-react?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/clue/stdio-react)
 
 Async, event-driven and UTF-8 aware console input & output (STDIN, STDOUT) for
-truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org).
+truly interactive CLI applications, built on top of [ReactPHP](https://reactphp.org/).
 
 You can use this library to build truly interactive and responsive command
 line (CLI) applications, that immediately react when the user types in
@@ -18,18 +18,18 @@ without requiring any extensions or special installation.
 * [Support us](#support-us)
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
-  * [Stdio](#stdio)
-    * [Output](#output)
-    * [Input](#input)
-    * [Prompt](#prompt)
-    * [Echo](#echo)
-    * [Input buffer](#input-buffer)
-    * [Cursor](#cursor)
-    * [History](#history)
-    * [Autocomplete](#autocomplete)
-    * [Keys](#keys)
-    * [Bell](#bell)
-  * [Readline](#readline)
+    * [Stdio](#stdio)
+        * [Output](#output)
+        * [Input](#input)
+        * [Prompt](#prompt)
+        * [Echo](#echo)
+        * [Input buffer](#input-buffer)
+        * [Cursor](#cursor)
+        * [History](#history)
+        * [Autocomplete](#autocomplete)
+        * [Keys](#keys)
+        * [Bell](#bell)
+    * [~~Readline~~](#readline)
 * [Pitfalls](#pitfalls)
 * [Install](#install)
 * [Tests](#tests)
@@ -570,7 +570,9 @@ enable or disable emitting the BELL signal when using a disabled function:
 $stdio->setBell(false);
 ```
 
-### Readline
+### ~~Readline~~
+
+> Deprecated since v2.3.0, see [`Stdio`](#stdio) instead.
 
 The deprecated `Readline` class is responsible for reacting to user input and
 presenting a prompt to the user. It does so by reading individual bytes from the
@@ -633,7 +635,7 @@ ob_start(function ($chunk) use ($stdio) {
 
 ## Install
 
-The recommended way to install this library is [through Composer](https://getcomposer.org).
+The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
 This project follows [SemVer](https://semver.org/).
@@ -648,7 +650,7 @@ See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 This project aims to run on any platform and thus does not require any PHP
 extensions and supports running on legacy PHP 5.3 through current PHP 8+ and
 HHVM.
-It's *highly recommended to use PHP 7+* for this project.
+It's *highly recommended to use the latest supported PHP version* for this project.
 
 Internally, it will use the `ext-mbstring` to count and measure string sizes.
 If this extension is missing, then this library will use a slighty slower Regex
@@ -663,22 +665,19 @@ Input line editing is handled entirely within this library and does not rely on
 Installing `ext-readline` is entirely optional.
 
 Note that *Microsoft Windows is not supported*.
-Due to platform inconsistencies, PHP does not provide support for reading from
-standard console input without blocking.
+Due to platform constraints, PHP does not provide support for reading from
+standard console input without blocking on Windows.
 Unfortunately, until the underlying PHP feature request is implemented (which
 is unlikely to happen any time soon), there's little we can do in this library.
-A work-around for this remains unknown.
-Your only option would be to entirely
-[disable interactive input for Microsoft Windows](https://github.com/clue/psocksd/commit/c2f2f90ffc8ebf8233839ba2f3553f2698930125).
-However this package does work on [`Windows Subsystem for Linux`](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) 
-(or WSL) without issues. We suggest [installing WSL](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) 
+However, this package does work on Windows Subsystem for Linux (or WSL) without
+issues. We suggest [installing WSL](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) 
 when you want to run this package on Windows.
 See also [#18](https://github.com/clue/reactphp-stdio/issues/18) for more details.
 
 ## Tests
 
 To run the test suite, you first need to clone this repo and then install all
-dependencies [through Composer](https://getcomposer.org):
+dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
 $ composer install
@@ -687,7 +686,7 @@ $ composer install
 To run the test suite, go to the project root and run:
 
 ```bash
-$ php vendor/bin/phpunit
+$ vendor/bin/phpunit
 ```
 
 ## License
