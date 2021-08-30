@@ -1,10 +1,8 @@
 <?php
 
-use Clue\React\Stdio\Stdio;
-
 require __DIR__ . '/../vendor/autoload.php';
 
-$stdio = new Stdio();
+$stdio = new Clue\React\Stdio\Stdio();
 $stdio->setPrompt('Username: ');
 
 $first = true;

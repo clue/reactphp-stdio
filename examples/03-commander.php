@@ -1,13 +1,8 @@
 <?php
 
-use Clue\React\Stdio\Stdio;
-use Clue\Arguments;
-use Clue\Commander\Router;
-use Clue\Commander\NoRouteFoundException;
-
 require __DIR__ . '/../vendor/autoload.php';
 
-$stdio = new Stdio();
+$stdio = new Clue\React\Stdio\Stdio();
 $stdio->setPrompt('> ');
 
 // limit history to HISTSIZE env
@@ -21,7 +16,7 @@ if ($limit === '' || $limit < 0) {
 }
 
 // register all available commands and their arguments
-$router = new Router();
+$router = new Clue\Commander\Router();
 $router->add('exit | quit', function() use ($stdio) {
     $stdio->end();
 });
@@ -54,8 +49,8 @@ $stdio->on('data', function ($line) use ($router, $stdio) {
     }
 
     try {
-        $args = Arguments\split($line);
-    } catch (Arguments\UnclosedQuotesException $e) {
+        $args = Clue\Arguments\split($line);
+    } catch (Clue\Arguments\UnclosedQuotesException $e) {
         $stdio->write('Error: Invalid command syntax (unclosed quotes)' . PHP_EOL);
         return;
     }
@@ -67,7 +62,7 @@ $stdio->on('data', function ($line) use ($router, $stdio) {
 
     try {
         $router->handleArgs($args);
-    } catch (NoRouteFoundException $e) {
+    } catch (Clue\Commander\NoRouteFoundException $e) {
         $stdio->write('Error: Invalid command usage' . PHP_EOL);
     }
 });

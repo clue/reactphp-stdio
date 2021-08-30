@@ -11,7 +11,7 @@ use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
 
 /**
- * @deprecated use Stdio instead
+ * @deprecated 2.3.0 Use `Stdio` instead
  * @see Stdio
  */
 class Readline extends EventEmitter implements ReadableStreamInterface

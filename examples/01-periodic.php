@@ -1,11 +1,10 @@
 <?php
 
-use Clue\React\Stdio\Stdio;
 use React\EventLoop\Loop;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$stdio = new Stdio();
+$stdio = new Clue\React\Stdio\Stdio();
 
 $stdio->write('Will print periodic messages until you submit anything' . PHP_EOL);
 
