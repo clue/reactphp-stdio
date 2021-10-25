@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.5.0 (2021-10-25)
+
+*   Feature: Simplify usage by supporting new default loop
+    (#99 by @clue)
+    
+    ```php
+    // old (still supported)
+    $stdio = new Clue\React\Stdio\Stdio($loop);
+
+    // new (using default loop)
+    $stdio = new Clue\React\Stdio\Stdio();
+    ```
+    
+*   Maintenance: Improve code examples and documentation
+    (#100 by @clue and #98 by @PaulRotmann)
+
+*   Maintenance: Use GitHub actions for continuous integration (CI)
+    (#97 by @SimonFrings)
+
 ## 2.4.0 (2020-11-20)
 
 *   Fix: Refactor executing functional tests without ext-readline.
