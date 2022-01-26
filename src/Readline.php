@@ -938,7 +938,7 @@ class Readline extends EventEmitter implements ReadableStreamInterface
      */
     private function strsplit($str)
     {
-        return preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY);
+        return preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
     }
 
     /**
