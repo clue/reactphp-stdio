@@ -1,10 +1,15 @@
 # Changelog
 
+## 2.6.0 (2022-03-18)
+
+*   Feature: Full support for PHP 8.1 release.
+    (#101 by @cdosoftei)
+
 ## 2.5.0 (2021-10-25)
 
 *   Feature: Simplify usage by supporting new default loop.
     (#99 by @clue)
-    
+
     ```php
     // old (still supported)
     $stdio = new Clue\React\Stdio\Stdio($loop);
@@ -12,7 +17,7 @@
     // new (using default loop)
     $stdio = new Clue\React\Stdio\Stdio();
     ```
-    
+
 *   Improve code examples and documentation.
     (#100 by @clue and #98 by @PaulRotmann)
 
