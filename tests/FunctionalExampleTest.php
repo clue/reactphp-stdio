@@ -38,6 +38,10 @@ class FunctionalExampleTest extends TestCase
             $this->markTestSkipped('Test fails for Github CI with PHP >= 7.0 and HHVM');
         }
 
+        if (PHP_VERSION_ID === 80108 || PHP_VERSION_ID === 80107 || PHP_VERSION_ID === 80020) {
+            $this->markTestSkipped('Skip bugged PHP version: https://github.com/php/php-src/issues/8827');
+        }
+
         $output = $this->execExample('php 01-periodic.php <&-');
 
         if (strpos($output, 'said') !== false) {
@@ -51,6 +55,10 @@ class FunctionalExampleTest extends TestCase
     {
         if (getenv('CI') === 'true' && (defined('HHVM_VERSION') || PHP_VERSION_ID >= 70000)) {
             $this->markTestSkipped('Test fails for Github CI with PHP >= 7.0 and HHVM');
+        }
+
+        if (PHP_VERSION_ID === 80108 || PHP_VERSION_ID === 80107 || PHP_VERSION_ID === 80020) {
+            $this->markTestSkipped('Skip bugged PHP version: https://github.com/php/php-src/issues/8827');
         }
 
         $output = $this->execExample('php 01-periodic.php <&- >&- 2>&-');
@@ -113,10 +121,6 @@ class FunctionalExampleTest extends TestCase
 
     public function testPeriodicExampleViaInteractiveModeQuitsImmediately()
     {
-        if (getenv('CI') === 'true' && PHP_VERSION_ID >= 70000) {
-            $this->markTestSkipped('Test fails for Github CI with PHP >= 7.0');
-        }
-
         if (defined('HHVM_VERSION')) {
             $this->markTestSkipped('Skipped interactive mode on HHVM');
         }

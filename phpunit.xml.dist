@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- PHPUnit configuration file with new format for PHPUnit 9.3+ -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+<!-- PHPUnit configuration file with new format for PHPUnit 9.6+ -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true"
          cacheResult="false"
+         colors="true"
          convertDeprecationsToExceptions="true">
     <testsuites>
-        <testsuite name="Stdio React Test Suite">
+        <testsuite name="Stdio Test Suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
@@ -17,4 +17,7 @@
             <directory>./src/</directory>
         </include>
     </coverage>
+    <php>
+        <ini name="error_reporting" value="-1" />
+    </php>
 </phpunit>
