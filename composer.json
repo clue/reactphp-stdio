@@ -20,18 +20,19 @@
     "require-dev": {
         "clue/arguments": "^2.0",
         "clue/commander": "^1.2",
-        "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35"
+        "phpunit/phpunit": "^9.6 || ^5.7 || ^4.8.36"
     },
     "suggest": {
         "ext-mbstring": "Using ext-mbstring should provide slightly better performance for handling I/O"
     },
-    "config": {
-        "sort-packages": true
-    },
     "autoload": {
-        "psr-4": { "Clue\\React\\Stdio\\": "src/" }
+        "psr-4": {
+            "Clue\\React\\Stdio\\": "src/"
+        }
     },
     "autoload-dev": {
-        "psr-4": { "Clue\\Tests\\React\\Stdio\\": "tests/" }
+        "psr-4": {
+            "Clue\\Tests\\React\\Stdio\\": "tests/"
+        }
     }
 }
