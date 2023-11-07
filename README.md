@@ -618,7 +618,7 @@ $stdio->write('hello world!' . PHP_EOL);
 ```
 
 Depending on your program, it may or may not be reasonable to
-replace all such occurences.
+replace all such occurrences.
 As an alternative, you may utilize output buffering that will
 automatically forward all write events to the [`Stdio`](#stdio)
 instance like this:
@@ -653,7 +653,7 @@ HHVM.
 It's *highly recommended to use the latest supported PHP version* for this project.
 
 Internally, it will use the `ext-mbstring` to count and measure string sizes.
-If this extension is missing, then this library will use a slighty slower Regex
+If this extension is missing, then this library will use a slightly slower Regex
 work-around that should otherwise work equally well.
 Installing `ext-mbstring` is highly recommended.
 
