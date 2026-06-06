@@ -14,7 +14,7 @@
         "php": ">=5.3",
         "clue/term-react": "^1.0 || ^0.1.1",
         "clue/utf8-react": "^1.0 || ^0.1",
-        "react/event-loop": "^1.2",
+        "react/event-loop": "^1.6",
         "react/stream": "^1.4"
     },
     "require-dev": {
