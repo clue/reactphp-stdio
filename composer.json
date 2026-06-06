@@ -20,7 +20,7 @@
     "require-dev": {
         "clue/arguments": "^2.0",
         "clue/commander": "^1.2",
-        "phpunit/phpunit": "^9.6 || ^5.7 || ^4.8.36"
+        "phpunit/phpunit": "^9.6 || ^8.5 || ^5.7 || ^4.8.36"
     },
     "suggest": {
         "ext-mbstring": "Using ext-mbstring should provide slightly better performance for handling I/O"
