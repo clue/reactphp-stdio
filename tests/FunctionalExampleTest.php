@@ -110,7 +110,7 @@ class FunctionalExampleTest extends TestCase
 
     public function testStubCanEndWithoutOutput()
     {
-        $output = $this->execExample('php ../tests/stub/04-end.php');
+        $output = $this->execExample('php ../tests/stub/04-end.php < /dev/null');
 
         $this->assertEquals('', $output);
     }
