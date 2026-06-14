@@ -32,40 +32,50 @@ class FunctionalExampleTest extends TestCase
         $this->assertNotContainsString('you just said:', $output);
     }
 
-    public function testPeriodicExampleWithClosedInputQuitsImmediately()
+    public function testStubReportsStdinIsReadableByDefault()
     {
-        if (getenv('CI') === 'true' && (defined('HHVM_VERSION') || PHP_VERSION_ID >= 70000)) {
-            $this->markTestSkipped('Test fails for Github CI with PHP >= 7.0 and HHVM');
-        }
+        $output = $this->execExample('php ../tests/stub/01-check-stdin.php');
 
+        $this->assertContainsString('YES', $output);
+    }
+
+    public function testStubReportsStdinIsNotReadableWithoutDescriptor()
+    {
         if (PHP_VERSION_ID === 80108 || PHP_VERSION_ID === 80107 || PHP_VERSION_ID === 80020) {
             $this->markTestSkipped('Skip bugged PHP version: https://github.com/php/php-src/issues/8827');
         }
 
-        $output = $this->execExample('php 01-periodic.php <&-');
+        $output = $this->execExample('php ../tests/stub/01-check-stdin.php <&-');
 
-        if (strpos($output, 'said') !== false) {
-            $this->markTestIncomplete('Your platform exhibits a closed STDIN bug, this may need some further debugging');
+        // Closing STDIN frees file descriptor 0, which may then be reused by an
+        // internal stream descriptor so STDIN no longer refers to the console and
+        // is wrongly reported as readable. This is platform- and PHP-version
+        // dependent (see https://github.com/php/php-src/issues/8827). Skip here
+        // (and the dependent tests via @depends) when this platform does not
+        // report the closed STDIN as unreadable.
+        if (strpos($output, 'NO') === false) {
+            $this->markTestSkipped('Closed STDIN is not reliably detectable on this platform (file descriptor 0 reused)');
         }
+
+        $this->assertContainsString('NO', $output);
+    }
+
+    /**
+     * @depends testStubReportsStdinIsNotReadableWithoutDescriptor
+     */
+    public function testPeriodicExampleWithClosedInputQuitsImmediately()
+    {
+        $output = $this->execExample('php 01-periodic.php <&-');
 
         $this->assertNotContainsString('you just said:', $output);
     }
 
+    /**
+     * @depends testPeriodicExampleWithClosedInputQuitsImmediately
+     */
     public function testPeriodicExampleWithClosedInputAndOutputQuitsImmediatelyWithoutOutput()
     {
-        if (getenv('CI') === 'true' && (defined('HHVM_VERSION') || PHP_VERSION_ID >= 70000)) {
-            $this->markTestSkipped('Test fails for Github CI with PHP >= 7.0 and HHVM');
-        }
-
-        if (PHP_VERSION_ID === 80108 || PHP_VERSION_ID === 80107 || PHP_VERSION_ID === 80020) {
-            $this->markTestSkipped('Skip bugged PHP version: https://github.com/php/php-src/issues/8827');
-        }
-
         $output = $this->execExample('php 01-periodic.php <&- >&- 2>&-');
-
-        if (strpos($output, 'said') !== false) {
-            $this->markTestIncomplete('Your platform exhibits a closed STDIN bug, this may need some further debugging');
-        }
 
         $this->assertEquals('', $output);
     }
@@ -84,13 +94,6 @@ class FunctionalExampleTest extends TestCase
         $this->assertContainsString('you just said: hellö (6)' . PHP_EOL, $output);
     }
 
-    public function testStubShowStdinIsReadableByDefault()
-    {
-        $output = $this->execExample('php ../tests/stub/01-check-stdin.php');
-
-        $this->assertContainsString('YES', $output);
-    }
-
     public function testStubCanCloseStdinAndIsNotReadable()
     {
         $output = $this->execExample('php ../tests/stub/02-close-stdin.php');
@@ -107,7 +110,7 @@ class FunctionalExampleTest extends TestCase
 
     public function testStubCanEndWithoutOutput()
     {
-        $output = $this->execExample('php ../tests/stub/04-end.php');
+        $output = $this->execExample('php ../tests/stub/04-end.php < /dev/null');
 
         $this->assertEquals('', $output);
     }
