@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.0 (2026-06-14)
+
+*   Feature: Improve PHP 8.5+, PHP 8.4+, PHP 8.3+ and PHP 8.2+ support and update test environment.
+    (#112, #109 and #103 by @clue, #107 by @SimonFrings and #106 by @yadaiio)
+
+*   Minor documentation improvements.
+    (#105 by @yadaiio)
+
+*   Improve test suite to ensure 100% code coverage, skip flaky tests and fix legacy tests.
+    (#108, #113 and #111 by @clue and #102 by @SimonFrings)
+
 ## 2.6.0 (2022-03-18)
 
 *   Feature: Full support for PHP 8.1 release.
